@@ -34,7 +34,7 @@ class DailyCourseCard extends StatelessWidget {
   static const double _paddingH = 24;
   static const double _paddingV = 16;
   static const double _newDotSize = 8;
-  static const double _newDotInset = 20; // 테두리 안쪽 기준 위·오른쪽 거리
+  static const double _newDotInset = 17; // 테두리 안쪽 기준 위&오른쪽 거리
 
   bool get _isHighlighted => type != MyCourseCardType.normal;
 
