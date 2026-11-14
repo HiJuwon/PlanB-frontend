@@ -15,11 +15,12 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onLogoTap;          // null이면 로고 탭 동작 없음
   final VoidCallback? onNotificationTap;  // 알림 버튼 탭
 
-  static const double _height = 44; // 높이 고정 44
+  static const double _contentHeight = 44;  // 콘텐츠 영역 높이
+  static const double _verticalPadding = 8; // 상하 패딩
+  static const double _height = _contentHeight + _verticalPadding * 2; // 전체 높이 60
 
   @override
   Size get preferredSize => const Size.fromHeight(_height);
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -27,7 +28,10 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: SizedBox(
         height: _height,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: _verticalPadding,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -39,7 +43,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: onLogoTap,
                   child: Container(
-                    height: _height,
+                    height: _contentHeight,
                     padding: const EdgeInsets.only(left: 10, right: 10, top: 4),
                     alignment: Alignment.center,
                     child: SvgPicture.asset(
