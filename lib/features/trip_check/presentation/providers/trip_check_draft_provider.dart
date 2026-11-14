@@ -21,6 +21,9 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
   /// 플로우 시작 시 전체 초기화
   void reset() => state = const TripCheckDraft();
 
+  /// 저장된 조건으로 복원 (플래너 '여행 플랜 다시 선택하기' -> 여행 고르기 재진입)
+  void restore(TripCheckDraft draft) => state = draft;
+
   /// Step 1: 여행 계획 기준 선택
   /// 기준이 바뀌면 이후 단계 입력은 다른 플로우 값이므로 함께 초기화
   void selectTripType(TripSelectionType type) {
