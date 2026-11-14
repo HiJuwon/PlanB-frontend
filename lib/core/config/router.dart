@@ -37,7 +37,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     // TODO
     // 나중에 로그인 연동할 때 로그인 상태에 따른 redirect 추가 필요함
     // (스플래시는 flutter_native_splash 네이티브 화면이라 별도 라우트 없음)
-    initialLocation: AppRoutes.tripCheck,
+    initialLocation: AppRoutes.home,
 
     redirect: (context, state) {
       final location = state.matchedLocation;
