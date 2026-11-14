@@ -24,13 +24,17 @@ class PlanTags extends StatelessWidget {
       runSpacing: runSpacing,
       children: [
         for (final tag in tags)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('#', style: style),
-              const SizedBox(width: 2),
-              Text(tag, style: style),
-            ],
+          Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(text: '#'),
+                const WidgetSpan(child: SizedBox(width: 2)), // '#'과 태그 사이 2px
+                TextSpan(text: tag),
+              ],
+            ),
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis, // 한 줄보다 긴 태그는 말줄임
           ),
       ],
     );
