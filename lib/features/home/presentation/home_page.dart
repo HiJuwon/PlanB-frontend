@@ -13,6 +13,7 @@ import 'package:plan_b/features/home/presentation/widgets/ongoing_trip_card/ongo
 import 'package:plan_b/features/home/presentation/widgets/trip_plan_list/trip_plan_list.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/header/title_header.dart';
+import 'package:plan_b/shared/widgets/date_change_builder.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -50,14 +51,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final hasOngoing =
-        _plans.any((plan) => plan.status == TripTimeStatus.ongoing);
+    // 날짜가 바뀌면 플랜 상태(다가오는 / 진행중 / 지난)와 디데이를 다시 계산
+    return DateChangeBuilder(
+      builder: (context, today) {
+        final hasOngoing =
+            _plans.any((plan) => plan.status == TripTimeStatus.ongoing);
 
-    final listedPlans = _plansOf(
-      _segment == MainSegment.upcomingTrip
-          ? TripTimeStatus.upcoming
-          : TripTimeStatus.past,
-    );
+        final listedPlans = _plansOf(
+          _segment == MainSegment.upcomingTrip
+              ? TripTimeStatus.upcoming
+              : TripTimeStatus.past,
+        );
 
     return Scaffold(
       backgroundColor: AppColors.bgSolidBasic,
@@ -153,13 +157,15 @@ class _HomePageState extends State<HomePage> {
                           child: TripPlanList(plans: listedPlans),
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
+              ],
+            );
+          },
+        ),
+      );
+    }
+  );
   }
 }
