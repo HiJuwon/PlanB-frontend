@@ -3,17 +3,16 @@
 import 'package:flutter/material.dart';
 
 import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
+import 'package:plan_b/features/home/data/models/trip_time_status.dart';
 import 'package:plan_b/features/home/presentation/widgets/trip_plan_list/trip_plan_thumbnail_card.dart';
 
 class TripPlanList extends StatelessWidget {
   const TripPlanList({
     super.key,
     required this.plans,
-    required this.isUpcoming,
   });
 
   final List<TripPlanSummary> plans;
-  final bool isUpcoming; // true: 다가오는 여행 (디데이 표시) / false: 지난 여행
 
   static const int _columns = 2;
   static const double _spacing = 16;    // 카드 좌우 간격
@@ -21,6 +20,10 @@ class TripPlanList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 진행중인 여행은 플랜 카드로 그리지 않음
+    final visiblePlans =
+        plans.where((plan) => plan.status != TripTimeStatus.ongoing).toList();
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // 카드 너비 = (전체 너비 - 간격 합) / 열 개수
@@ -31,7 +34,7 @@ class TripPlanList extends StatelessWidget {
           spacing: _spacing,
           runSpacing: _runSpacing,
           children: [
-            for (final plan in plans)
+            for (final plan in visiblePlans)
               SizedBox(
                 width: cardWidth,
                 child: TripPlanThumbnailCard(
@@ -40,7 +43,10 @@ class TripPlanList extends StatelessWidget {
                   title: plan.title,
                   period: plan.period,
                   budget: plan.budget,
-                  daysLeft: isUpcoming ? plan.daysLeft : null,
+                  // 다가오는 여행만 디데이 태그 표시
+                  daysLeft: plan.status == TripTimeStatus.upcoming
+                      ? plan.daysLeft
+                      : null,
                 ),
               ),
           ],

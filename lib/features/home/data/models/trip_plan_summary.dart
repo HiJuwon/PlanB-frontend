@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart' show DateTimeRange;
 
+import 'package:plan_b/features/home/data/models/trip_time_status.dart';
+
 class TripPlanSummary {
   const TripPlanSummary({
     required this.id,
@@ -18,11 +20,24 @@ class TripPlanSummary {
   final DateTimeRange period;   // 여행 기간
   final String budget;          // 예산 (표시 형식: '200-270만원')
 
-  /// 여행 시작일까지 남은 일수 (오늘 기준)
+  /// 시간을 버린 날짜 (날짜 단위 비교용)
+  static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  /// 여행 시작일 기준 남은 일수 (양수: 시작 전 / 0: 시작일 당일 / 음수: 시작일 이후)
+  /// 디데이 태그는 상태와 관계없이 항상 시작일 기준
   int get daysLeft {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final start = DateTime(period.start.year, period.start.month, period.start.day);
-    return start.difference(today).inDays;
+    final today = _dateOnly(DateTime.now());
+    return _dateOnly(period.start).difference(today).inDays;
+  }
+
+  /// 오늘 기준 상태
+  /// - 시작일 전: upcoming
+  /// - 시작일 당일 ~ 종료일 당일: ongoing
+  /// - 종료일 다음 날부터: past
+  TripTimeStatus get status {
+    final today = _dateOnly(DateTime.now());
+    if (today.isBefore(_dateOnly(period.start))) return TripTimeStatus.upcoming;
+    if (today.isAfter(_dateOnly(period.end))) return TripTimeStatus.past;
+    return TripTimeStatus.ongoing;
   }
 }
