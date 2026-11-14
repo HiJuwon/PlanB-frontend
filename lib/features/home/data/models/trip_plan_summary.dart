@@ -25,7 +25,8 @@ class TripPlanSummary {
   final String budget;          // 예산 (표시 형식: '200-270만원')
 
   /// 시간을 버린 날짜 (날짜 단위 비교용)
-  static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+  /// 연,월,일은 현지 날짜 그대로 쓰되 UTC로 만들어서, 썸머타임(DST) 전환일에도 날짜 차이가 정확히 일 단위로 계산되도록 함.
+  static DateTime _dateOnly(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 
   /// 여행 시작일 기준 남은 일수 (양수: 시작 전 / 0: 시작일 당일 / 음수: 시작일 이후)
   /// 디데이 태그는 상태와 관계없이 항상 시작일 기준
