@@ -76,10 +76,7 @@ class _HomePageState extends State<HomePage> {
           return Stack(
             fit: StackFit.expand,
             children: [
-              // 배경 1: 하단 ellipse
-              const BgBottomEllipse(),
-
-              // 배경 2: 상단 구름 그래픽
+              // 배경 1: 상단 구름 그래픽 (화면 제일 밑에 배치)
               Positioned(
                 top: 0,
                 left: 0,
@@ -91,6 +88,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
+
+              // 배경 2: 하단 ellipse
+              const BgBottomEllipse(),
 
               // 콘텐츠: 상단바 아래에서 시작, 스크롤하면 상단바 경계에서 잘림
               Positioned(
