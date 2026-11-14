@@ -10,6 +10,8 @@ class TripPlanSummary {
     required this.id,
     required this.thumbnailUrl,
     required this.title,
+    required this.destination,
+    required this.tags,
     required this.period,
     required this.budget,
   });
@@ -17,6 +19,8 @@ class TripPlanSummary {
   final String id;              // 플랜 id (플래너 화면 이동용)
   final String thumbnailUrl;    // 썸네일 이미지 URL
   final String title;           // 이탈리아 9월 여행 플랜
+  final String destination;     // 헝가리 (진행중인 여행 카드용)
+   final List<String> tags;      // 부다페스트, 근교 ('#' 없이, 진행중인 여행 카드용)
   final DateTimeRange period;   // 여행 기간
   final String budget;          // 예산 (표시 형식: '200-270만원')
 
