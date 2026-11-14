@@ -32,7 +32,9 @@ class BtnTextPrimary extends StatelessWidget {
 
     return Semantics(
       button: true,
+      enabled: onPressed != null, // onPressed가 null이면 비활성 버튼으로 읽힘
       label: text,
+      onTap: onPressed, // excludeSemantics로 자식(GestureDetector)의 탭 동작이 빠지므로 직접 지정
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,

@@ -48,6 +48,7 @@ class _GlobalTabState extends State<GlobalTab> {
       button: true,
       selected: widget.isActive,   // 스크린 리더에 선택 상태 전달
       label: widget.tabName,
+      onTap: widget.onTap, // excludeSemantics로 자식의 탭 동작이 빠지므로 직접 지정
       excludeSemantics: true,   // 내부 텍스트가 중복으로 읽히지 않게
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,   // 탭 영역 전체
