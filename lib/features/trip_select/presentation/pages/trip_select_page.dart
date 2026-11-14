@@ -85,24 +85,34 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
         extendBody: true, // 파란 시트가 하단 cta 영역 라운드 뒤까지 보이도록
         body: SafeArea(
           bottom: false,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const TitleHeader(title: '$_userName 님을 위한 여행 플랜 추천'),
-                    const SizedBox(height: _infoTopGap),
-                    TripBasicInfoSection(rows: _infoRows(draft, tripType)),
-                    const SizedBox(height: _sheetTopGap),
-                    isBudget ? _buildTicketSheet() : _buildReceiptSheet(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 상단 고정 타이틀 헤더 (스크롤 영역 밖)
+              const TitleHeader(title: '$_userName 님을 위한 여행 플랜 추천'),
+
+              // 헤더 아래 영역만 스크롤
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: _infoTopGap),
+                          TripBasicInfoSection(rows: _infoRows(draft, tripType)),
+                          const SizedBox(height: _sheetTopGap),
+                          isBudget ? _buildTicketSheet() : _buildReceiptSheet(),
+                        ],
+                      ),
+                    ),
+                    // 콘텐츠가 화면보다 짧을 때 남은 영역도 파란 배경으로
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: ColoredBox(color: AppColors.blue100),
+                    ),
                   ],
                 ),
-              ),
-              // 콘텐츠가 화면보다 짧을 때 남은 영역도 파란 배경으로
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: ColoredBox(color: AppColors.blue100),
               ),
             ],
           ),
