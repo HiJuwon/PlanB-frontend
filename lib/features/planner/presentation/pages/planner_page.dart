@@ -8,6 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
+import 'package:plan_b/shared/providers/global_loading_provider.dart';
+import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
 import 'package:plan_b/features/planner/data/dummy/planner_trip_check_dummy.dart';
 import 'package:plan_b/features/planner/data/models/planner_trip_plan.dart';
 import 'package:plan_b/features/planner/presentation/providers/planner_trip_plan_provider.dart';
@@ -101,7 +103,9 @@ class _PlannerContent extends ConsumerWidget {
     );
     if (!confirmed || !context.mounted) return; // 취소: 모달만 닫힘
 
-    final TripCheckDraft draft = await _requestPlanReselect(plan);
+    final TripCheckDraft draft = await ref
+      .read(globalLoadingProvider.notifier)
+      .run(() => _requestPlanReselect(plan));
     if (!context.mounted) return;
 
     // 여행 고르기가 이 플랜을 만들 때의 조건(플로우, 기본 정보)으로 보이도록 입력 상태 복원
@@ -126,8 +130,7 @@ class _PlannerContent extends ConsumerWidget {
         ref.watch(plannerTripPlanProvider(planId));
 
     return asyncPlan.when(
-      // TODO: 로딩 / 에러 UI 디자인 확정 후 교체
-      loading: () => const SizedBox.shrink(),
+      loading: () => ShowGlobalLoading(),
       error: (_, _) => Padding(
         padding: const EdgeInsets.only(top: 40),
         child: Text(
