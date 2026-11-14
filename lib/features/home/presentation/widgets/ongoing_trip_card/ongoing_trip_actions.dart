@@ -31,16 +31,21 @@ class OngoingTripActions extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          BtnTextPrimary(
-            text: '여행 플랜 보기',
-            size: BtnTextSize.sm,
-            onPressed: () => _open(context, ref, AppRoutes.planner),
+          // Flexible: 폭이 부족하면 두 버튼이 남은 폭을 나눠 쓰고, 버튼 안 텍스트는 말줄임 처리 (내용이 짧으면 기존처럼 내용 크기만큼만 차지해서 가운데 정렬 유지)
+          Flexible(
+            child: BtnTextPrimary(
+              text: '여행 플랜 보기',
+              size: BtnTextSize.sm,
+              onPressed: () => _open(context, ref, AppRoutes.planner),
+            ),
           ),
           const SizedBox(width: 32),
-          BtnTextPrimary(
-            text: '여행 코스 보기',
-            size: BtnTextSize.sm,
-            onPressed: () => _open(context, ref, AppRoutes.course),
+          Flexible(
+            child: BtnTextPrimary(
+              text: '여행 코스 보기',
+              size: BtnTextSize.sm,
+              onPressed: () => _open(context, ref, AppRoutes.course),
+            ),
           ),
         ],
       ),
