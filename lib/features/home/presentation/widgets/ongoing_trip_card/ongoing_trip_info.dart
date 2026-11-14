@@ -72,13 +72,19 @@ class OngoingTripInfo extends StatelessWidget {
                     runSpacing: 2,
                     children: [
                       for (final tag in tags)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('#', style: tagStyle),
-                            const SizedBox(width: 2),
-                            Text(tag, style: tagStyle),
-                          ],
+                        // Row 대신 Text 하나로 구성: Wrap이 준 폭 안에서 크기가 정해져 카드 밖으로 넘치지 않음
+                        // '#'과 태그 사이 2px 간격은 WidgetSpan으로 유지
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(text: '#'),
+                              const WidgetSpan(child: SizedBox(width: 2)),
+                              TextSpan(text: tag),
+                            ],
+                          ),
+                          style: tagStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis, // 한 줄보다 긴 태그는 말줄임
                         ),
                     ],
                   ),
