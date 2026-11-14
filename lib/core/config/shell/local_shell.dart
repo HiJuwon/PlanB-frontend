@@ -15,6 +15,7 @@ class LocalShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true, // 로컬 탭바 뒤까지 각 화면의 배경과 콘텐츠가 이어지게 설정.
       body: navigationShell,
       bottomNavigationBar: SafeArea(
         top: false,

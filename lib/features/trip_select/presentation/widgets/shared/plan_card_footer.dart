@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:plan_b/core/theme/app_text_styles.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_palette.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
 import 'package:plan_b/shared/widgets/divider/dashed_line.dart';
 
 /// 하단: 상세보기 / 닫기 (컨테이너 전체가 탭 영역)

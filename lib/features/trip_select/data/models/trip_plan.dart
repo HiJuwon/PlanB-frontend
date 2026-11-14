@@ -1,3 +1,8 @@
+import 'package:plan_b/shared/models/trip_plan_cost_item.dart';
+
+// 기존에 trip_plan.dart만 import하던 파일(더미 등)이 그대로 동작하도록 다시 내보냄
+export 'package:plan_b/shared/models/trip_plan_cost_item.dart';
+
 /// 여행 플랜 티켓(trip_plan_ticket)에 표시할 데이터
 /// API 스펙 확정 전이라 UI 기준으로만 구조화함
 /// 스웨거 확인 후 fromJson / DTO 매핑 추가 예정
@@ -23,14 +28,4 @@ class TripPlan {
   final TripPlanCostItem flight;           // 항공
   final String totalCost;   // 총 예상 비용 (인당)
   final String summary;     // 하단 한 줄 요약
-}
-
-class TripPlanCostItem {
-  const TripPlanCostItem({
-    required this.title,
-    required this.cost,
-  });
-
-  final String title; // 도쿄 핵심 명소 투어
-  final String cost;  // 약 15만원
 }

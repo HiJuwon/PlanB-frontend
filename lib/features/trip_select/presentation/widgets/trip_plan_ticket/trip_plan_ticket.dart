@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:plan_b/core/theme/app_effects.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_footer.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_palette.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_highlight_ellipse.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/trip_plan_ticket/ticket_body.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/trip_plan_ticket/ticket_header.dart';

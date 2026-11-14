@@ -20,7 +20,7 @@ class GlobalShell extends StatelessWidget {
 
   void _onTabSelected(BuildContext context, GlobalNavTab tab) {
     if (tab == GlobalNavTab.createPlan) {
-      context.push(AppRoutes.tripType);
+      context.push(AppRoutes.tripCheck);
       return;
     }
 

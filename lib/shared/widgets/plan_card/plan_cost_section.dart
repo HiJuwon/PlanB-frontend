@@ -1,10 +1,12 @@
+// 여행 플랜 카드(티켓·영수증·플래너) 공통: 비용 줄 / 점 / 점선 섹션 / 총 예상 비용
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:plan_b/core/theme/app_text_styles.dart';
-import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_palette.dart';
+import 'package:plan_b/shared/models/trip_plan_cost_item.dart';
 import 'package:plan_b/shared/widgets/divider/dashed_line.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
 
 /// 항목명 + 비용 한 줄 (항목명이 길면 줄바꿈, 비용은 첫 줄에 고정)
 class PlanCostRow extends StatelessWidget {
@@ -83,11 +85,13 @@ class PlanDashedSection extends StatelessWidget {
     required this.color,
     required this.spacing,
     required this.children,
+    this.bottomGap = 20, // 콘텐츠 ~ 점선 간격 (티켓·영수증 20 / 플래너 기본 정보 16)
   });
 
   final Color color;
   final double spacing;
   final List<Widget> children;
+  final double bottomGap;
 
   @override
   Widget build(BuildContext context) {
@@ -99,8 +103,40 @@ class PlanDashedSection extends StatelessWidget {
           spacing: spacing,
           children: children,
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: bottomGap),
         DashedLine(color: color),
+      ],
+    );
+  }
+}
+
+/// 총 예상 비용 (인당) 한 줄 (기존 ticket_body의 _TotalCostRow를 공용으로 분리)
+class PlanTotalCostRow extends StatelessWidget {
+  const PlanTotalCostRow({
+    super.key,
+    required this.totalCost,
+    required this.palette,
+  });
+
+  final String totalCost;
+  final PlanCardPalette palette;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          '총 예상 비용 (인당)',
+          style: AppTextStyles.titleSemiBold18.copyWith(color: palette.totalLabel),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            totalCost,
+            textAlign: TextAlign.right,
+            style: AppTextStyles.titleSemiBold18.copyWith(color: palette.totalValue),
+          ),
+        ),
       ],
     );
   }
