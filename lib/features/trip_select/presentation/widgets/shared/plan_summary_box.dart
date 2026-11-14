@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:plan_b/core/theme/app_text_styles.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_palette.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
 
 /// 한 줄 요약 박스
 class PlanSummaryBox extends StatelessWidget {

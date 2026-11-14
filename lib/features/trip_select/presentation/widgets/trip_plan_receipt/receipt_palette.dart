@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:plan_b/core/theme/app_colors.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_palette.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
 
 /// 영수증 색상: 티켓과 같은 값은 PlanCardPalette를 그대로 쓰고, 다른 값만 추가
 class ReceiptPalette {

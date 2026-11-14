@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_palette.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
 import 'package:plan_b/shared/widgets/btn/btn_check.dart';
 
 /// 티켓의 헤더

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_palette.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_cost_section.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_cost_section.dart';
 
 /// 열림: 주요 일정(하단 점선) + 숙소/항공
 class ReceiptDetails extends StatelessWidget {

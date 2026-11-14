@@ -3,8 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_card_palette.dart';
-import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_cost_section.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
+import 'package:plan_b/shared/widgets/plan_card/plan_cost_section.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_summary_box.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/shared/plan_tags.dart';
 
@@ -117,7 +117,7 @@ class _OpenContent extends StatelessWidget {
                 ],
               ),
 
-              _TotalCostRow(totalCost: plan.totalCost, palette: p),
+              PlanTotalCostRow(totalCost: plan.totalCost, palette: p),
             ],
           ),
           PlanSummaryBox(summary: plan.summary, palette: p),
@@ -145,34 +145,6 @@ class _SummaryTitle extends StatelessWidget {
         textAlign: TextAlign.center,
         style: AppTextStyles.titleSemiBold18.copyWith(color: palette.summaryTitle),
       ),
-    );
-  }
-}
-
-/// 총 예상 비용 (인당)
-class _TotalCostRow extends StatelessWidget {
-  const _TotalCostRow({required this.totalCost, required this.palette});
-
-  final String totalCost;
-  final PlanCardPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          '총 예상 비용 (인당)',
-          style: AppTextStyles.titleSemiBold18.copyWith(color: palette.totalLabel),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            totalCost,
-            textAlign: TextAlign.right,
-            style: AppTextStyles.titleSemiBold18.copyWith(color: palette.totalValue),
-          ),
-        ),
-      ],
     );
   }
 }
