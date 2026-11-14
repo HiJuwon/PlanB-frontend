@@ -67,9 +67,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: AppColors.bgSolidBasic,
       extendBodyBehindAppBar: true, // 배경 그래픽이 상단바 뒤까지 깔리도록
       appBar: MainAppBar(
-        onNotificationTap: () {
-          // TODO: 알림 화면 이동
-        },
+        onNotificationTap: () {},
       ),
       body: Builder(
         builder: (context) {
