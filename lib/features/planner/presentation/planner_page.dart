@@ -130,7 +130,7 @@ class _PlannerContent extends ConsumerWidget {
         ref.watch(plannerTripPlanProvider(planId));
 
     return asyncPlan.when(
-      loading: () => ShowGlobalLoading(),
+      loading: () => const ShowGlobalLoading(),
       error: (_, _) => Padding(
         padding: const EdgeInsets.only(top: 40),
         child: Text(

@@ -10,7 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/config/shell/global_shell.dart';
 import 'package:plan_b/core/config/shell/local_shell.dart';
-import 'package:plan_b/features/planner/presentation/pages/planner_page.dart';
+import 'package:plan_b/features/planner/presentation/planner_page.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 
 import 'package:plan_b/features/home/presentation/home_page.dart';
