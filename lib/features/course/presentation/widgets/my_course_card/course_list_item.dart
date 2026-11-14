@@ -5,7 +5,18 @@ import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/course/presentation/widgets/my_course_card/course_timeline_indicator.dart';
 
 /// 일일 코스 카드 안에서 이 항목의 위치
-enum CourseListItemPosition { first, between, last }
+enum CourseListItemPosition {
+  first,
+  between,
+  last;
+
+  /// 리스트 index와 전체 개수로 위치 계산
+  static CourseListItemPosition of(int index, int length) {
+    if (index == 0) return first;
+    if (index == length - 1) return last;
+    return between;
+  }
+}
 
 /// 일일 코스 카드의 장소 항목 한 줄
 class CourseListItem extends StatelessWidget {
