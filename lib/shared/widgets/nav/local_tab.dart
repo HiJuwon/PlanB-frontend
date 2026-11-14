@@ -48,6 +48,7 @@ class _LocalTabState extends State<LocalTab> {
       button: true,
       selected: widget.isActive,
       label: widget.tabName,
+      onTap: widget.onTap, // excludeSemantics로 자식의 탭 동작이 빠지므로 직접 지정
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,

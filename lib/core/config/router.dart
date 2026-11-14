@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/config/shell/global_shell.dart';
 import 'package:plan_b/core/config/shell/local_shell.dart';
+import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 
 import 'package:plan_b/features/home/presentation/home_page.dart';
 import 'package:plan_b/core/config/pages/not_found_page.dart';
@@ -34,22 +35,30 @@ final routerProvider = Provider<GoRouter>((ref) {
     navigatorKey: _rootNavigatorKey,
 
     // TODO
-    // 나중에 로그인 연동할 때 스플래시로 바꾸고 로그인 상태에 따른 redirect 추가 필요함
-    initialLocation: AppRoutes.tripCheck,
+    // 나중에 로그인 연동할 때 로그인 상태에 따른 redirect 추가 필요함
+    // (스플래시는 flutter_native_splash 네이티브 화면이라 별도 라우트 없음)
+    initialLocation: AppRoutes.home,
 
-    // '/'로 들어오면 홈으로 리다이렉트
-    redirect: (context, state) =>
-        state.matchedLocation == '/' ? AppRoutes.home : null,
+    redirect: (context, state) {
+      final location = state.matchedLocation;
+
+      // '/'로 들어오면 홈으로 리다이렉트
+      if (location == '/') return AppRoutes.home;
+
+      // 선택된 플랜 없이 플랜 화면(/home/plan/...)에 들어오면 홈으로
+      final isPlanRoute = location.startsWith('${AppRoutes.home}/plan');
+      if (isPlanRoute && ref.read(selectedPlanIdProvider) == null) {
+        return AppRoutes.home;
+      }
+
+      return null;
+    },
 
     // 정의되지 않은 경로로 이동하면 안내 화면 표시
     errorBuilder: (context, state) => const NotFoundPage(),
 
     routes: [
-      // 서비스 진입 화면 (로그인 구현 전까지는 직접 이동할 때만 사용)
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (context, state) => const TodoPage('스플래시'),
-      ),
+      // 로그인 화면 (로그인 구현 전까지는 직접 이동할 때만 사용)
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const TodoPage('로그인'),
