@@ -11,6 +11,7 @@ import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/config/shell/global_shell.dart';
 import 'package:plan_b/core/config/shell/local_shell.dart';
 import 'package:plan_b/features/course/presentation/pages/course_page.dart';
+import 'package:plan_b/features/monthly_guide/presentation/monthly_guide_page.dart';
 import 'package:plan_b/features/my_page/presentation/my_page.dart';
 import 'package:plan_b/features/planner/presentation/planner_page.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
@@ -101,7 +102,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                           GoRoute(
                             path: AppPaths.monthlyGuide,
                             builder: (context, state) =>
-                                const TodoPage('월별 여행 준비'),
+                                const MonthlyGuidePage(),
                           ),
                         ],
                       ),

@@ -25,7 +25,6 @@ class MonthlyTodoCard extends StatelessWidget {
   final Widget? budgetItem;            // 이번 달 예산 목표 (regular 전용)
   final List<Widget> reservationItems; // 준비 항목 (없으면 섹션 숨김)
 
-  static const double width = 342;
   static const double height = 496;
   static const double _radius = 100;
   static const EdgeInsets _padding = EdgeInsets.fromLTRB(52, 70, 52, 0);
@@ -39,7 +38,7 @@ class MonthlyTodoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width,
+      width: double.infinity,
       height: height,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(_radius),
