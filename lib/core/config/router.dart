@@ -11,6 +11,7 @@ import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/config/shell/global_shell.dart';
 import 'package:plan_b/core/config/shell/local_shell.dart';
 import 'package:plan_b/features/course/presentation/pages/course_page.dart';
+import 'package:plan_b/features/login/presentation/login.dart';
 import 'package:plan_b/features/monthly_guide/presentation/monthly_guide_page.dart';
 import 'package:plan_b/features/my_page/presentation/my_page.dart';
 import 'package:plan_b/features/planner/presentation/planner_page.dart';
@@ -40,7 +41,6 @@ final routerProvider = Provider<GoRouter>((ref) {
 
     // TODO
     // 나중에 로그인 연동할 때 로그인 상태에 따른 redirect 추가 필요함
-    // (스플래시는 flutter_native_splash 네이티브 화면이라 별도 라우트 없음)
     initialLocation: AppRoutes.home,
 
     redirect: (context, state) {
@@ -62,10 +62,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     errorBuilder: (context, state) => const NotFoundPage(),
 
     routes: [
-      // 로그인 화면 (로그인 구현 전까지는 직접 이동할 때만 사용)
+      // 로그인 화면
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const TodoPage('로그인'),
+        builder: (context, state) => const LoginPage(),
       ),
 
       // 글로벌 Shell
