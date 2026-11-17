@@ -30,44 +30,51 @@ class LoginPage extends StatelessWidget {
           const BgBottomEllipse(),
           const BgTopGradient(),
 
-          // 콘텐츠: 피그마상 화면 전체(상태바 포함) 기준 세로 중앙 정렬
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 로고 + 소개 문구
-                  SvgPicture.asset(
-                    'assets/logos/logo_planb_lg.svg',
-                    width: _logoWidth,
-                    height: _logoHeight,
-                  ),
-                  const SizedBox(height: _logoToIntroGap),
-                  Text(
-                    _intro,
-                    style: AppTextStyles.titleMedium18
-                        .copyWith(color: AppColors.gray500),
-                    textAlign: TextAlign.center,
-                  ),
+          // 콘텐츠: 피그마상 화면 전체(상태바 포함) 기준 세로 중앙 정렬. (화면이 낮으면 세로 스크롤 적용.)
+          LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 로고 + 소개 문구
+                        SvgPicture.asset(
+                          'assets/logos/logo_planb_lg.svg',
+                          width: _logoWidth,
+                          height: _logoHeight,
+                        ),
+                        const SizedBox(height: _logoToIntroGap),
+                        Text(
+                          _intro,
+                          style: AppTextStyles.titleMedium18
+                              .copyWith(color: AppColors.gray500),
+                          textAlign: TextAlign.center,
+                        ),
 
-                  const SizedBox(height: _introToCtaGap),
+                        const SizedBox(height: _introToCtaGap),
 
-                  // 소셜 로그인 버튼
-                  Column(
-                    spacing: _ctaGap,
-                    children: [
-                      CtaSocialLogin(
-                        type: SocialLoginType.kakao,
-                        onPressed: () {}, // TODO: 카카오 로그인 연동
-                      ),
-                      CtaSocialLogin(
-                        type: SocialLoginType.google,
-                        onPressed: () {}, // TODO: 구글 로그인 연동
-                      ),
-                    ],
+                        // 소셜 로그인 버튼
+                        Column(
+                          spacing: _ctaGap,
+                          children: [
+                            CtaSocialLogin(
+                              type: SocialLoginType.kakao,
+                              onPressed: () {}, // TODO: 카카오 로그인 연동
+                            ),
+                            CtaSocialLogin(
+                              type: SocialLoginType.google,
+                              onPressed: () {}, // TODO: 구글 로그인 연동
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
           ),
