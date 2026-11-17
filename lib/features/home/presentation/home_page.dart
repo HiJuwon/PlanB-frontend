@@ -14,6 +14,8 @@ import 'package:plan_b/features/home/presentation/widgets/main_segmented_control
 import 'package:plan_b/features/home/presentation/widgets/ongoing_trip_card/ongoing_trip_carousel.dart';
 import 'package:plan_b/features/home/presentation/widgets/trip_plan_list/trip_plan_list.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
+import 'package:plan_b/shared/widgets/btn/btn_text_secondary.dart';
+import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
 import 'package:plan_b/shared/widgets/header/title_header.dart';
 import 'package:plan_b/shared/widgets/date_change_builder.dart';
 
@@ -48,10 +50,73 @@ class _HomePageState extends ConsumerState<HomePage> {
     return [for (final (_, plan) in indexed) plan];
   }
 
+  /// 플랜 목록 영역
+  /// - 최초 로딩: 전역 로딩 표시
+  /// - 조회 실패: 안내 문구 + 다시 시도
+  /// - 조회 성공 & 결과 없음: '여행 플랜이 없어요'
+  /// - 조회 성공 & 결과 있음: 카드 목록
+  Widget _buildPlanListSliver(
+    AsyncValue<List<TripPlanSummary>> plansAsync,
+    List<TripPlanSummary> listedPlans,
+  ) {
+    return plansAsync.when(
+      // 에러 상태에서 '다시 시도'를 누르면 로딩이 보이도록 (기본값은 이전 에러 화면을 유지함)
+      // 데이터가 있는 상태에서의 새로고침은 기존 목록을 유지
+      skipLoadingOnRefresh: !plansAsync.hasError,
+      loading: () => const SliverFillRemaining(
+        hasScrollBody: false,
+        child: ShowGlobalLoading(),
+      ),
+      error: (error, stackTrace) => SliverFillRemaining(
+        hasScrollBody: false, // 남은 영역을 채우고 그 가운데에 문구 표시
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '여행 플랜을 불러오지 못했어요',
+                style: AppTextStyles.bodyMedium16.copyWith(
+                  color: AppColors.gray400,
+                ),
+              ),
+              const SizedBox(height: 12),
+              BtnTextSecondary(
+                text: '다시 시도',
+                // provider를 무효화하면 다시 로딩 상태가 되면서 API를 새로 호출
+                onPressed: () => ref.invalidate(homePlansProvider),
+              ),
+            ],
+          ),
+        ),
+      ),
+      data: (_) => listedPlans.isEmpty
+          ? SliverFillRemaining(
+              hasScrollBody: false, // 남은 영역을 채우고 그 가운데에 문구 표시
+              child: Center(
+                child: Text(
+                  '여행 플랜이 없어요',
+                  style: AppTextStyles.bodyMedium16.copyWith(
+                    color: AppColors.gray400,
+                  ),
+                ),
+              ),
+            )
+          : SliverPadding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 40), // 좌우 24, 하단 여백 40
+              sliver: SliverToBoxAdapter(
+                child: TripPlanList(plans: listedPlans),
+              ),
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 서버 데이터 (로딩 중이거나 에러면 빈 목록)
-    final plans = ref.watch(homePlansProvider).valueOrNull ?? const <TripPlanSummary>[];
+    final plansAsync = ref.watch(homePlansProvider);
+
+    // 조회에 성공한 데이터만 사용 (로딩 중·에러일 때는 진행중 캐러셀도 숨김)
+    // 목록 영역은 아래 _buildPlanListSliver에서 로딩/에러/성공을 구분해서 표시
+    final plans = plansAsync.whenOrNull(data: (plans) => plans) ?? const <TripPlanSummary>[];
 
     // 날짜가 바뀌면 플랜 상태(다가오는 / 진행중 / 지난)와 디데이를 다시 계산
     return DateChangeBuilder(
@@ -134,26 +199,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
 
-                    // 여행 플랜 카드 목록 / 빈 목록 안내
-                    if (listedPlans.isEmpty)
-                      SliverFillRemaining(
-                        hasScrollBody: false, // 남은 영역을 채우고 그 가운데에 문구 표시
-                        child: Center(
-                          child: Text(
-                            '여행 플랜이 없어요',
-                            style: AppTextStyles.bodyMedium16.copyWith(
-                              color: AppColors.gray400,
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 40), // 좌우 24, 하단 여백 40
-                        sliver: SliverToBoxAdapter(
-                          child: TripPlanList(plans: listedPlans),
-                        ),
-                      ),
+                    // 여행 플랜 카드 목록 (로딩 / 에러 / 빈 목록 / 목록)
+                    _buildPlanListSliver(plansAsync, listedPlans),
                     ],
                   ),
                 ),
