@@ -41,6 +41,14 @@ class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
     // 선택을 해제한 직후 화면을 벗어나기 전 한 번 더 그려질 수 있어 null 처리 (플래너와 동일)
     final String? planId = ref.watch(selectedPlanIdProvider);
 
+    // 보기를 전환해도 월별 가이드 상태(완료 체크)가 유지되도록 페이지가 provider를 계속 구독
+    // - 보기 전환 중: 페이지가 구독 중이라 폐기되지 않음
+    // - 플랜 화면(로컬 Shell)을 벗어나면: 구독이 끊겨 autoDispose로 폐기 → 다시 들어오면 새로 조회
+    // - listen이라 데이터가 바뀌어도 페이지 전체가 다시 그려지지는 않음
+    if (planId != null) {
+      ref.listen(monthlyGuideProvider(planId), (_, _){});
+    }
+
     return Scaffold(
       backgroundColor: AppColors.blue50,
       extendBodyBehindAppBar: true, // 배경 ellipse가 상단바 뒤까지 깔리도록
