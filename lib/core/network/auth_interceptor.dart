@@ -38,16 +38,27 @@ class AuthInterceptor extends QueuedInterceptor { // Interceptor → QueuedInter
     // 앞선 요청이 이미 재발급했으면 그 토큰을 재사용
     final usedToken =
         (req.headers['Authorization'] as String?)?.replaceFirst('Bearer ', '');
-    var newToken = await storage.readAccessToken();
-    if (newToken == null || newToken == usedToken) {
-      newToken = await _reissue();
-    }
+    final savedToken = await storage.readAccessToken();
 
-    // 재발급 실패 = 리프레시 토큰도 만료 -> 로그아웃
-    if (newToken == null) {
-      await storage.clear();
-      onSessionExpired?.call();
-      return handler.next(err);
+    final String newToken;
+    if (savedToken != null && savedToken != usedToken) {
+      newToken = savedToken;
+    } else {
+      switch (await _reissue()) {
+        case _ReissueSuccess(:final token):
+          newToken = token;
+
+        // 리프레시 토큰이 없거나 서버가 무효라고 응답 → 토큰 삭제 후 로그아웃
+        case _ReissueInvalid():
+          await storage.clear();
+          onSessionExpired?.call();
+          return handler.next(err);
+
+        // 일시적인 실패(타임아웃, 네트워크 끊김, 5xx 등) → 토큰은 그대로 두고 에러만 전달
+        // 다음 요청에서 401이 나면 다시 재발급을 시도할 수 있음
+        case _ReissueTransientFailure():
+          return handler.next(err);
+      }
     }
 
     // 실패했던 요청을 새 토큰으로 다시 보내기
@@ -61,21 +72,55 @@ class AuthInterceptor extends QueuedInterceptor { // Interceptor → QueuedInter
     }
   }
 
-  Future<String?> _reissue() async {
+  /// 리프레시 토큰으로 액세스 토큰 재발급
+  /// - 성공: 새 토큰 저장 후 반환
+  /// - 무효: 리프레시 토큰이 없거나, 서버가 400/401/403으로 거절 (다시 로그인 필요)
+  /// - 일시 실패: 그 외 모든 실패 (토큰을 지우면 안 됨)
+  Future<_ReissueResult> _reissue() async {
     final refreshToken = await storage.readRefreshToken();
-    if (refreshToken == null) return null;
+    if (refreshToken == null) return const _ReissueInvalid();
 
     try {
       final res = await _plainDio.post(
         _reissuePath,
         data: {'refreshToken': refreshToken},
       );
-      final data = res.data as Map<String, dynamic>;
-      final token = (data['access_token'] ?? data['data']?['access_token']) as String?;
-      if (token != null) await storage.saveAccessToken(token);
-      return token;
+      final data = res.data;
+      final token = data is Map
+          ? (data['access_token'] ?? data['data']?['access_token']) as String?
+          : null;
+
+      // 200인데 토큰이 없으면 서버 응답 이상 → 로그아웃시키지 않고 일시 실패로 처리
+      if (token == null) return const _ReissueTransientFailure();
+
+      await storage.saveAccessToken(token);
+      return _ReissueSuccess(token);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 400 || status == 401 || status == 403) {
+        return const _ReissueInvalid();
+      }
+      return const _ReissueTransientFailure();
     } catch (_) {
-      return null;
+      return const _ReissueTransientFailure();
     }
   }
+}
+
+/// 재발급 결과
+sealed class _ReissueResult {
+  const _ReissueResult();
+}
+
+class _ReissueSuccess extends _ReissueResult {
+  const _ReissueSuccess(this.token);
+  final String token;
+}
+
+class _ReissueInvalid extends _ReissueResult {
+  const _ReissueInvalid();
+}
+
+class _ReissueTransientFailure extends _ReissueResult {
+  const _ReissueTransientFailure();
 }
