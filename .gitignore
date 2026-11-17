@@ -45,4 +45,7 @@ app.*.map.json
 /android/app/release
 
 .env
-.env.* // Ignore all .env files (나중에 .env.prod, .env.dev 등 추가할 경우에 대비)
+# Ignore all .env files (나중에 .env.prod, .env.dev 등 추가할 경우에 대비)
+.env.*
+
+dev_secrets.json
