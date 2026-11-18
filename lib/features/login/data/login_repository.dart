@@ -10,12 +10,16 @@ class LoginRepository {
   final Dio _dio;
 
   /// 카카오 액세스 토큰 -> PlanB 토큰
-  Future<JwtLoginResponse> loginWithKakao(String kakaoAccessToken) async {
+  Future<JwtLoginResponse> loginWithKakao(String kakaoAccessToken) =>
+      _socialLogin('/api/v1/auth/login/kakao', kakaoAccessToken);
+
+  /// 구글 ID 토큰 -> PlanB 토큰
+  Future<JwtLoginResponse> loginWithGoogle(String googleIdToken) =>
+      _socialLogin('/api/v1/auth/login/google', googleIdToken);
+
+  Future<JwtLoginResponse> _socialLogin(String path, String token) async {
     try {
-      final res = await _dio.post(
-        '/api/v1/auth/login/kakao',
-        data: {'token': kakaoAccessToken},
-      );
+      final res = await _dio.post(path, data: {'token': token});
       final body = res.data as Map<String, dynamic>;
       // 응답이 감싸져 있으면 data를, 아니면 body 그대로 사용
       final json = body['data'] is Map<String, dynamic>
