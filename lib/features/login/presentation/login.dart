@@ -8,6 +8,7 @@ import 'package:plan_b/features/login/presentation/providers/login_controller.da
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/login/presentation/widgets/cta_social_login.dart';
+import 'package:plan_b/shared/widgets/feedback/toast.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_top_gradient.dart';
 
@@ -44,9 +45,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       // 원인은 개발용 로그로만 남기고, 사용자에게는 고정 문구만 보여줌
       debugPrint('카카오 로그인 실패: $e\n$st');
       if (mounted) {
-        // TODO: 프로젝트 공용 toast로 교체
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.')),
+        showToast(
+          context,
+          text: '로그인에 실패했어요.\n잠시 후 다시 시도해 주세요.',
+          type: ToastType.warning,
         );
       }
     } finally {
