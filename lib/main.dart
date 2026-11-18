@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:plan_b/core/auth/auth_provider.dart';
+import 'package:plan_b/core/storage/token_storage.dart';
+
 import 'package:plan_b/core/config/router.dart';
 import 'package:plan_b/core/theme/app_theme.dart';
 import 'package:plan_b/shared/widgets/feedback/global_loading/global_loading_host.dart';
@@ -11,8 +15,18 @@ Future<void> main() async {
 
   await dotenv.load(fileName: '.env');
 
+  // 카카오 SDK 초기화 (dotenv.load 다음에)
+  KakaoSdk.init(nativeAppKey: dotenv.env['KAKAO_NATIVE_KEY']!);
+
+  // 저장된 토큰이 있으면 로그인 상태로 시작 → 앱을 껐다 켜도 로그인 유지
+  final hasToken = await TokenStorage().readAccessToken() != null;
+
+
   // Riverpod 사용 : 앱 전체를 ProviderScope로 감쌈
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(ProviderScope(
+    overrides: [initialLoggedInProvider.overrideWithValue(hasToken)],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends ConsumerWidget {
