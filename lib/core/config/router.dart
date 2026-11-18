@@ -31,20 +31,34 @@ import 'package:plan_b/features/trip_check/presentation/pages/trip_check_page.da
 import 'package:plan_b/features/trip_check/presentation/pages/trip_type_page.dart';
 import 'package:plan_b/features/trip_select/presentation/pages/trip_select_completed_page.dart';
 import 'package:plan_b/features/trip_select/presentation/pages/trip_select_page.dart';
+import 'package:plan_b/core/auth/auth_provider.dart';
 
 // 탭바를 덮는 화면(local Shell, 전체 화면 라우트)이 올라가는 최상위 내비게이터
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final routerProvider = Provider<GoRouter>((ref) {
+  // auth 상태가 바뀌면 GoRouter에게 "redirect 다시 계산해"라고 알리는 신호
+  final authRefresh = ValueNotifier<AuthState>(ref.read(authProvider));
+  ref.listen<AuthState>(authProvider, (_, next) => authRefresh.value = next);
+  ref.onDispose(authRefresh.dispose);
+
   final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-
-    // TODO
-    // 나중에 로그인 연동할 때 로그인 상태에 따른 redirect 추가 필요함
     initialLocation: AppRoutes.home,
+    refreshListenable: authRefresh,
 
     redirect: (context, state) {
       final location = state.matchedLocation;
+      final auth = ref.read(authProvider);
+      final isOnLogin = location == AppRoutes.login;
+
+      // 로그인 안 됨 > 로그인 화면으로 (이미 로그인 화면이면 그대로)
+      if (!auth.isLoggedIn) return isOnLogin ? null : AppRoutes.login;
+
+      // 로그인 됨인데 로그인 화면에 있음 > 신규 회원은 온보딩, 기존 회원은 홈
+      if (isOnLogin) {
+        return auth.isNewUser ? AppRoutes.tripCheck : AppRoutes.home;
+      }
 
       // '/'로 들어오면 홈으로 리다이렉트
       if (location == '/') return AppRoutes.home;
