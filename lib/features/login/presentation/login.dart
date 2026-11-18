@@ -37,11 +37,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     try {
       await ref.read(loginControllerProvider).loginWithKakao();
       // 성공하면 라우터 가드가 홈/온보딩으로 이동시킴
-    } catch (e) {
-      if (!KakaoLoginService.isCanceled(e) && mounted) {
+    } catch (e, st) {
+      // 사용자가 직접 취소한 경우는 안내하지 않음
+      if (KakaoLoginService.isCanceled(e)) return;
+
+      // 원인은 개발용 로그로만 남기고, 사용자에게는 고정 문구만 보여줌
+      debugPrint('카카오 로그인 실패: $e\n$st');
+      if (mounted) {
         // TODO: 프로젝트 공용 toast로 교체
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('카카오 로그인에 실패했어요: $e')),
+          const SnackBar(content: Text('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.')),
         );
       }
     } finally {
