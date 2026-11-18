@@ -24,7 +24,10 @@ class LoginRepository {
       return JwtLoginResponse.fromJson(json);
     } on DioException catch (e) {
       final body = e.response?.data;
-      final message = body is Map ? body['message'] as String? : null;
+      // message가 문자열일 때만 사용 (배열 등 다른 형태면 기본 메시지)
+      final message = body is Map && body['message'] is String
+          ? body['message'] as String
+          : null;
       throw ApiException(message ?? '로그인에 실패했어요', statusCode: e.response?.statusCode);
     }
   }
