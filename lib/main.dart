@@ -20,7 +20,14 @@ Future<void> main() async {
   KakaoSdk.init(nativeAppKey: requireEnv('KAKAO_NATIVE_KEY'));
 
   // 액세스·리프레시 토큰이 둘 다 저장돼 있으면 로그인 상태로 시작 → 앱을 껐다 켜도 로그인 유지
-  final hasSession = await TokenStorage().hasCompleteSession();
+  // 보안 저장소를 읽지 못하면(플랫폼 오류 등) 토큰은 지우지 않고 로그인 화면부터 시작
+  // → 다시 로그인하면 새 토큰으로 덮어써짐
+  var hasSession = false;
+  try {
+    hasSession = await TokenStorage().hasCompleteSession();
+  } catch (e) {
+    debugPrint('저장된 토큰 확인 실패: $e');
+  }
 
 
   // Riverpod 사용 : 앱 전체를 ProviderScope로 감쌈
