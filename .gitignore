@@ -47,5 +47,7 @@ app.*.map.json
 .env
 # Ignore all .env files (나중에 .env.prod, .env.dev 등 추가할 경우에 대비)
 .env.*
+# 키 이름만 적어둔 예시 파일은 공유
+!.env.example
 
 dev_secrets.json
