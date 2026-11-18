@@ -5,8 +5,8 @@ import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/core/network/dio_provider.dart';
 import 'package:plan_b/features/login/data/models/jwt_login_response.dart';
 
-class AuthRepository {
-  AuthRepository(this._dio);
+class LoginRepository {
+  LoginRepository(this._dio);
   final Dio _dio;
 
   /// 카카오 액세스 토큰 -> PlanB 토큰
@@ -28,10 +28,7 @@ class AuthRepository {
       throw ApiException(message ?? '로그인에 실패했어요', statusCode: e.response?.statusCode);
     }
   }
-
-  /// 서버에 로그아웃 알림 (리프레시 토큰 무효화 등)
-  Future<void> logout() => _dio.post('/api/v1/auth/logout');
 }
 
-final authRepositoryProvider =
-    Provider((ref) => AuthRepository(ref.read(dioProvider)));
+final loginRepositoryProvider =
+    Provider((ref) => LoginRepository(ref.read(dioProvider)));

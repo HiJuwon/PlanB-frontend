@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:plan_b/core/auth/auth_provider.dart';
 import 'package:plan_b/features/login/data/kakao_login_service.dart';
+import 'package:plan_b/features/login/presentation/providers/login_controller.dart';
 
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
@@ -35,7 +35,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(authProvider.notifier).loginWithKakao();
+      await ref.read(loginControllerProvider).loginWithKakao();
       // 성공하면 라우터 가드가 홈/온보딩으로 이동시킴
     } catch (e) {
       if (!KakaoLoginService.isCanceled(e) && mounted) {

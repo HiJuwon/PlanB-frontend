@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:plan_b/core/auth/session_repository.dart';
 import 'package:plan_b/core/storage/token_storage.dart';
-import 'package:plan_b/features/login/data/auth_repository.dart';
-import 'package:plan_b/features/login/data/kakao_login_service.dart';
 
 class AuthState {
   const AuthState({required this.isLoggedIn, this.isNewUser = false});
@@ -20,22 +19,24 @@ class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() => AuthState(isLoggedIn: ref.read(initialLoggedInProvider));
 
-  /// 카카오 로그인 > 서버 로그인 > 토큰 저장 > 상태 변경
-  Future<void> loginWithKakao() async {
-    final kakaoToken = await ref.read(kakaoLoginServiceProvider).login();
-    final res = await ref.read(authRepositoryProvider).loginWithKakao(kakaoToken);
-
+  /// 로그인 성공 후 받은 PlanB 토큰 저장 > 로그인 상태로 변경
+  /// (카카오, 구글 등 로그인 방식별 처리는 features/login에서 하고, 여기는 결과만 받음)
+  Future<void> signIn({
+    required String accessToken,
+    required String refreshToken,
+    required bool isNewUser,
+  }) async {
     await ref.read(tokenStorageProvider).saveTokens(
-          access: res.jwtAccessToken,
-          refresh: res.jwtRefreshToken,
+          access: accessToken,
+          refresh: refreshToken,
         );
-    state = AuthState(isLoggedIn: true, isNewUser: res.newUser);
+    state = AuthState(isLoggedIn: true, isNewUser: isNewUser);
   }
 
   /// 사용자가 직접 로그아웃
   Future<void> logout() async {
     try {
-      await ref.read(authRepositoryProvider).logout();
+      await ref.read(sessionRepositoryProvider).logout();
     } catch (_) {
       // 서버 요청이 실패해도 앱에서는 로그아웃 처리
     }
