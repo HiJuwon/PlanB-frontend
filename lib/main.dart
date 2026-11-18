@@ -18,13 +18,13 @@ Future<void> main() async {
   // 카카오 SDK 초기화 (dotenv.load 다음에)
   KakaoSdk.init(nativeAppKey: dotenv.env['KAKAO_NATIVE_KEY']!);
 
-  // 저장된 토큰이 있으면 로그인 상태로 시작 → 앱을 껐다 켜도 로그인 유지
-  final hasToken = await TokenStorage().readAccessToken() != null;
+  // 액세스·리프레시 토큰이 둘 다 저장돼 있으면 로그인 상태로 시작 → 앱을 껐다 켜도 로그인 유지
+  final hasSession = await TokenStorage().hasCompleteSession();
 
 
   // Riverpod 사용 : 앱 전체를 ProviderScope로 감쌈
   runApp(ProviderScope(
-    overrides: [initialLoggedInProvider.overrideWithValue(hasToken)],
+    overrides: [initialLoggedInProvider.overrideWithValue(hasSession)],
     child: const MyApp(),
   ));
 }

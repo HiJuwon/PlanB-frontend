@@ -30,6 +30,17 @@ class TokenStorage {
   }
 
   Future<void> clear() => _storage.deleteAll();
+
+  /// 앱 시작 시 로그인 상태로 복원해도 되는지
+  /// 액세스·리프레시 토큰이 둘 다 있어야 true
+  /// (저장 도중 실패 등으로 하나만 남은 불완전한 세션은 지우고 로그인 화면부터 시작)
+  Future<bool> hasCompleteSession() async {
+    final access = await readAccessToken();
+    final refresh = await readRefreshToken();
+    if (access != null && refresh != null) return true;
+    if (access != null || refresh != null) await clear();
+    return false;
+  }
 }
 
 // 앱 전체에서 Riverpod을 통해 TokenStorage를 꺼내 쓰게 한다
