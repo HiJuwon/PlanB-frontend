@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plan_b/core/env.dart';
 import 'package:plan_b/core/network/auth_interceptor.dart';
 import 'package:plan_b/core/storage/token_storage.dart';
 import 'package:plan_b/core/auth/auth_provider.dart';
@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final baseOptions = BaseOptions(
-    baseUrl: dotenv.env['BASE_URL']!,
+    baseUrl: requireEnv('BASE_URL'),
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 60),
     headers: {'Content-Type': 'application/json'},

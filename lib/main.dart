@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:plan_b/core/auth/auth_provider.dart';
+import 'package:plan_b/core/env.dart';
 import 'package:plan_b/core/storage/token_storage.dart';
 
 import 'package:plan_b/core/config/router.dart';
@@ -16,7 +17,7 @@ Future<void> main() async {
   await dotenv.load(fileName: '.env');
 
   // 카카오 SDK 초기화 (dotenv.load 다음에)
-  KakaoSdk.init(nativeAppKey: dotenv.env['KAKAO_NATIVE_KEY']!);
+  KakaoSdk.init(nativeAppKey: requireEnv('KAKAO_NATIVE_KEY'));
 
   // 액세스·리프레시 토큰이 둘 다 저장돼 있으면 로그인 상태로 시작 → 앱을 껐다 켜도 로그인 유지
   final hasSession = await TokenStorage().hasCompleteSession();
