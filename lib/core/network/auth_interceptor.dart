@@ -93,8 +93,10 @@ class AuthInterceptor extends QueuedInterceptor { // Interceptor → QueuedInter
       // 200인데 토큰이 없으면 서버 응답 이상 → 로그아웃시키지 않고 일시 실패로 처리
       if (token == null) return const _ReissueTransientFailure();
 
-      await storage.saveAccessToken(token);
-      return _ReissueSuccess(token);
+      // 응답이 'Bearer xxx' 형태여도 저장할 때와 같은 정규화된 토큰으로 바로 재전송
+      final normalized = TokenStorage.stripBearer(token);
+      await storage.saveAccessToken(normalized);
+      return _ReissueSuccess(normalized);
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       if (status == 400 || status == 401 || status == 403) {
