@@ -65,10 +65,13 @@ class _BudgetFirstBasicInfoPageState
   }
 
   /// 세 항목을 모두 채워야 다음으로 진행 가능
-    static bool _isComplete(TripCheckDraft draft) =>
-      draft.travelPeriod != null &&
-      (draft.peopleCount ?? 0) > 0 &&
-      draft.companionType != null;
+  static bool _isComplete(TripCheckDraft draft) {
+    final period = draft.travelPeriod;
+    return period != null &&
+        !period.start.isBefore(DateUtils.dateOnly(DateTime.now())) && // 지난 기간이면 다시 선택해야 함
+        (draft.peopleCount ?? 0) > 0 &&
+        draft.companionType != null;
+  }
 
   Future<void> _onNext() async {
     if (_isSaving) return;
