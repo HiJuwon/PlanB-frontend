@@ -1,7 +1,7 @@
 // POST /api/v1/plans/goal, PATCH /api/v1/plans/goal/{planId} 요청 바디
 
-import 'package:plan_b/features/trip_check/data/models/common_travel_plan_dto.dart';
-import 'package:plan_b/features/trip_check/data/models/meal_budget.dart';
+import 'package:plan_b/features/trip_check/data/models/dto/common_travel_plan_dto.dart';
+import 'package:plan_b/features/trip_check/data/models/options/meal_budget.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/shared/models/destination.dart';
 

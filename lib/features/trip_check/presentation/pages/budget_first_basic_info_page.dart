@@ -9,7 +9,7 @@ import 'package:plan_b/features/trip_check/presentation/providers/trip_check_dra
 
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
-import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/companion_type.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/day_picker/day_picker.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/field_label.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/people_count_field.dart';

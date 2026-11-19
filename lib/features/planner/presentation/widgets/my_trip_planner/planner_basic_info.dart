@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/planner/data/models/planner_trip_plan.dart';
-import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/shared/widgets/plan_card/plan_card_palette.dart';
 import 'package:plan_b/shared/widgets/plan_card/plan_cost_section.dart';
 

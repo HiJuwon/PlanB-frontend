@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/shared/models/destination.dart';
-import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/companion_type.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/combo_box/combo_box.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/day_picker/day_picker.dart';

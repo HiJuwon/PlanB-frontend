@@ -2,10 +2,10 @@
 // - TripCheckDraft(앱 상태) -> 서버 스펙으로 변환
 // - 값이 없으면 키를 빼고 보낸다 (임시저장 시 미입력 필드)
 
-import 'package:plan_b/features/trip_check/data/models/accommodation_type.dart';
-import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
-import 'package:plan_b/features/trip_check/data/models/flight_preference.dart';
-import 'package:plan_b/features/trip_check/data/models/travel_style.dart';
+import 'package:plan_b/features/trip_check/data/models/options/accommodation_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/companion_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/flight_preference.dart';
+import 'package:plan_b/features/trip_check/data/models/options/travel_style.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/segmented_chip.dart';
 

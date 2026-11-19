@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/core/network/dio_provider.dart';
-import 'package:plan_b/features/trip_check/data/models/wallet_plan_request_dto.dart';
-import 'package:plan_b/features/trip_check/data/models/wallet_plan_response_dto.dart';
-import 'package:plan_b/features/trip_check/data/models/goal_plan_request_dto.dart';
-import 'package:plan_b/features/trip_check/data/models/goal_plan_response_dto.dart';
+import 'package:plan_b/features/trip_check/data/models/dto/wallet_plan_request_dto.dart';
+import 'package:plan_b/features/trip_check/data/models/dto/wallet_plan_response_dto.dart';
+import 'package:plan_b/features/trip_check/data/models/dto/goal_plan_request_dto.dart';
+import 'package:plan_b/features/trip_check/data/models/dto/goal_plan_response_dto.dart';
 
 class TripCheckRepository {
   TripCheckRepository(this._dio);

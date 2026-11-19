@@ -5,11 +5,11 @@ import 'package:flutter/material.dart' show DateTimeRange;
 
 import 'package:plan_b/shared/models/destination.dart';
 import 'package:plan_b/features/planner/data/models/planner_trip_plan.dart';
-import 'package:plan_b/features/trip_check/data/models/budget_range.dart';
-import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
-import 'package:plan_b/features/trip_check/data/models/meal_budget.dart';
+import 'package:plan_b/features/trip_check/data/models/options/budget_range.dart';
+import 'package:plan_b/features/trip_check/data/models/options/companion_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/meal_budget.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
-import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 
 TripCheckDraft dummyTripCheckDraftOf(PlannerTripPlan plan) {
   final bool isBudget = plan.tripType == TripSelectionType.budget;

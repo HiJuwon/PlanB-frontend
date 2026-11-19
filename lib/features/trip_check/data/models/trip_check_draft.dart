@@ -4,13 +4,13 @@ import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:plan_b/shared/models/destination.dart';
-import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
-import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
-import 'package:plan_b/features/trip_check/data/models/budget_range.dart';
-import 'package:plan_b/features/trip_check/data/models/flight_preference.dart';
-import 'package:plan_b/features/trip_check/data/models/travel_style.dart';
-import 'package:plan_b/features/trip_check/data/models/accommodation_type.dart';
-import 'package:plan_b/features/trip_check/data/models/meal_budget.dart';
+import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/companion_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/budget_range.dart';
+import 'package:plan_b/features/trip_check/data/models/options/flight_preference.dart';
+import 'package:plan_b/features/trip_check/data/models/options/travel_style.dart';
+import 'package:plan_b/features/trip_check/data/models/options/accommodation_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/meal_budget.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/segmented_chip.dart';
 
 part 'trip_check_draft.freezed.dart';

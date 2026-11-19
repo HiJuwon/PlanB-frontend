@@ -1,4 +1,4 @@
-import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/shared/models/trip_plan_cost_item.dart';
 
 /// 나의 여행 플래너(my_trip_planner)에 표시할 여행 플랜 기본 데이터
