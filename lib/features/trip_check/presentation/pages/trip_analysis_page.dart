@@ -71,8 +71,7 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
       case TripSelectionType.budget:
         await notifier.saveWalletPlan(isDraft: false);
       case TripSelectionType.goal:
-        // TODO: POST /api/v1/plans/goal 연동
-        await Future<void>.delayed(const Duration(seconds: 3));
+        await notifier.saveGoalPlan(isDraft: false);
       case null:
         throw StateError('tripType이 선택되지 않았어요');
     }

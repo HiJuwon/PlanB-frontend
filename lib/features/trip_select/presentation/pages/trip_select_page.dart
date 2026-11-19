@@ -190,7 +190,7 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
           TripInfoRow('예산', [_formatBudget(draft.maxBudget)]),
         ],
       TripSelectionType.goal => [
-          TripInfoRow('국가', [draft.destination ?? '-']),
+          TripInfoRow('국가', [draft.destination?.label ?? '-']),
           period,
           people,
         ],

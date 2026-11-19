@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart' show DateTimeRange;
 
+import 'package:plan_b/shared/models/destination.dart';
 import 'package:plan_b/features/planner/data/models/planner_trip_plan.dart';
 import 'package:plan_b/features/trip_check/data/models/budget_range.dart';
 import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
@@ -15,7 +16,7 @@ TripCheckDraft dummyTripCheckDraftOf(PlannerTripPlan plan) {
 
   return TripCheckDraft(
     tripType: plan.tripType,
-    destination: isBudget ? null : '일본', // 여행지는 목표 기준 플로우만 표시한다
+    destination: isBudget ? null : Destination.tokyo, // 여행지는 목표 기준 플로우만 표시한다
     travelPeriod: DateTimeRange(
       start: DateTime(2026, 8, 10),
       end: DateTime(2026, 8, 18),

@@ -22,7 +22,7 @@ mixin _$TripCheckDraft {
   int? get planId =>
       throw _privateConstructorUsedError; // 서버에 저장된 플랜 id (임시저장/제출 응답으로 받음)
   // 기본 정보
-  String? get destination =>
+  Destination? get destination =>
       throw _privateConstructorUsedError; // 여행지 (목표 기준 플로우만 사용)
   DateTimeRange<DateTime>? get travelPeriod =>
       throw _privateConstructorUsedError; // 여행 가능 시기 (시작일만 고르면 시작일 = 종료일)
@@ -59,7 +59,7 @@ abstract class $TripCheckDraftCopyWith<$Res> {
   $Res call({
     TripSelectionType? tripType,
     int? planId,
-    String? destination,
+    Destination? destination,
     DateTimeRange<DateTime>? travelPeriod,
     int? peopleCount,
     CompanionType? companionType,
@@ -111,7 +111,7 @@ class _$TripCheckDraftCopyWithImpl<$Res, $Val extends TripCheckDraft>
             destination: freezed == destination
                 ? _value.destination
                 : destination // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as Destination?,
             travelPeriod: freezed == travelPeriod
                 ? _value.travelPeriod
                 : travelPeriod // ignore: cast_nullable_to_non_nullable
@@ -162,7 +162,7 @@ abstract class _$$TripCheckDraftImplCopyWith<$Res>
   $Res call({
     TripSelectionType? tripType,
     int? planId,
-    String? destination,
+    Destination? destination,
     DateTimeRange<DateTime>? travelPeriod,
     int? peopleCount,
     CompanionType? companionType,
@@ -213,7 +213,7 @@ class __$$TripCheckDraftImplCopyWithImpl<$Res>
         destination: freezed == destination
             ? _value.destination
             : destination // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as Destination?,
         travelPeriod: freezed == travelPeriod
             ? _value.travelPeriod
             : travelPeriod // ignore: cast_nullable_to_non_nullable
@@ -280,7 +280,7 @@ class _$TripCheckDraftImpl implements _TripCheckDraft {
   // 서버에 저장된 플랜 id (임시저장/제출 응답으로 받음)
   // 기본 정보
   @override
-  final String? destination;
+  final Destination? destination;
   // 여행지 (목표 기준 플로우만 사용)
   @override
   final DateTimeRange<DateTime>? travelPeriod;
@@ -402,7 +402,7 @@ abstract class _TripCheckDraft implements TripCheckDraft {
   const factory _TripCheckDraft({
     final TripSelectionType? tripType,
     final int? planId,
-    final String? destination,
+    final Destination? destination,
     final DateTimeRange<DateTime>? travelPeriod,
     final int? peopleCount,
     final CompanionType? companionType,
@@ -419,7 +419,7 @@ abstract class _TripCheckDraft implements TripCheckDraft {
   int? get planId; // 서버에 저장된 플랜 id (임시저장/제출 응답으로 받음)
   // 기본 정보
   @override
-  String? get destination; // 여행지 (목표 기준 플로우만 사용)
+  Destination? get destination; // 여행지 (목표 기준 플로우만 사용)
   @override
   DateTimeRange<DateTime>? get travelPeriod; // 여행 가능 시기 (시작일만 고르면 시작일 = 종료일)
   @override

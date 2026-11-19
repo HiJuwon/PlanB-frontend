@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'package:plan_b/shared/models/destination.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
 import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
 import 'package:plan_b/features/trip_check/data/models/budget_range.dart';
@@ -21,7 +22,7 @@ class TripCheckDraft with _$TripCheckDraft {
     int? planId, // 서버에 저장된 플랜 id (임시저장/제출 응답으로 받음)
 
     // 기본 정보
-    String? destination,             // 여행지 (목표 기준 플로우만 사용)
+    Destination? destination,             // 여행지 (목표 기준 플로우만 사용)
     DateTimeRange? travelPeriod,     // 여행 가능 시기 (시작일만 고르면 시작일 = 종료일)
     int? peopleCount,                // 여행 인원 (비어 있으면 null)
     CompanionType? companionType,    // 여행 구성원 유형
