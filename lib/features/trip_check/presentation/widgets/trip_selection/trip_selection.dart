@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/trip_selection/trip_selection_card.dart';
 
 class TripSelection extends StatelessWidget {

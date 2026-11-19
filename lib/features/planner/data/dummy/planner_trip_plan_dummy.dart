@@ -5,7 +5,7 @@ import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:plan_b/features/home/data/dummy/trip_plan_summary_dummy.dart';
 import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
 import 'package:plan_b/features/planner/data/models/planner_trip_plan.dart';
-import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/shared/models/trip_plan_cost_item.dart';
 
 /// 홈 더미에 없는 플래너 전용 값

@@ -13,7 +13,7 @@ class ComboBox extends StatefulWidget {
     super.key,
     required this.items,
     this.initialValue,
-    this.hintText = '예시) 프랑스 파리',
+    this.hintText = '예시) 후쿠오카',
     this.onSelected,
   });
 

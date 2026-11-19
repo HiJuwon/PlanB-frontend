@@ -6,9 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
-import 'package:plan_b/features/trip_check/data/models/budget_range.dart';
+import 'package:plan_b/features/trip_check/data/models/options/budget_range.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
-import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_select/data/dummy/trip_plan_dummy.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/plan_list_sheet.dart';
@@ -190,7 +190,7 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
           TripInfoRow('예산', [_formatBudget(draft.maxBudget)]),
         ],
       TripSelectionType.goal => [
-          TripInfoRow('국가', [draft.destination ?? '-']),
+          TripInfoRow('여행지', [draft.destination?.label ?? '-']),
           period,
           people,
         ],

@@ -1,14 +1,15 @@
-// (맞춤 여행 체크) 목표 기준 Step 2: 여행 기본 정보 입력 페이지
+// (맞춤 여행 체크) 지갑 기준 Step 2: 여행 기본 정보 입력 페이지
+// - 진입 시 '내 지갑을 기준으로 선택했어요' 토스트 표시
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:plan_b/core/config/app_routes.dart';
-import 'package:plan_b/features/trip_check/data/dummy/destination_dummy.dart';
-import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
-import 'package:plan_b/features/trip_check/presentation/widgets/combo_box/combo_box.dart';
+
+import 'package:plan_b/core/config/app_routes.dart';
+import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
+import 'package:plan_b/features/trip_check/data/models/options/companion_type.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/day_picker/day_picker.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/field_label.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/people_count_field.dart';
@@ -19,21 +20,25 @@ import 'package:plan_b/shared/widgets/feedback/toast.dart';
 import 'package:plan_b/shared/widgets/header/title_header.dart';
 import 'package:plan_b/shared/widgets/nav/top_app_bar.dart';
 
-class GoalFirstBasicInfoPage extends ConsumerStatefulWidget {
-  const GoalFirstBasicInfoPage({super.key, this.showGuideToast = true});
+class BudgetFirstBasicInfoPage extends ConsumerStatefulWidget {
+  const BudgetFirstBasicInfoPage({super.key, this.showGuideToast = true});
 
   final bool showGuideToast; // false: 여행 고르기에서 조건 재선택으로 들어온 경우
 
   @override
-  ConsumerState<GoalFirstBasicInfoPage> createState() =>
-      _GoalFirstBasicInfoPageState();
+  ConsumerState<BudgetFirstBasicInfoPage> createState() =>
+      _BudgetFirstBasicInfoPageState();
 }
 
-class _GoalFirstBasicInfoPageState
-    extends ConsumerState<GoalFirstBasicInfoPage> {
+class _BudgetFirstBasicInfoPageState
+    extends ConsumerState<BudgetFirstBasicInfoPage> {
   static const double _contentTopGap = 47;  // title_header 바깥 경계 ~ 첫 입력 필드 간격
   static const double _fieldGap = 32;       // 입력 필드끼리 간격
   static const double _ctaBottomGap = 20;   // CTA ~ 하단 safe area 간격
+
+  bool _isSaving = false; // 중복 탭 방지
+
+  static const Duration _savedToastDelay = Duration(seconds: 1);  // 임시저장 토스트를 화면에서 보여주는 시간
 
   late final TextEditingController _peopleController;
 
@@ -49,7 +54,7 @@ class _GoalFirstBasicInfoPageState
     // (여행 고르기에서 조건 재선택으로 돌아온 경우는 생략)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !widget.showGuideToast) return;
-      showToast(context, text: '여행 목표를 기준으로 선택했어요');
+      showToast(context, text: '내 지갑을 기준으로 선택했어요');
     });
   }
 
@@ -59,10 +64,43 @@ class _GoalFirstBasicInfoPageState
     super.dispose();
   }
 
-  void _onNext() {
+  /// 세 항목을 모두 채워야 다음으로 진행 가능
+  static bool _isComplete(TripCheckDraft draft) {
+    final period = draft.travelPeriod;
+    return period != null &&
+        !period.start.isBefore(DateUtils.dateOnly(DateTime.now())) && // 지난 기간이면 다시 선택해야 함
+        (draft.peopleCount ?? 0) > 0 &&
+        draft.companionType != null;
+  }
+
+  Future<void> _onNext() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true); // 저장 + 토스트 대기 동안 CTA 비활성
+
+    var saved = false;
+    try {
+      await ref.read(tripCheckDraftProvider.notifier).saveWalletPlan(isDraft: true);
+      saved = true;
+    } catch (_) {
+      // 임시저장 실패는 진행을 막지 않음 (최종 제출 때 다시 전송됨)
+    }
+    if (!mounted) return;
+
+    // 저장 성공 시: 현재 화면에서 토스트를 잠깐 보여준 뒤 이동
+    if (saved) {
+      showToast(context, text: '진행상황이 저장되었습니다');
+      await Future<void>.delayed(_savedToastDelay);
+      if (!mounted) return; // 기다리는 사이 뒤로가기로 나간 경우
+    }
+
     // 다음 화면까지 토스트가 따라가지 않도록 정리
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    context.push(AppRoutes.goalFirstDetails);
+    setState(() => _isSaving = false); // 뒤로 돌아왔을 때 CTA 다시 활성
+
+    // 저장&토스트 대기 중에 입력이 바뀌었을 수 있으니 이동 직전에 다시 확인
+    if (!_isComplete(ref.read(tripCheckDraftProvider))) return;
+
+    context.push(AppRoutes.budgetFirstBudget);
   }
 
   @override
@@ -70,11 +108,7 @@ class _GoalFirstBasicInfoPageState
     final draft = ref.watch(tripCheckDraftProvider);
     final notifier = ref.read(tripCheckDraftProvider.notifier);
 
-    // 네 항목을 모두 채워야 다음으로 진행 가능
-    final bool isComplete = draft.destination != null &&
-        draft.travelPeriod != null &&
-        (draft.peopleCount ?? 0) > 0 &&
-        draft.companionType != null;
+    final bool isComplete = _isComplete(draft);
 
     return AppPage(
       appBar: const TopAppBar(),
@@ -92,21 +126,6 @@ class _GoalFirstBasicInfoPageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: _contentTopGap),
-
-              // 여행지 (입력하면 자동완성 / chevron으로 전체 목록에서 선택)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 6,
-                children: [
-                  const FieldLabel('여행지'),
-                  ComboBox(
-                    items: dummyDestinations, // TODO: 서버 여행지 목록으로 교체
-                    initialValue: draft.destination,
-                    onSelected: notifier.setDestination,
-                  ),
-                ],
-              ),
-              const SizedBox(height: _fieldGap),
 
               // 여행 가능 시기
               Column(
@@ -164,7 +183,7 @@ class _GoalFirstBasicInfoPageState
         padding: const EdgeInsets.only(bottom: _ctaBottomGap),
         child: Cta(
           text: '다음',
-          isActive: isComplete,
+          isActive: isComplete && !_isSaving,
           onPressed: _onNext,
         ),
       ),

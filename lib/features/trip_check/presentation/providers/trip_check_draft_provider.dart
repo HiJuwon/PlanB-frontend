@@ -4,17 +4,19 @@
 import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:plan_b/features/trip_check/data/models/wallet_plan_request_dto.dart';
+import 'package:plan_b/features/trip_check/data/models/dto/wallet_plan_request_dto.dart';
+import 'package:plan_b/features/trip_check/data/models/dto/goal_plan_request_dto.dart';
 import 'package:plan_b/features/trip_check/data/repositories/trip_check_repository.dart';
 
-import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
+import 'package:plan_b/shared/models/destination.dart';
+import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
-import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
-import 'package:plan_b/features/trip_check/data/models/budget_range.dart';
-import 'package:plan_b/features/trip_check/data/models/travel_style.dart';
-import 'package:plan_b/features/trip_check/data/models/accommodation_type.dart';
-import 'package:plan_b/features/trip_check/data/models/flight_preference.dart';
-import 'package:plan_b/features/trip_check/data/models/meal_budget.dart';
+import 'package:plan_b/features/trip_check/data/models/options/companion_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/budget_range.dart';
+import 'package:plan_b/features/trip_check/data/models/options/travel_style.dart';
+import 'package:plan_b/features/trip_check/data/models/options/accommodation_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/flight_preference.dart';
+import 'package:plan_b/features/trip_check/data/models/options/meal_budget.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/segmented_chip.dart';
 
 class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
@@ -53,7 +55,7 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
   // 기본 정보
 
   // 여행지: 목표 기준 플로우에서만 사용
-  void setDestination(String destination) =>
+  void setDestination(Destination destination) =>
       state = state.copyWith(destination: destination);
 
   void setTravelPeriod(DateTimeRange period) =>
@@ -73,36 +75,45 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
   /// 지갑 기준 플랜 저장
   /// - planId 없음 -> 생성(POST) / 있음 -> 수정(PATCH)
   /// - isDraft: true -> 단계별 임시저장 / false -> 최종 제출
-  /// - 요청은 한 번에 하나씩 순서대로 처리 (진행 중인 POST가 있으면 끝난 뒤 PATCH로 이어짐)
   /// - 실패 시 ApiException을 그대로 던짐 (화면에서 처리)
   Future<void> saveWalletPlan({required bool isDraft}) {
+    return _enqueueSave((planId) async {
+      final repository = ref.read(tripCheckRepositoryProvider);
+      final request = WalletPlanRequestDto(draft: state, isDraft: isDraft);
+      final res = planId == null
+          ? await repository.createWalletPlan(request)
+          : await repository.updateWalletPlan(planId, request);
+      return res.planId;
+    });
+  }
+
+  /// 목표 기준 플랜 저장 (동작은 saveWalletPlan과 같음)
+  Future<void> saveGoalPlan({required bool isDraft}) {
+    return _enqueueSave((planId) async {
+      final repository = ref.read(tripCheckRepositoryProvider);
+      final request = GoalPlanRequestDto(draft: state, isDraft: isDraft);
+      final res = planId == null
+          ? await repository.createGoalPlan(request)
+          : await repository.updateGoalPlan(planId, request);
+      return res.planId;
+    });
+  }
+
+  /// 저장 요청을 대기열에 넣어 한 번에 하나씩 순서대로 처리 (지갑/목표 공통)
+  Future<void> _enqueueSave(Future<int> Function(int? planId) send) {
     final flowId = _flowId;
-    final run = _saveQueue.then(
-      (_) => _saveWalletPlan(isDraft: isDraft, flowId: flowId),
-    );
+    final run = _saveQueue.then((_) async {
+      if (flowId != _flowId) return;
+
+      final planId = await send(state.planId);
+      if (flowId != _flowId) return;
+
+      // 요청 중 사용자가 값을 바꿨을 수 있으니 현재 state에 planId만 반영
+      state = state.copyWith(planId: planId);
+    });
     // 앞 요청이 실패해도 다음 요청은 진행되도록 대기열에는 에러를 남기지 않음
     _saveQueue = run.catchError((Object _) {});
     return run;
-  }
-
-  Future<void> _saveWalletPlan({required bool isDraft, required int flowId}) async {
-    // 기다리는 사이 새 플로우가 시작됐으면 이전 플로우 저장은 건너뜀
-    if (flowId != _flowId) return;
-
-    final repository = ref.read(tripCheckRepositoryProvider);
-    // 앞 요청이 끝난 뒤의 state 기준: 앞 요청이 생성했다면 planId가 있어 PATCH로 감
-    final request = WalletPlanRequestDto(draft: state, isDraft: isDraft);
-    final planId = state.planId;
-
-    final res = planId == null
-        ? await repository.createWalletPlan(request)
-        : await repository.updateWalletPlan(planId, request);
-
-    // 응답을 기다리는 사이 새 플로우가 시작됐으면 이전 planId를 붙이지 않음
-    if (flowId != _flowId) return;
-
-    // 요청 중 사용자가 값을 바꿨을 수 있으니 '현재' state에 planId만 반영
-    state = state.copyWith(planId: res.planId);
   }
 
   // 목표 기준 플로우

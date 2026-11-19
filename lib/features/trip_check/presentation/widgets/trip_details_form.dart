@@ -6,9 +6,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:plan_b/features/trip_check/data/models/accommodation_type.dart';
-import 'package:plan_b/features/trip_check/data/models/flight_preference.dart';
-import 'package:plan_b/features/trip_check/data/models/travel_style.dart';
+import 'package:plan_b/features/trip_check/data/models/options/accommodation_type.dart';
+import 'package:plan_b/features/trip_check/data/models/options/flight_preference.dart';
+import 'package:plan_b/features/trip_check/data/models/options/travel_style.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/field_label.dart';
