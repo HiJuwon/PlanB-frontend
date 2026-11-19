@@ -55,7 +55,7 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
       state = state.copyWith(maxBudget: budget);
 
   /// 지갑 기준 플랜 저장
-  /// - planId 없음 -> 생성(POST), 있음 -> 수정(PATCH, 현재 임시로 POST)
+  /// - planId 없음 -> 생성(POST) / 있음 -> 수정(PATCH)
   /// - isDraft: true -> 단계별 임시저장 / false -> 최종 제출
   /// - 실패 시 ApiException을 그대로 던짐 (화면에서 처리)
   Future<void> saveWalletPlan({required bool isDraft}) async {

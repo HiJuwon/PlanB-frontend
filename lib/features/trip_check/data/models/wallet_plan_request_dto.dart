@@ -1,4 +1,4 @@
-// POST /api/v1/plans/wallet (+ 추후 PATCH) 요청 바디
+// POST /api/v1/plans/wallet, PATCH /api/v1/plans/wallet/{planId} 요청 바디
 // - TripCheckDraft(앱 상태) -> 서버 스펙으로 변환
 // - 값이 없으면 키를 빼고 보낸다 (임시저장 시 미입력 필드)
 //
@@ -47,6 +47,8 @@ class WalletPlanRequestDto {
         if (route != null)
           'flightRoute': route == SegmentedChipSide.left ? 'DIRECT' : 'TRANSFER',
         if (tripWay != null) 'isRoundFlight': tripWay == SegmentedChipSide.left,
+        // 지갑 기준은 식비 입력이 없지만 서버 최종 제출 시 필수값이라 0을 전송
+        'foodBudget': 0,
       },
       // TODO(서버): '400만원 이상'(상한 없음)일 때 보낼 값 미정 (현재 미전송 처리함.)
       if (maxManwon != null) 'totalBudget': maxManwon * 10000,
