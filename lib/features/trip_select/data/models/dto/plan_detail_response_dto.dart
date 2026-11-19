@@ -17,7 +17,6 @@ class PlanDetailResponseDto with _$PlanDetailResponseDto {
     required int planId,
     String? planType,
     // 모르는 여행지가 오면: 앱이 죽지 않고 null로 처리
-    // ignore: invalid_annotation_target
     @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
     Destination? destination, // 목표 기준만
     String? startDate,

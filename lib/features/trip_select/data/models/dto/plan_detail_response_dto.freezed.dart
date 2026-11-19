@@ -26,7 +26,6 @@ mixin _$PlanDetailResponseDto {
   int get planId => throw _privateConstructorUsedError;
   String? get planType =>
       throw _privateConstructorUsedError; // 모르는 여행지가 오면: 앱이 죽지 않고 null로 처리
-  // ignore: invalid_annotation_target
   @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   Destination? get destination => throw _privateConstructorUsedError; // 목표 기준만
   String? get startDate => throw _privateConstructorUsedError;
@@ -240,7 +239,6 @@ class _$PlanDetailResponseDtoImpl implements _PlanDetailResponseDto {
   @override
   final String? planType;
   // 모르는 여행지가 오면: 앱이 죽지 않고 null로 처리
-  // ignore: invalid_annotation_target
   @override
   @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   final Destination? destination;
@@ -334,7 +332,6 @@ abstract class _PlanDetailResponseDto implements PlanDetailResponseDto {
   int get planId;
   @override
   String? get planType; // 모르는 여행지가 오면: 앱이 죽지 않고 null로 처리
-  // ignore: invalid_annotation_target
   @override
   @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   Destination? get destination; // 목표 기준만
