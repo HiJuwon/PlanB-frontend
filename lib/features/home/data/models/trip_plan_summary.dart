@@ -1,5 +1,5 @@
-/// 홈 화면 여행 플랜 카드(trip_plan_thumbnail_card)에 표시할 데이터
-/// (API 스펙 확정 전이라 UI 기준으로만 구조화했음)
+// 홈 화면 여행 플랜 카드(trip_plan_thumbnail_card)에 표시할 데이터
+// (API 스펙 확정 전이라 UI 기준으로만 구조화했음)
 
 import 'package:flutter/material.dart' show DateTimeRange;
 
