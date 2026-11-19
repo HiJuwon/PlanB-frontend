@@ -10,6 +10,7 @@ class MonthCalendar extends StatelessWidget {
   const MonthCalendar({
     super.key,
     required this.visibleMonth,
+    required this.firstDay,
     required this.start,
     required this.end,
     required this.onPrev,
@@ -18,6 +19,7 @@ class MonthCalendar extends StatelessWidget {
   });
 
   final DateTime visibleMonth;           // 보여줄 달 (1일 기준)
+  final DateTime firstDay;               // 선택 가능한 첫 날짜 (이전 날짜는 비활성)
   final DateTime? start;                 // 선택된 시작일
   final DateTime? end;                   // 선택된 종료일. null이면 종료일 선택 대기 중
   final VoidCallback onPrev;             // 이전 달 버튼 탭
@@ -107,15 +109,19 @@ class MonthCalendar extends StatelessWidget {
                         final DateTime day =
                             DateTime(year, month, 1 - leading + week * 7 + i);
                         final bool isCurrentMonth = day.month == month;
+                        final bool isDisabled = day.isBefore(firstDay); // 선택 가능한 첫 날짜 이전 날짜는 비활성 처리.
 
                         return CalendarDayCell(
                           day: day.day,
                           isCurrentMonth: isCurrentMonth,
+                          isDisabled: isDisabled,
                           // 이전/다음 달 날짜는 표시만 하고 선택 불가
                           range: isCurrentMonth
                               ? _rangeOf(day)
                               : CalendarDayRange.none,
-                          onTap: isCurrentMonth ? () => onDayTap(day) : null,
+                          onTap: isCurrentMonth && !isDisabled
+                              ? () => onDayTap(day)
+                              : null,
                         );
                       },
                     ),

@@ -65,6 +65,9 @@ class _DayPickerState extends State<DayPicker> {
 
   static DateTime _monthOf(DateTime date) => DateTime(date.year, date.month);
 
+  /// 오늘 0시 (오늘부터 선택 가능)
+  DateTime get _today => DateUtils.dateOnly(DateTime.now());
+
   /// YY.MM.DD 형식
   static String _format(DateTime date) {
     String two(int n) => n.toString().padLeft(2, '0');
@@ -90,9 +93,9 @@ class _DayPickerState extends State<DayPicker> {
   // 월 이동
 
   void _moveMonth(int offset) {
-    setState(() {
-      _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month + offset);
-    });
+    final next = DateTime(_visibleMonth.year, _visibleMonth.month + offset);
+    if (next.isBefore(_monthOf(_today))) return; // 이번 달 이전으로는 이동하지 않음
+    setState(() => _visibleMonth = next);
   }
 
   // 날짜 선택
@@ -238,6 +241,7 @@ class _DayPickerState extends State<DayPicker> {
               child: SingleChildScrollView(
                 child: MonthCalendar(
                   visibleMonth: _visibleMonth,
+                  firstDay: _today,
                   start: _start,
                   end: _end,
                   onPrev: () => _moveMonth(-1),
