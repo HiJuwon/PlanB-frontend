@@ -9,7 +9,7 @@ import 'package:plan_b/core/theme/app_text_styles.dart';
 class TripInfoRow {
   const TripInfoRow(this.label, this.values);
 
-  final String label;         // 국가, 시기, 인원, 예산
+  final String label;         // 여행지, 시기, 인원, 예산
   final List<String> values;  // 여러 개면 ' | '로 이어서 표시 (4명 | 가족)
 }
 
