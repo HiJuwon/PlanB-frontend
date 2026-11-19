@@ -34,28 +34,23 @@ Map<String, dynamic> _$$PlanListResponseDtoImplToJson(
   'pastPlans': instance.pastPlans,
 };
 
-_$PlanSummaryDtoImpl _$$PlanSummaryDtoImplFromJson(Map<String, dynamic> json) =>
-    _$PlanSummaryDtoImpl(
-      planId: (json['planId'] as num).toInt(),
-      confirmedPlanId: (json['confirmedPlanId'] as num?)?.toInt(),
-      title: json['title'] as String?,
-      destination: $enumDecodeNullable(
-        _$DestinationEnumMap,
-        json['destination'],
-        unknownValue: JsonKey.nullForUndefinedEnumValue,
-      ),
-      destinationImageUrl: json['destinationImageUrl'] as String?,
-      startDate: json['startDate'] as String?,
-      endDate: json['endDate'] as String?,
-      lowTotalCost: json['lowTotalCost'] as num?,
-      highTotalCost: json['highTotalCost'] as num?,
-      dDay: (json['dDay'] as num?)?.toInt(),
-      hashtags:
-          (json['hashtags'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-    );
+_$PlanSummaryDtoImpl _$$PlanSummaryDtoImplFromJson(
+  Map<String, dynamic> json,
+) => _$PlanSummaryDtoImpl(
+  planId: (json['planId'] as num).toInt(),
+  confirmedPlanId: (json['confirmedPlanId'] as num?)?.toInt(),
+  title: json['title'] as String?,
+  destination: $enumDecodeNullable(_$DestinationEnumMap, json['destination']),
+  destinationImageUrl: json['destinationImageUrl'] as String?,
+  startDate: json['startDate'] as String?,
+  endDate: json['endDate'] as String?,
+  lowTotalCost: json['lowTotalCost'] as num?,
+  highTotalCost: json['highTotalCost'] as num?,
+  dDay: (json['dDay'] as num?)?.toInt(),
+  hashtags:
+      (json['hashtags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+);
 
 Map<String, dynamic> _$$PlanSummaryDtoImplToJson(
   _$PlanSummaryDtoImpl instance,

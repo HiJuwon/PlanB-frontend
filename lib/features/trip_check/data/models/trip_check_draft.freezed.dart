@@ -19,6 +19,8 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$TripCheckDraft {
   TripSelectionType? get tripType =>
       throw _privateConstructorUsedError; // Step 1 여행 계획 기준 (null이면 미선택)
+  int? get planId =>
+      throw _privateConstructorUsedError; // 서버에 저장된 플랜 id (임시저장/제출 응답으로 받음)
   // 기본 정보
   String? get destination =>
       throw _privateConstructorUsedError; // 여행지 (목표 기준 플로우만 사용)
@@ -56,6 +58,7 @@ abstract class $TripCheckDraftCopyWith<$Res> {
   @useResult
   $Res call({
     TripSelectionType? tripType,
+    int? planId,
     String? destination,
     DateTimeRange<DateTime>? travelPeriod,
     int? peopleCount,
@@ -84,6 +87,7 @@ class _$TripCheckDraftCopyWithImpl<$Res, $Val extends TripCheckDraft>
   @override
   $Res call({
     Object? tripType = freezed,
+    Object? planId = freezed,
     Object? destination = freezed,
     Object? travelPeriod = freezed,
     Object? peopleCount = freezed,
@@ -100,6 +104,10 @@ class _$TripCheckDraftCopyWithImpl<$Res, $Val extends TripCheckDraft>
                 ? _value.tripType
                 : tripType // ignore: cast_nullable_to_non_nullable
                       as TripSelectionType?,
+            planId: freezed == planId
+                ? _value.planId
+                : planId // ignore: cast_nullable_to_non_nullable
+                      as int?,
             destination: freezed == destination
                 ? _value.destination
                 : destination // ignore: cast_nullable_to_non_nullable
@@ -153,6 +161,7 @@ abstract class _$$TripCheckDraftImplCopyWith<$Res>
   @useResult
   $Res call({
     TripSelectionType? tripType,
+    int? planId,
     String? destination,
     DateTimeRange<DateTime>? travelPeriod,
     int? peopleCount,
@@ -180,6 +189,7 @@ class __$$TripCheckDraftImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? tripType = freezed,
+    Object? planId = freezed,
     Object? destination = freezed,
     Object? travelPeriod = freezed,
     Object? peopleCount = freezed,
@@ -196,6 +206,10 @@ class __$$TripCheckDraftImplCopyWithImpl<$Res>
             ? _value.tripType
             : tripType // ignore: cast_nullable_to_non_nullable
                   as TripSelectionType?,
+        planId: freezed == planId
+            ? _value.planId
+            : planId // ignore: cast_nullable_to_non_nullable
+                  as int?,
         destination: freezed == destination
             ? _value.destination
             : destination // ignore: cast_nullable_to_non_nullable
@@ -242,6 +256,7 @@ class __$$TripCheckDraftImplCopyWithImpl<$Res>
 class _$TripCheckDraftImpl implements _TripCheckDraft {
   const _$TripCheckDraftImpl({
     this.tripType,
+    this.planId,
     this.destination,
     this.travelPeriod,
     this.peopleCount,
@@ -260,6 +275,9 @@ class _$TripCheckDraftImpl implements _TripCheckDraft {
   @override
   final TripSelectionType? tripType;
   // Step 1 여행 계획 기준 (null이면 미선택)
+  @override
+  final int? planId;
+  // 서버에 저장된 플랜 id (임시저장/제출 응답으로 받음)
   // 기본 정보
   @override
   final String? destination;
@@ -315,7 +333,7 @@ class _$TripCheckDraftImpl implements _TripCheckDraft {
 
   @override
   String toString() {
-    return 'TripCheckDraft(tripType: $tripType, destination: $destination, travelPeriod: $travelPeriod, peopleCount: $peopleCount, companionType: $companionType, maxBudget: $maxBudget, mealBudget: $mealBudget, travelStyles: $travelStyles, accommodationTypes: $accommodationTypes, flightPreferences: $flightPreferences)';
+    return 'TripCheckDraft(tripType: $tripType, planId: $planId, destination: $destination, travelPeriod: $travelPeriod, peopleCount: $peopleCount, companionType: $companionType, maxBudget: $maxBudget, mealBudget: $mealBudget, travelStyles: $travelStyles, accommodationTypes: $accommodationTypes, flightPreferences: $flightPreferences)';
   }
 
   @override
@@ -325,6 +343,7 @@ class _$TripCheckDraftImpl implements _TripCheckDraft {
             other is _$TripCheckDraftImpl &&
             (identical(other.tripType, tripType) ||
                 other.tripType == tripType) &&
+            (identical(other.planId, planId) || other.planId == planId) &&
             (identical(other.destination, destination) ||
                 other.destination == destination) &&
             (identical(other.travelPeriod, travelPeriod) ||
@@ -355,6 +374,7 @@ class _$TripCheckDraftImpl implements _TripCheckDraft {
   int get hashCode => Object.hash(
     runtimeType,
     tripType,
+    planId,
     destination,
     travelPeriod,
     peopleCount,
@@ -381,6 +401,7 @@ class _$TripCheckDraftImpl implements _TripCheckDraft {
 abstract class _TripCheckDraft implements TripCheckDraft {
   const factory _TripCheckDraft({
     final TripSelectionType? tripType,
+    final int? planId,
     final String? destination,
     final DateTimeRange<DateTime>? travelPeriod,
     final int? peopleCount,
@@ -394,6 +415,8 @@ abstract class _TripCheckDraft implements TripCheckDraft {
 
   @override
   TripSelectionType? get tripType; // Step 1 여행 계획 기준 (null이면 미선택)
+  @override
+  int? get planId; // 서버에 저장된 플랜 id (임시저장/제출 응답으로 받음)
   // 기본 정보
   @override
   String? get destination; // 여행지 (목표 기준 플로우만 사용)

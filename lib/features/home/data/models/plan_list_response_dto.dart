@@ -38,6 +38,7 @@ class PlanSummaryDto with _$PlanSummaryDto {
     @Default([]) List<String> hashtags,
   }) = _PlanSummaryDto;
 
+  @override
   @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   Destination? get destination;
 

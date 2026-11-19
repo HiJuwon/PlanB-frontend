@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:plan_b/core/config/app_routes.dart';
-import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
+
+import 'package:plan_b/core/config/app_routes.dart';
+import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
+import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/day_picker/day_picker.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/field_label.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/people_count_field.dart';
@@ -34,6 +36,10 @@ class _BudgetFirstBasicInfoPageState
   static const double _fieldGap = 32;       // 입력 필드끼리 간격
   static const double _ctaBottomGap = 20;   // CTA ~ 하단 safe area 간격
 
+  bool _isSaving = false; // 중복 탭 방지
+
+  static const Duration _savedToastDelay = Duration(seconds: 1);  // 임시저장 토스트를 화면에서 보여주는 시간
+
   late final TextEditingController _peopleController;
 
   @override
@@ -58,9 +64,42 @@ class _BudgetFirstBasicInfoPageState
     super.dispose();
   }
 
-  void _onNext() {
+  /// 세 항목을 모두 채워야 다음으로 진행 가능
+  static bool _isComplete(TripCheckDraft draft) {
+    final period = draft.travelPeriod;
+    return period != null &&
+        !period.start.isBefore(DateUtils.dateOnly(DateTime.now())) && // 지난 기간이면 다시 선택해야 함
+        (draft.peopleCount ?? 0) > 0 &&
+        draft.companionType != null;
+  }
+
+  Future<void> _onNext() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true); // 저장 + 토스트 대기 동안 CTA 비활성
+
+    var saved = false;
+    try {
+      await ref.read(tripCheckDraftProvider.notifier).saveWalletPlan(isDraft: true);
+      saved = true;
+    } catch (_) {
+      // 임시저장 실패는 진행을 막지 않음 (최종 제출 때 다시 전송됨)
+    }
+    if (!mounted) return;
+
+    // 저장 성공 시: 현재 화면에서 토스트를 잠깐 보여준 뒤 이동
+    if (saved) {
+      showToast(context, text: '진행상황이 저장되었습니다');
+      await Future<void>.delayed(_savedToastDelay);
+      if (!mounted) return; // 기다리는 사이 뒤로가기로 나간 경우
+    }
+
     // 다음 화면까지 토스트가 따라가지 않도록 정리
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    setState(() => _isSaving = false); // 뒤로 돌아왔을 때 CTA 다시 활성
+
+    // 저장&토스트 대기 중에 입력이 바뀌었을 수 있으니 이동 직전에 다시 확인
+    if (!_isComplete(ref.read(tripCheckDraftProvider))) return;
+
     context.push(AppRoutes.budgetFirstBudget);
   }
 
@@ -69,10 +108,7 @@ class _BudgetFirstBasicInfoPageState
     final draft = ref.watch(tripCheckDraftProvider);
     final notifier = ref.read(tripCheckDraftProvider.notifier);
 
-    // 세 항목을 모두 채워야 다음으로 진행 가능
-    final bool isComplete = draft.travelPeriod != null &&
-        (draft.peopleCount ?? 0) > 0 &&
-        draft.companionType != null;
+    final bool isComplete = _isComplete(draft);
 
     return AppPage(
       appBar: const TopAppBar(),
@@ -147,7 +183,7 @@ class _BudgetFirstBasicInfoPageState
         padding: const EdgeInsets.only(bottom: _ctaBottomGap),
         child: Cta(
           text: '다음',
-          isActive: isComplete,
+          isActive: isComplete && !_isSaving,
           onPressed: _onNext,
         ),
       ),

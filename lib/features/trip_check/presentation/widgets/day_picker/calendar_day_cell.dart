@@ -17,12 +17,14 @@ class CalendarDayCell extends StatelessWidget {
     super.key,
     required this.day,
     this.isCurrentMonth = true,
+    this.isDisabled = false,
     this.range = CalendarDayRange.none,
     this.onTap,
   });
 
   final int day;                 // 표시할 일(day)
   final bool isCurrentMonth;     // 현재 달 날짜인지 여부 (false면 이전/다음 달 날짜이므로 흐리게 표시)
+  final bool isDisabled;         // 오늘 이전 날짜는 선택 불가 날짜
   final CalendarDayRange range;  // 선택 기간 내 위치
   final VoidCallback? onTap;     // 탭 콜백. null이면 표시 전용(탭 불가)
 
@@ -50,7 +52,7 @@ class CalendarDayCell extends StatelessWidget {
       child: Text(
         '$day',
         style: AppTextStyles.bodyMedium14.copyWith(
-          color: isCurrentMonth ? AppColors.gray700 : AppColors.gray200,
+          color: isCurrentMonth && !isDisabled ? AppColors.gray700 : AppColors.gray200,
         ),
       ),
     );

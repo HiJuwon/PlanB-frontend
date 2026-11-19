@@ -38,7 +38,6 @@ class _DayPickerState extends State<DayPicker> {
   static const double _frameHeight = (_dropdownPadding + _dropdownBorder) * 2; // 34
 
   /// 6주짜리 달 기준 드롭다운 최대 높이: 열 방향 판단에 사용 (달을 넘겨도 방향이 바뀌지 않도록)
-  /// 헤더 28 + 간격 16 + 요일 28 + 6주 × (행 간격 8 + 날짜 칸 36) + 바깥 프레임 34
   static const double _maxDropdownHeight = 28 + 16 + 28 + 6 * (8 + 36) + _frameHeight; // 370
 
   /// 공간이 아주 좁아도 유지할 최소 높이 (헤더 + 요일 + 한 주 + 프레임)
@@ -60,10 +59,24 @@ class _DayPickerState extends State<DayPicker> {
       _start = DateUtils.dateOnly(range.start);
       _end = DateUtils.dateOnly(range.end);
     }
-    _visibleMonth = _monthOf(_start ?? DateTime.now());
+    _visibleMonth = _initialVisibleMonth();
   }
 
   static DateTime _monthOf(DateTime date) => DateTime(date.year, date.month);
+
+  /// 오늘 0시 (오늘부터 선택 가능)
+  DateTime get _today => DateUtils.dateOnly(DateTime.now());
+
+  /// 달력을 열 때 보여줄 달: 선택된 시작일의 달 (단, 이번 달보다 이전이면 이번 달)
+  /// - 지난 기간이 남아 있어도 선택 가능한 달부터 보여줘서 다시 고를 수 있게 함
+  DateTime _initialVisibleMonth() {
+    final thisMonth = _monthOf(_today);
+    final start = _start;
+    if (start == null) return thisMonth;
+
+    final startMonth = _monthOf(start);
+    return startMonth.isBefore(thisMonth) ? thisMonth : startMonth;
+  }
 
   /// YY.MM.DD 형식
   static String _format(DateTime date) {
@@ -77,7 +90,7 @@ class _DayPickerState extends State<DayPicker> {
 
   void _open() {
     setState(() {
-      _visibleMonth = _monthOf(_start ?? DateTime.now()); // 열 때 선택된 달부터 보여줌
+      _visibleMonth = _initialVisibleMonth(); // 열 때 선택된 달부터 (지난 달이면 이번 달부터)
       _overlay.show();
     });
   }
@@ -90,9 +103,9 @@ class _DayPickerState extends State<DayPicker> {
   // 월 이동
 
   void _moveMonth(int offset) {
-    setState(() {
-      _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month + offset);
-    });
+    final next = DateTime(_visibleMonth.year, _visibleMonth.month + offset);
+    if (next.isBefore(_monthOf(_today))) return; // 이번 달 이전으로는 이동하지 않음
+    setState(() => _visibleMonth = next);
   }
 
   // 날짜 선택
@@ -238,6 +251,7 @@ class _DayPickerState extends State<DayPicker> {
               child: SingleChildScrollView(
                 child: MonthCalendar(
                   visibleMonth: _visibleMonth,
+                  firstDay: _today,
                   start: _start,
                   end: _end,
                   onPrev: () => _moveMonth(-1),

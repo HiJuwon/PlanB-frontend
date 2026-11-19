@@ -267,7 +267,6 @@ mixin _$PlanSummaryDto {
   int? get confirmedPlanId => throw _privateConstructorUsedError;
   String? get title =>
       throw _privateConstructorUsedError; // 서버에 모르는 여행지가 새로 생겨도 앱이 죽지 않고 null로 처리
-  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   Destination? get destination => throw _privateConstructorUsedError;
   String? get destinationImageUrl => throw _privateConstructorUsedError;
   String? get startDate => throw _privateConstructorUsedError; // "2026-12-01"
@@ -298,7 +297,6 @@ abstract class $PlanSummaryDtoCopyWith<$Res> {
     int planId,
     int? confirmedPlanId,
     String? title,
-    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
     Destination? destination,
     String? destinationImageUrl,
     String? startDate,
@@ -402,7 +400,6 @@ abstract class _$$PlanSummaryDtoImplCopyWith<$Res>
     int planId,
     int? confirmedPlanId,
     String? title,
-    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
     Destination? destination,
     String? destinationImageUrl,
     String? startDate,
@@ -498,7 +495,6 @@ class _$PlanSummaryDtoImpl implements _PlanSummaryDto {
     required this.planId,
     this.confirmedPlanId,
     this.title,
-    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
     this.destination,
     this.destinationImageUrl,
     this.startDate,
@@ -520,7 +516,6 @@ class _$PlanSummaryDtoImpl implements _PlanSummaryDto {
   final String? title;
   // 서버에 모르는 여행지가 새로 생겨도 앱이 죽지 않고 null로 처리
   @override
-  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   final Destination? destination;
   @override
   final String? destinationImageUrl;
@@ -612,7 +607,6 @@ abstract class _PlanSummaryDto implements PlanSummaryDto {
     required final int planId,
     final int? confirmedPlanId,
     final String? title,
-    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
     final Destination? destination,
     final String? destinationImageUrl,
     final String? startDate,
@@ -633,7 +627,6 @@ abstract class _PlanSummaryDto implements PlanSummaryDto {
   @override
   String? get title; // 서버에 모르는 여행지가 새로 생겨도 앱이 죽지 않고 null로 처리
   @override
-  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   Destination? get destination;
   @override
   String? get destinationImageUrl;

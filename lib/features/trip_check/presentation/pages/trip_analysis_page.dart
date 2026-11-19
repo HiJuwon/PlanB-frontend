@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:plan_b/core/config/app_routes.dart';
+import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/shared/widgets/app_page.dart';
@@ -63,16 +64,25 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
   }
 
   /// 여행 계획 분석 요청
-  // TODO: 서버 API 연동 (draft를 요청 바디로 변환해 전송, 응답으로 받은 플랜 저장)
   Future<void> _requestAnalysis(TripCheckDraft draft) async {
-    await Future<void>.delayed(const Duration(seconds: 3)); // 임시: 서버 응답 대기 흉내
+    final notifier = ref.read(tripCheckDraftProvider.notifier);
+
+    switch (draft.tripType) {
+      case TripSelectionType.budget:
+        await notifier.saveWalletPlan(isDraft: false);
+      case TripSelectionType.goal:
+        // TODO: POST /api/v1/plans/goal 연동
+        await Future<void>.delayed(const Duration(seconds: 3));
+      case null:
+        throw StateError('tripType이 선택되지 않았어요');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 분석 중에는 안드로이드 뒤로가기·iOS 스와이프 뒤로가기를 막음
+    // 분석 중: 플로우 중단 방지
     return PopScope(
-      canPop: _isDone,
+      canPop: false,  // 분석 중에는 이미 최종 제출된 플랜이라 시스템 뒤로가기도 막음
       child: Stack(
         children: [
           // 배경: 흰색 + 배경 하단 ellipse
