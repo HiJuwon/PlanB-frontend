@@ -109,7 +109,10 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: _infoTopGap),
-                          TripBasicInfoSection(rows: _infoRows(basicInfo, tripType)),
+                          TripBasicInfoSection(
+                            rows: _infoRows(draft, tripType),
+                            alignValues: !isBudget, // 목표 기준만 값 정렬
+                          ),
                           const SizedBox(height: _sheetTopGap),
                           isBudget ? _buildTicketSheet() : _buildReceiptSheet(),
                         ],
