@@ -23,7 +23,8 @@ JwtLoginResponse _$JwtLoginResponseFromJson(Map<String, dynamic> json) {
 mixin _$JwtLoginResponse {
   String get jwtAccessToken => throw _privateConstructorUsedError;
   String get jwtRefreshToken => throw _privateConstructorUsedError;
-  bool get newUser => throw _privateConstructorUsedError; // true면 첫 로그인 → 온보딩으로
+  bool get newUser =>
+      throw _privateConstructorUsedError; // true면 첫 로그인 -> 온보딩으로
   int? get userId => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
   String? get nickname => throw _privateConstructorUsedError;
@@ -216,7 +217,7 @@ class _$JwtLoginResponseImpl implements _JwtLoginResponse {
   @override
   @JsonKey()
   final bool newUser;
-  // true면 첫 로그인 → 온보딩으로
+  // true면 첫 로그인 -> 온보딩으로
   @override
   final int? userId;
   @override
@@ -298,7 +299,7 @@ abstract class _JwtLoginResponse implements JwtLoginResponse {
   @override
   String get jwtRefreshToken;
   @override
-  bool get newUser; // true면 첫 로그인 → 온보딩으로
+  bool get newUser; // true면 첫 로그인 -> 온보딩으로
   @override
   int? get userId;
   @override
