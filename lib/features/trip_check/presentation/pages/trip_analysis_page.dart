@@ -80,9 +80,9 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 분석 중에는 안드로이드 뒤로가기·iOS 스와이프 뒤로가기를 막음
+    // 분석 중: 플로우 중단 방지
     return PopScope(
-      canPop: _isDone,
+      canPop: false,  // 분석 중에는 이미 최종 제출된 플랜이라 시스템 뒤로가기도 막음
       child: Stack(
         children: [
           // 배경: 흰색 + 배경 하단 ellipse
