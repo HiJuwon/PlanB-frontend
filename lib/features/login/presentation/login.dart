@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plan_b/features/login/data/kakao_login_service.dart';
+import 'package:plan_b/features/login/data/google_login_service.dart';
 import 'package:plan_b/features/login/presentation/providers/login_controller.dart';
 
 import 'package:plan_b/core/theme/app_colors.dart';
@@ -31,19 +32,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   bool _isLoading = false;
 
-  Future<void> _loginWithKakao() async {
+  Future<void> _login({
+    required String label,                       // 로그용 ('카카오', '구글')
+    required Future<void> Function() action,
+    required bool Function(Object e) isCanceled,
+  }) async {
     if (_isLoading) return; // 중복 탭 방지
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(loginControllerProvider).loginWithKakao();
+      await action();
       // 성공하면 라우터 가드가 홈/온보딩으로 이동시킴
     } catch (e, st) {
-      // 사용자가 직접 취소한 경우는 안내하지 않음
-      if (KakaoLoginService.isCanceled(e)) return;
+      if (isCanceled(e)) return; // 사용자가 직접 취소한 경우는 안내하지 않음
 
-      // 원인은 개발용 로그로만 남기고, 사용자에게는 고정 문구만 보여줌
-      debugPrint('카카오 로그인 실패: $e\n$st');
+      debugPrint('$label 로그인 실패: $e\n$st');
       if (mounted) {
         showToast(
           context,
@@ -55,6 +58,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
+
+  void _loginWithKakao() => _login(
+        label: '카카오',
+        action: ref.read(loginControllerProvider).loginWithKakao,
+        isCanceled: KakaoLoginService.isCanceled,
+      );
+
+  void _loginWithGoogle() => _login(
+        label: '구글',
+        action: ref.read(loginControllerProvider).loginWithGoogle,
+        isCanceled: GoogleLoginService.isCanceled,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +119,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                             CtaSocialLogin(
                               type: SocialLoginType.google,
-                              onPressed: () {}, // TODO: 구글 로그인 연동
+                              onPressed: _isLoading ? null : _loginWithGoogle,
                             ),
                           ],
                         ),
