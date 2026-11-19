@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 
 import 'package:plan_b/core/config/app_routes.dart';
+import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/day_picker/day_picker.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/field_label.dart';
@@ -63,6 +64,12 @@ class _BudgetFirstBasicInfoPageState
     super.dispose();
   }
 
+  /// 세 항목을 모두 채워야 다음으로 진행 가능
+    static bool _isComplete(TripCheckDraft draft) =>
+      draft.travelPeriod != null &&
+      (draft.peopleCount ?? 0) > 0 &&
+      draft.companionType != null;
+
   Future<void> _onNext() async {
     if (_isSaving) return;
     setState(() => _isSaving = true); // 저장 + 토스트 대기 동안 CTA 비활성
@@ -86,6 +93,10 @@ class _BudgetFirstBasicInfoPageState
     // 다음 화면까지 토스트가 따라가지 않도록 정리
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
     setState(() => _isSaving = false); // 뒤로 돌아왔을 때 CTA 다시 활성
+
+    // 저장&토스트 대기 중에 입력이 바뀌었을 수 있으니 이동 직전에 다시 확인
+    if (!_isComplete(ref.read(tripCheckDraftProvider))) return;
+
     context.push(AppRoutes.budgetFirstBudget);
   }
 
@@ -94,10 +105,7 @@ class _BudgetFirstBasicInfoPageState
     final draft = ref.watch(tripCheckDraftProvider);
     final notifier = ref.read(tripCheckDraftProvider.notifier);
 
-    // 세 항목을 모두 채워야 다음으로 진행 가능
-    final bool isComplete = draft.travelPeriod != null &&
-        (draft.peopleCount ?? 0) > 0 &&
-        draft.companionType != null;
+    final bool isComplete = _isComplete(draft);
 
     return AppPage(
       appBar: const TopAppBar(),
