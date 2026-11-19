@@ -18,6 +18,7 @@ part 'trip_check_draft.freezed.dart';
 class TripCheckDraft with _$TripCheckDraft {
   const factory TripCheckDraft({
     TripSelectionType? tripType, // Step 1 여행 계획 기준 (null이면 미선택)
+    int? planId, // 서버에 저장된 플랜 id (임시저장/제출 응답으로 받음)
 
     // 기본 정보
     String? destination,             // 여행지 (목표 기준 플로우만 사용)

@@ -4,6 +4,9 @@
 import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:plan_b/features/trip_check/data/models/wallet_plan_request_dto.dart';
+import 'package:plan_b/features/trip_check/data/repositories/trip_check_repository.dart';
+
 import 'package:plan_b/features/trip_check/data/models/trip_selection_type.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
@@ -48,12 +51,27 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
       state = state.copyWith(companionType: type);
 
   // 지갑 기준 플로우
-
   void setMaxBudget(BudgetRange budget) =>
       state = state.copyWith(maxBudget: budget);
 
-  // 목표 기준 플로우
+  /// 지갑 기준 플랜 저장
+  /// - planId 없음 -> 생성(POST), 있음 -> 수정(PATCH, 현재 임시로 POST)
+  /// - isDraft: true -> 단계별 임시저장 / false -> 최종 제출
+  /// - 실패 시 ApiException을 그대로 던짐 (화면에서 처리)
+  Future<void> saveWalletPlan({required bool isDraft}) async {
+    final repository = ref.read(tripCheckRepositoryProvider);
+    final request = WalletPlanRequestDto(draft: state, isDraft: isDraft);
+    final planId = state.planId;
 
+    final res = planId == null
+        ? await repository.createWalletPlan(request)
+        : await repository.updateWalletPlan(planId, request);
+
+    // 요청 중 사용자가 값을 바꿨을 수 있으니 '현재' state에 planId만 반영
+    state = state.copyWith(planId: res.planId);
+  }
+
+  // 목표 기준 플로우
   void setMealBudget(MealBudget budget) =>
       state = state.copyWith(mealBudget: budget);
 
