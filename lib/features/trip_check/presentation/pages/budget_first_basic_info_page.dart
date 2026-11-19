@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
+
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/features/trip_check/data/models/companion_type.dart';
-import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/day_picker/day_picker.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/field_label.dart';
 import 'package:plan_b/features/trip_check/presentation/widgets/people_count_field.dart';
@@ -34,6 +35,10 @@ class _BudgetFirstBasicInfoPageState
   static const double _fieldGap = 32;       // 입력 필드끼리 간격
   static const double _ctaBottomGap = 20;   // CTA ~ 하단 safe area 간격
 
+  bool _isSaving = false; // 중복 탭 방지
+
+  static const Duration _savedToastDelay = Duration(seconds: 1);  // 임시저장 토스트를 화면에서 보여주는 시간
+
   late final TextEditingController _peopleController;
 
   @override
@@ -58,9 +63,29 @@ class _BudgetFirstBasicInfoPageState
     super.dispose();
   }
 
-  void _onNext() {
+  Future<void> _onNext() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true); // 저장 + 토스트 대기 동안 CTA 비활성
+
+    var saved = false;
+    try {
+      await ref.read(tripCheckDraftProvider.notifier).saveWalletPlan(isDraft: true);
+      saved = true;
+    } catch (_) {
+      // 임시저장 실패는 진행을 막지 않음 (최종 제출 때 다시 전송됨)
+    }
+    if (!mounted) return;
+
+    // 저장 성공 시: 현재 화면에서 토스트를 잠깐 보여준 뒤 이동
+    if (saved) {
+      showToast(context, text: '진행상황이 저장되었습니다');
+      await Future<void>.delayed(_savedToastDelay);
+      if (!mounted) return; // 기다리는 사이 뒤로가기로 나간 경우
+    }
+
     // 다음 화면까지 토스트가 따라가지 않도록 정리
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    setState(() => _isSaving = false); // 뒤로 돌아왔을 때 CTA 다시 활성
     context.push(AppRoutes.budgetFirstBudget);
   }
 
@@ -147,7 +172,7 @@ class _BudgetFirstBasicInfoPageState
         padding: const EdgeInsets.only(bottom: _ctaBottomGap),
         child: Cta(
           text: '다음',
-          isActive: isComplete,
+          isActive: isComplete && !_isSaving,
           onPressed: _onNext,
         ),
       ),
