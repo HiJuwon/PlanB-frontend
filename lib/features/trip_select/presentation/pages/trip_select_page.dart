@@ -9,6 +9,8 @@ import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/features/trip_check/data/models/options/budget_range.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
+import 'package:plan_b/features/trip_select/data/models/trip_basic_info.dart';
+import 'package:plan_b/features/trip_select/presentation/providers/trip_basic_info_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_select/data/dummy/trip_plan_dummy.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/plan_list_sheet.dart';
@@ -71,8 +73,15 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
   @override
   Widget build(BuildContext context) {
     final TripCheckDraft draft = ref.watch(tripCheckDraftProvider);
-    // 정상 플로우라면 항상 값이 있음 (직접 진입 시 지갑 기준으로 표시)
-    final TripSelectionType tripType = draft.tripType ?? TripSelectionType.budget;
+
+    // 서버 값이 오기 전(로딩/실패/planId 없음)에는 입력값으로 먼저 보여줌
+    final TripBasicInfo basicInfo =
+        ref.watch(tripBasicInfoProvider).valueOrNull ?? TripBasicInfo.fromDraft(draft);
+
+    // 서버 값 > 입력값 > 지갑 기준 순서로 사용
+    final TripSelectionType tripType =
+        basicInfo.tripType ?? draft.tripType ?? TripSelectionType.budget;
+
     final bool isBudget = tripType == TripSelectionType.budget;
 
     return PopScope(
@@ -100,7 +109,7 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: _infoTopGap),
-                          TripBasicInfoSection(rows: _infoRows(draft, tripType)),
+                          TripBasicInfoSection(rows: _infoRows(basicInfo, tripType)),
                           const SizedBox(height: _sheetTopGap),
                           isBudget ? _buildTicketSheet() : _buildReceiptSheet(),
                         ],
@@ -176,21 +185,21 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
 
   // 기본 정보 박스 행 구성
 
-  List<TripInfoRow> _infoRows(TripCheckDraft draft, TripSelectionType tripType) {
-    final period = TripInfoRow('시기', [_formatPeriod(draft.travelPeriod)]);
+  List<TripInfoRow> _infoRows(TripBasicInfo info, TripSelectionType tripType) {
+    final period = TripInfoRow('시기', [_formatPeriod(info.travelPeriod)]);
     final people = TripInfoRow('인원', [
-      if (draft.peopleCount != null) '${draft.peopleCount}명',
-      if (draft.companionType != null) draft.companionType!.label,
+      if (info.peopleCount != null) '${info.peopleCount}명',
+      if (info.companionType != null) info.companionType!.label,
     ]);
 
     return switch (tripType) {
       TripSelectionType.budget => [
           period,
           people,
-          TripInfoRow('예산', [_formatBudget(draft.maxBudget)]),
+          TripInfoRow('예산', [_formatBudget(info.maxBudget)]),
         ],
       TripSelectionType.goal => [
-          TripInfoRow('여행지', [draft.destination?.label ?? '-']),
+          TripInfoRow('여행지', [info.destination?.label ?? '-']),
           period,
           people,
         ],
