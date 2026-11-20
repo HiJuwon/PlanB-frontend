@@ -46,12 +46,27 @@ class _LoadingSpinnerState extends State<LoadingSpinner>
   @override
   void initState() {
     super.initState();
+    // 처음부터 완료 상태면 0 -> 100%를 fillDuration 동안 한 번에 채움
+    if (widget.isComplete) {
+      _fillAll();
+      return;
+    }
     _controller.animateTo(
       widget.holdProgress,
       duration: widget.fillDuration,
       curve: Curves.easeOut,
     );
-    if (widget.isComplete) _finish();
+  }
+
+  /// 0%에서 100%까지 채운 뒤 onFilled 호출 (처음부터 isComplete인 경우)
+  Future<void> _fillAll() async {
+    _isFinishing = true;
+    await _controller.animateTo(
+      1,
+      duration: widget.fillDuration,
+      curve: Curves.easeInOut,
+    );
+    if (mounted) widget.onFilled?.call();
   }
 
   @override
