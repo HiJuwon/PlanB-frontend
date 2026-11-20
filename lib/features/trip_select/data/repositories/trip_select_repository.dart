@@ -27,7 +27,10 @@ class TripSelectRepository {
   /// 지갑 기준 AI 여행지 추천 생성 (1~3순위)
   Future<List<TripPlan>> createWalletRecommendations(int planId) {
     return apiRequest(
-      () => _dio.post('/api/v1/plans/$planId/recommendations/wallet'),
+      () => _dio.post(
+        '/api/v1/plans/$planId/recommendations/wallet',
+        options: Options(receiveTimeout: _recommendationTimeout),
+      ),
       (data) => RecommendationResponseDto.fromJson(data as Map<String, dynamic>)
           .toWalletTripPlans(),
     );
