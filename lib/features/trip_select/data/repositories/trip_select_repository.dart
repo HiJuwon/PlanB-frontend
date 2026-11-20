@@ -12,6 +12,9 @@ class TripSelectRepository {
   TripSelectRepository(this._dio);
   final Dio _dio;
 
+  /// AI 추천 생성은 오래 걸려서 이 요청만 응답 대기 시간을 늘림 (기본 60초)
+  static const Duration _recommendationTimeout = Duration(minutes: 10);
+
   /// 플랜 기본 정보 조회 (여행 고르기 상단의 여행 기본 정보 섹션)
   Future<TripBasicInfo> getPlanBasicInfo(int planId) {
     return apiRequest(

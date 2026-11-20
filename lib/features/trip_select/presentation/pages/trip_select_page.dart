@@ -16,6 +16,7 @@ import 'package:plan_b/features/trip_select/data/models/trip_basic_info.dart';
 import 'package:plan_b/features/trip_select/presentation/providers/trip_basic_info_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_select/data/dummy/trip_plan_dummy.dart';
+import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/plan_list_sheet.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/select_bottom_bar.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/trip_basic_info_section.dart';
@@ -144,6 +145,7 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
   }
 
   /// 지갑 기준: trip_plan_ticket (AI 추천 TOP 1~3)
+  /// 분석 페이지에서 이미 생성된 결과를 바로 사용 (재시도/직접 진입 시에만 로딩)
   Widget _buildTicketSheet() {
     final AsyncValue<List<TripPlan>> recommendations =
         ref.watch(walletRecommendationsProvider);
@@ -162,12 +164,8 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
             ),
           // TODO: 4~6순위(GET /recommendations/wallet/more) 연동 시 '다른 여행지도 보고싶어요' 버튼 복구
         ],
-        loading: () => const [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 40),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-        ],
+        // 화면에 있는 동안 전역 로딩 오버레이 표시, 데이터가 오면 자동으로 꺼짐
+        loading: () => const [ShowGlobalLoading()],
         error: (_, __) => [
           Text(
             '여행지 추천을 불러오지 못했어요.',
@@ -176,6 +174,8 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
           ),
           Btn(
             text: '다시 시도',
+            variant: BtnVariant.primary,
+            iconPosition: BtnIconPosition.trailing,
             onPressed: () {
               setState(() => _selectedPlanId = null);
               ref.invalidate(walletRecommendationsProvider);
