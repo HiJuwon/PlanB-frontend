@@ -18,6 +18,9 @@ import 'package:plan_b/features/trip_select/data/models/trip_basic_info.dart';
 import 'package:plan_b/features/trip_select/presentation/providers/trip_basic_info_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
+import 'package:plan_b/features/trip_select/data/repositories/trip_select_repository.dart';
+import 'package:plan_b/shared/providers/global_loading_provider.dart';
+import 'package:plan_b/shared/widgets/feedback/toast.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/plan_list_sheet.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/select_bottom_bar.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/trip_basic_info_section.dart';
@@ -43,6 +46,8 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
   static const double _sheetTopGap = 40;  // 여행 기본 정보 ~ 파란 시트
 
   String? _selectedPlanId;       // 하나만 선택
+  List<TripPlan> _morePlans = const []; // 지갑 기준: 추가 조회한 4~6순위
+  bool _isLoadingMore = false;          // 4~6순위 조회 중 (버튼 중복 탭 방지)
 
   void _onPlanSelected(String planId, bool selected) =>
       setState(() => _selectedPlanId = selected ? planId : null);
@@ -74,6 +79,32 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
     // TODO: 선택한 플랜 서버 저장 & 플랜 생성은 완료 페이지에서 로딩과 함께 처리
     // (실패하면 완료 페이지가 pop해서 여기로 돌아오므로 push 유지)
        context.push(AppRoutes.tripSelectCompleted, extra: _selectedPlanId);
+  }
+
+  /// 지갑 기준: '다른 여행지도 보고싶어요' -> 4~6순위 추가 조회
+  /// - 성공: 1~3순위 아래에 붙이고 버튼 숨김
+  /// - 실패: 토스트만 띄우고 버튼은 남겨서 다시 시도 가능
+  Future<void> _onShowMorePressed() async {
+    final int? planId = ref.read(tripCheckDraftProvider).planId;
+    if (planId == null || _isLoadingMore) return;
+
+    setState(() => _isLoadingMore = true);
+    try {
+      final List<TripPlan> plans = await ref
+          .read(globalLoadingProvider.notifier)
+          .run(() => ref.read(tripSelectRepositoryProvider).getMoreWalletRecommendations(planId));
+      if (!mounted) return;
+      setState(() => _morePlans = plans);
+    } catch (_) {
+      if (!mounted) return;
+      showToast(
+        context,
+        text: '다른 여행지를 불러오지 못했어요.\n다시 시도해 주세요.',
+        type: ToastType.warning,
+      );
+    } finally {
+      if (mounted) setState(() => _isLoadingMore = false);
+    }
   }
 
   @override
@@ -148,7 +179,7 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
     );
   }
 
-  /// 지갑 기준: trip_plan_ticket (AI 추천 TOP 1~3)
+  /// 지갑 기준: trip_plan_ticket (AI 추천 TOP 1~3 + '다른 여행지' 4~6)
   /// 분석 페이지에서 이미 생성된 결과를 바로 사용 (재시도/직접 진입 시에만 로딩)
   Widget _buildTicketSheet() {
     final AsyncValue<List<TripPlan>> recommendations =
@@ -159,14 +190,19 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
       subtitle: '마음에 드는 여행지 티켓을 선택하세요.',
       children: recommendations.when(
         data: (plans) => [
-          for (final plan in plans)
+          for (final plan in [...plans, ..._morePlans])
             TripPlanTicket(
               key: ValueKey(plan.id), // 열림 상태가 다른 티켓으로 옮겨가지 않도록
               plan: plan,
               isSelected: _selectedPlanId == plan.id,
               onSelectedChanged: (selected) => _onPlanSelected(plan.id, selected),
             ),
-          // TODO: 4~6순위(GET /recommendations/wallet/more) 연동 시 '다른 여행지도 보고싶어요' 버튼 복구
+          // 4~6순위를 아직 안 불러왔을 때만 노출
+          if (plans.isNotEmpty && _morePlans.isEmpty)
+            Btn(
+              text: '다른 여행지도 보고싶어요',
+              onPressed: _onShowMorePressed,
+            ),
         ],
         // 화면에 있는 동안 전역 로딩 오버레이 표시, 데이터가 오면 자동으로 꺼짐
         loading: () => const [ShowGlobalLoading()],
@@ -181,7 +217,11 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
             variant: BtnVariant.primary,
             iconPosition: BtnIconPosition.trailing,
             onPressed: () {
-              setState(() => _selectedPlanId = null);
+              // 1~3순위를 새로 생성하므로 이전에 불러온 4~6순위와 선택도 초기화
+              setState(() {
+                _selectedPlanId = null;
+                _morePlans = const [];
+              });
               ref.invalidate(walletRecommendationsProvider);
             },
           ),

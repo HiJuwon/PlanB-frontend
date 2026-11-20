@@ -37,6 +37,19 @@ class TripSelectRepository {
     );
   }
 
+  /// 지갑 기준 추천 여행지 추가 조회 (4~6순위)
+  Future<List<TripPlan>> getMoreWalletRecommendations(int planId) {
+    return apiRequest(
+      () => _dio.get(
+        '/api/v1/plans/$planId/recommendations/wallet/more',
+        // 일단 1~3순위와 같은 대기 시간 적용
+        options: Options(receiveTimeout: _recommendationTimeout),
+      ),
+      (data) => RecommendationResponseDto.fromJson(data as Map<String, dynamic>)
+          .toWalletTripPlans(),
+    );
+  }
+
   /// 목표 기준 AI 예산 추천 생성 (고/중/저 3단계)
   Future<List<BudgetLevelPlan>> createGoalRecommendations(int planId) {
     return apiRequest(
