@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
+import 'package:plan_b/features/my_page/presentation/providers/my_profile_provider.dart';
 
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
@@ -27,9 +28,6 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  // TODO: 로그인 연동 후 사용자 이름으로 교체
-  static const String _userName = '주원';
-
   MainSegment _segment = MainSegment.upcomingTrip;
 
   /// 상태별 플랜 목록 (정렬 규칙 적용)
@@ -112,6 +110,11 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // 로컬에 저장된 프로필 이름 (마이페이지에서 바꾸면 바로 반영됨)
+    final String userName = ref.watch(
+      myProfileProvider.select((profile) => profile.valueOrNull?.name ?? ''),
+    );
+
     final plansAsync = ref.watch(homePlansProvider);
 
     // 조회에 성공한 데이터만 사용 (로딩 중·에러일 때는 진행중 캐러셀도 숨김)
@@ -173,8 +176,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                         children: [
                           const SizedBox(height: 16), // 상단바 ~ 헤더 간격
 
-                          const TitleHeader(
-                            title: '반가워요, $_userName 님!',
+                          TitleHeader(
+                            title: userName.isEmpty ? '반가워요!' : '반가워요, $userName 님!',
                             subtitle: '즐거운 여행 준비가 되길 바랄게요.',
                             align: TitleHeaderAlign.center,
                           ),
