@@ -13,20 +13,23 @@ class GoalPlanRequestDto {
 
   Map<String, dynamic> toJson() {
     final destination = draft.destination;
+    final mealBudget = draft.mealBudget;
 
     return {
-      'common': CommonTravelPlanDto(
-        draft: draft,
-        isDraft: isDraft,
-        foodBudget: _foodBudget(draft.mealBudget),
-      ).toJson(),
+      'common': CommonTravelPlanDto(draft: draft, isDraft: isDraft).toJson(),
       if (destination != null) 'destination': _destination(destination),
+      if (mealBudget != null) 'foodBudgetRange': _foodBudgetRange(mealBudget),
     };
   }
 
-  /// 1인당 한 끼 식비: 선택지의 상한 금액(원)
-  // TODO(서버): '10만원 이상'(상한 없음)일 때 보낼 값 미정임 (현재는 일단 미전송 처리함)
-  static int? _foodBudget(MealBudget? budget) => budget?.maxWon;
+  /// 1인당 한 끼 식비 구간
+  static String _foodBudgetRange(MealBudget budget) => switch (budget) {
+        MealBudget.upTo10k => 'UNDER_1',
+        MealBudget.upTo30k => 'UNDER_3',
+        MealBudget.upTo50k => 'UNDER_5',
+        MealBudget.upTo100k => 'UNDER_10',
+        MealBudget.over100k => 'OVER_10',
+      };
 
   /// 서버 여행지 enum (nhaTrang -> NHA_TRANG)
   /// Destination의 @JsonEnum(fieldRename: screamingSnake)와 같은 규칙
