@@ -120,7 +120,8 @@ class _OpenContent extends StatelessWidget {
               PlanTotalCostRow(totalCost: plan.totalCost, palette: p),
             ],
           ),
-          PlanSummaryBox(summary: plan.summary, palette: p),
+          // 요약이 비어있으면 요약 박스 숨기도록 처리함
+          if (plan.summary.isNotEmpty) PlanSummaryBox(summary: plan.summary, palette: p),
         ],
       ),
     );
