@@ -8,7 +8,6 @@ import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/my_page/data/models/my_profile.dart';
 import 'package:plan_b/features/my_page/presentation/providers/my_profile_provider.dart';
 import 'package:plan_b/features/my_page/presentation/providers/push_notification_provider.dart';
-import 'package:plan_b/core/auth/auth_provider.dart';
 import 'package:plan_b/features/login/presentation/providers/login_controller.dart';
 import 'package:plan_b/shared/providers/global_loading_provider.dart';
 import 'package:plan_b/core/network/api_request.dart';
