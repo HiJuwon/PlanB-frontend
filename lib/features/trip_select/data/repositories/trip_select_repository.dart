@@ -5,6 +5,8 @@ import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/core/network/dio_provider.dart';
 import 'package:plan_b/features/trip_select/data/models/dto/plan_detail_response_dto.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_basic_info.dart';
+import 'package:plan_b/features/trip_select/data/models/dto/recommendation_response_dto.dart';
+import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
 
 class TripSelectRepository {
   TripSelectRepository(this._dio);
@@ -16,6 +18,15 @@ class TripSelectRepository {
       () => _dio.get('/api/v1/plans/$planId'),
       (data) => PlanDetailResponseDto.fromJson(data as Map<String, dynamic>)
           .toTripBasicInfo(),
+    );
+  }
+
+  /// 지갑 기준 AI 여행지 추천 생성 (1~3순위)
+  Future<List<TripPlan>> createWalletRecommendations(int planId) {
+    return apiRequest(
+      () => _dio.post('/api/v1/plans/$planId/recommendations/wallet'),
+      (data) => RecommendationResponseDto.fromJson(data as Map<String, dynamic>)
+          .toWalletTripPlans(),
     );
   }
 }
