@@ -67,6 +67,7 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
 
   /// 여행 계획 분석 요청
   /// - 지갑 기준: 플랜 최종 저장 -> AI 여행지 추천 생성까지 끝나야 분석 완료
+  /// - 추천 생성만 실패한 뒤 재시도하면 최종 저장은 생략되고(입력값 그대로) 추천만 다시 요청됨
   Future<void> _requestAnalysis(TripCheckDraft draft) async {
     final notifier = ref.read(tripCheckDraftProvider.notifier);
 
@@ -75,7 +76,7 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
         await notifier.saveWalletPlan(isDraft: false);
         if (!mounted) return;
 
-        // 조건을 다시 선택해서 planId가 같아도 이전 추천이 남지 않도록 항상 새로 생성
+        // 이전 추천이 남지 않도록 항상 새로 생성
         ref.invalidate(walletRecommendationsProvider);
         await ref.read(walletRecommendationsProvider.future);
       case TripSelectionType.goal:
