@@ -61,6 +61,23 @@ class TripSelectRepository {
           .toGoalBudgetPlans(),
     );
   }
+
+  /// 추천 계획 결정 (지갑/목표 기준 공통)
+  /// - planId: 맞춤 여행 체크에서 만든 플랜 id
+  /// - recommendationId: 여행 고르기에서 선택한 티켓/영수증 id
+  /// - 반환: 확정된 플랜 id (confirmedPlanId)
+  Future<int> confirmPlan({
+    required int planId,
+    required int recommendationId,
+  }) {
+    return apiRequest(
+      () => _dio.post(
+        '/api/v1/plans/$planId/confirm',
+        data: {'recommendationId': recommendationId},
+      ),
+      (data) => (data as num).toInt(),
+    );
+  }
 }
 
 final tripSelectRepositoryProvider =

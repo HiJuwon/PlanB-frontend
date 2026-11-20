@@ -218,7 +218,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppPaths.completed,
             builder: (context, state) => TripSelectCompletedPage(
-              planId: state.extra as String?, // 여행 고르기에서 선택한 플랜 id
+              recommendationId: state.extra as String?, // 여행 고르기에서 선택한 추천 id
             ),
           ),
         ],

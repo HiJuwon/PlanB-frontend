@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
+import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
+import 'package:plan_b/features/trip_select/data/repositories/trip_select_repository.dart';
+
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/shared/widgets/app_page.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
@@ -13,10 +17,10 @@ import 'package:plan_b/shared/widgets/feedback/toast.dart';
 import 'package:plan_b/shared/widgets/header/title_header.dart';
 
 class TripSelectCompletedPage extends ConsumerStatefulWidget {
-  const TripSelectCompletedPage({super.key, required this.planId});
+  const TripSelectCompletedPage({super.key, required this.recommendationId});
 
   /// 여행 고르기에서 선택한 플랜 id
-  final String? planId;
+  final String? recommendationId;
 
   @override
   ConsumerState<TripSelectCompletedPage> createState() =>
@@ -46,7 +50,7 @@ class _TripSelectCompletedPageState
     try {
       // 서버 응답과 최소 표시 시간 중 늦은 쪽에 완료
       await Future.wait([
-        _requestPlanSetup(widget.planId),
+        _requestPlanSetup(widget.recommendationId),
         Future<void>.delayed(_minLoadingDuration),
       ]);
       if (!mounted) return;
@@ -55,7 +59,7 @@ class _TripSelectCompletedPageState
       if (!mounted) return;
       showToast(
         context,
-        text: '여행 플랜 세팅에 실패했어요. 다시 시도해 주세요.',
+        text: '여행 플랜 세팅에 실패했어요.\n다시 시도해 주세요.',
         type: ToastType.warning,
       );
       // 코드에서 직접 부르는 pop은 PopScope와 상관없이 동작함
@@ -63,11 +67,21 @@ class _TripSelectCompletedPageState
     }
   }
 
-  /// 선택한 플랜 저장 + 홈 여행 플랜 생성 요청
-  // TODO: 서버 API 연동 (planId 전송 -> 응답으로 받은 여행 플랜을 홈 provider에 반영)
-  Future<void> _requestPlanSetup(String? planId) async {
-    if (planId == null) throw StateError('선택한 플랜이 없음');
-    await Future<void>.delayed(const Duration(seconds: 3)); // 임시: 서버 응답 대기 흉내
+  /// 선택한 추천 계획 확정 (실패하면 예외를 던져서 _runSetup이 토스트 + pop 처리)
+  Future<void> _requestPlanSetup(String? recommendationId) async {
+    final int? planId = ref.read(tripCheckDraftProvider).planId;
+    final int? recId = int.tryParse(recommendationId ?? '');
+    if (planId == null || recId == null) {
+      throw StateError('확정할 플랜 정보가 없음 (planId: $planId, recommendationId: $recommendationId)');
+    }
+
+    await ref.read(tripSelectRepositoryProvider).confirmPlan(
+          planId: planId,
+          recommendationId: recId,
+        );
+
+    // 홈 '나의 여행 플랜' 목록에 새 플랜이 보이도록 다시 조회
+    ref.invalidate(homePlansProvider);
   }
 
   /// 여행 플랜이 만들어졌으므로 맞춤 여행 체크, 여행 고르기 스택을 모두 비우고 홈으로
