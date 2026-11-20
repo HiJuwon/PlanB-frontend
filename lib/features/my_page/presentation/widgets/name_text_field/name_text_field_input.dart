@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'package:plan_b/features/my_page/data/models/dto/nickname_update_request_dto.dart';
 
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
@@ -34,6 +37,9 @@ class NameTextFieldInput extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           border: InputBorder.none,
         ),
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(NicknameUpdateRequestDto.maxLength),
+        ],
       ),
     );
   }
