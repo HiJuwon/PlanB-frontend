@@ -41,7 +41,7 @@ class TicketHeader extends StatelessWidget {
           const SizedBox(width: 11),
           Expanded(
             child: Text(
-              plan.country,
+              plan.destination?.label ?? '-',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.titleSemiBold20.copyWith(color: palette.country),
