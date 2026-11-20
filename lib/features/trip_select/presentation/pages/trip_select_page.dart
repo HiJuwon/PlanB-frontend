@@ -9,13 +9,14 @@ import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
 import 'package:plan_b/features/trip_select/presentation/providers/wallet_recommendation_provider.dart';
+import 'package:plan_b/features/trip_select/data/models/budget_level.dart';
+import 'package:plan_b/features/trip_select/presentation/providers/goal_recommendation_provider.dart';
 import 'package:plan_b/features/trip_check/data/models/options/budget_range.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_basic_info.dart';
 import 'package:plan_b/features/trip_select/presentation/providers/trip_basic_info_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
-import 'package:plan_b/features/trip_select/data/dummy/trip_plan_dummy.dart';
 import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/plan_list_sheet.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/select_bottom_bar.dart';
@@ -190,20 +191,44 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
   }
 
   /// 목표 기준: trip_plan_receipt
+  /// 분석 페이지에서 이미 생성된 결과를 바로 사용 (재시도/직접 진입 시에만 로딩)
   Widget _buildReceiptSheet() {
+    final AsyncValue<List<BudgetLevelPlan>> recommendations =
+        ref.watch(goalRecommendationsProvider);
+
     return PlanListSheet(
       title: '당신의 여행을 위한 3가지 예산 플랜',
       subtitle: '마음에 드는 여행 영수증을 선택하세요.',
-      children: [
-        for (final item in dummyGoalFirstPlans)
-          TripPlanReceipt(
-            key: ValueKey(item.plan.id),
-            plan: item.plan,
-            budgetLevel: item.level,
-            isSelected: _selectedPlanId == item.plan.id,
-            onSelectedChanged: (selected) => _onPlanSelected(item.plan.id, selected),
+      children: recommendations.when(
+        data: (items) => [
+          for (final item in items)
+            TripPlanReceipt(
+              key: ValueKey(item.plan.id), // 열림 상태가 다른 영수증으로 옮겨가지 않도록
+              plan: item.plan,
+              budgetLevel: item.level,
+              isSelected: _selectedPlanId == item.plan.id,
+              onSelectedChanged: (selected) => _onPlanSelected(item.plan.id, selected),
+            ),
+        ],
+        // 화면에 있는 동안 전역 로딩 오버레이 표시, 데이터가 오면 자동으로 꺼짐
+        loading: () => const [ShowGlobalLoading()],
+        error: (_, __) => [
+          Text(
+            '예산 플랜을 불러오지 못했어요.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium16,
           ),
-      ],
+          Btn(
+            text: '다시 시도',
+            variant: BtnVariant.primary,
+            iconPosition: BtnIconPosition.trailing,
+            onPressed: () {
+              setState(() => _selectedPlanId = null);
+              ref.invalidate(goalRecommendationsProvider);
+            },
+          ),
+        ],
+      ),
     );
   }
 

@@ -9,6 +9,7 @@ import 'package:plan_b/features/trip_check/data/models/options/trip_selection_ty
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_select/presentation/providers/wallet_recommendation_provider.dart';
+import 'package:plan_b/features/trip_select/presentation/providers/goal_recommendation_provider.dart';
 import 'package:plan_b/shared/widgets/app_page.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/btn/cta.dart';
@@ -66,7 +67,8 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
   }
 
   /// 여행 계획 분석 요청
-  /// - 지갑 기준: 플랜 최종 저장 -> AI 여행지 추천 생성까지 끝나야 분석 완료
+  /// - 플랜 최종 저장 -> AI 추천 생성까지 끝나야 분석 완료
+  ///   (지갑 기준: 여행지 TOP 1~3 / 목표 기준: 고/중/저 예산 플랜)
   /// - 추천 생성만 실패한 뒤 재시도하면 최종 저장은 생략되고(입력값 그대로) 추천만 다시 요청됨
   Future<void> _requestAnalysis(TripCheckDraft draft) async {
     final notifier = ref.read(tripCheckDraftProvider.notifier);
@@ -81,7 +83,11 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
         await ref.read(walletRecommendationsProvider.future);
       case TripSelectionType.goal:
         await notifier.saveGoalPlan(isDraft: false);
-        // TODO: 목표 기준 추천(/recommendations/goal) 연동
+        if (!mounted) return;
+
+        // 이전 추천이 남지 않도록 항상 새로 생성
+        ref.invalidate(goalRecommendationsProvider);
+        await ref.read(goalRecommendationsProvider.future);
       case null:
         throw StateError('tripType이 선택되지 않았어요');
     }

@@ -70,7 +70,8 @@ class _TripPlanReceiptState extends State<TripPlanReceipt> {
                       if (_isOpen) ReceiptDetails(plan: widget.plan, palette: palette.base),
                     ],
                   ),
-                  if (_isOpen)
+                  // TODO: 서버 summary 추가되면 조건 제거
+                  if (_isOpen && widget.plan.summary.isNotEmpty)
                     PlanSummaryBox(summary: widget.plan.summary, palette: palette.base),
                 ],
               ),

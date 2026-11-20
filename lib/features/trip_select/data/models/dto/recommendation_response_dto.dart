@@ -1,13 +1,14 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
+import 'package:plan_b/features/trip_select/data/models/budget_level.dart';
 import 'package:plan_b/shared/models/destination.dart';
 
 part 'recommendation_response_dto.freezed.dart';
 part 'recommendation_response_dto.g.dart';
 
-/// POST /api/v1/plans/{planId}/recommendations/wallet 응답의 data
-/// (목표 기준 /recommendations/goal 도 같은 응답 구조임)
+/// POST /api/v1/plans/{planId}/recommendations/wallet, /goal 응답의 data
+/// (지갑 기준: RANK_1~3 / 목표 기준: LEVEL_HIGH, MEDIUM, LOW)
 @freezed
 class RecommendationResponseDto with _$RecommendationResponseDto {
   const factory RecommendationResponseDto({
@@ -83,6 +84,17 @@ extension RecommendationResponseDtoMapper on RecommendationResponseDto {
   List<TripPlan> toWalletTripPlans() =>
       recommendations.map((dto) => dto.toTripPlan()).toList()
         ..sort((a, b) => a.rank.compareTo(b.rank));
+
+  /// 목표 기준: 고 -> 중 -> 저예산 순으로 정렬한 영수증 목록
+  /// (모르는 LEVEL 값은 예산 태그를 표시할 수 없어서 제외)
+  List<BudgetLevelPlan> toGoalBudgetPlans() {
+    final plans = <BudgetLevelPlan>[
+      for (final dto in recommendations)
+        if (_budgetLevel(dto.recommendationValue) case final level?)
+          (level: level, plan: dto.toTripPlan()),
+    ];
+    return plans..sort((a, b) => a.level.index.compareTo(b.level.index));
+  }
 }
 
 extension RecommendationItemDtoMapper on RecommendationItemDto {
@@ -111,6 +123,14 @@ extension RecommendationItemDtoMapper on RecommendationItemDto {
 /// 'RANK_2' -> 2 (형식이 다르면 0)
 int _rank(String? value) =>
     int.tryParse(value?.replaceFirst('RANK_', '') ?? '') ?? 0;
+
+/// 'LEVEL_HIGH' -> BudgetLevel.high (모르는 값이면 null)
+BudgetLevel? _budgetLevel(String? value) => switch (value) {
+      'LEVEL_HIGH' => BudgetLevel.high,
+      'LEVEL_MEDIUM' => BudgetLevel.medium,
+      'LEVEL_LOW' => BudgetLevel.low,
+      _ => null,
+    };
 
 /// 호스텔 패밀리룸 (6박)
 String _lodgingTitle(LodgingDto? lodging) {
