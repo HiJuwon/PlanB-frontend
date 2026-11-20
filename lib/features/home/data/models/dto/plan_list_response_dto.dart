@@ -26,6 +26,7 @@ class PlanSummaryDto with _$PlanSummaryDto {
   const factory PlanSummaryDto({
     required int planId,
     int? confirmedPlanId,
+    int? travelGuideId, // 월별 여행 준비 가이드 조회용
     String? title,
     // 서버에 모르는 여행지가 새로 생겨도 앱이 죽지 않고 null로 처리
     Destination? destination,
@@ -65,8 +66,9 @@ extension PlanSummaryDtoMapper on PlanSummaryDto {
     if (start == null || end == null) return null;
 
     return TripPlanSummary(
-      // 플래너/가이드/코스 API가 모두 confirmedPlanId를 쓰므로 이걸 id로 사용
+      // 플래너/코스 API가 모두 confirmedPlanId를 쓰므로 이걸 id로 사용
       id: (confirmedPlanId ?? planId).toString(),
+      travelGuideId: travelGuideId,
       thumbnailUrl: destinationImageUrl ?? '',
       title: title ?? '',
       destination: destination?.label ?? '',

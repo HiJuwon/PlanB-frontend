@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/core/network/dio_provider.dart';
-import 'package:plan_b/features/home/data/models/plan_list_response_dto.dart';
+import 'package:plan_b/features/home/data/models/dto/plan_list_response_dto.dart';
 import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
 
 class HomeRepository {
