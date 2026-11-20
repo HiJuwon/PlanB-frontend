@@ -13,12 +13,10 @@ class CommonTravelPlanDto {
   const CommonTravelPlanDto({
     required this.draft,
     required this.isDraft,
-    required this.foodBudget,
   });
 
   final TripCheckDraft draft;
   final bool isDraft;     // true: 임시저장, false: 최종 제출
-  final int? foodBudget;  // 1인당 한 끼 식비 (지갑: 0 고정 / 목표: 선택값). null이면 미전송
 
   Map<String, dynamic> toJson() {
     final period = draft.travelPeriod;
@@ -44,7 +42,6 @@ class CommonTravelPlanDto {
       if (route != null)
         'flightRoute': route == SegmentedChipSide.left ? 'DIRECT' : 'TRANSFER',
       if (tripWay != null) 'isRoundFlight': tripWay == SegmentedChipSide.left,
-      if (foodBudget != null) 'foodBudget': foodBudget,
     };
   }
 

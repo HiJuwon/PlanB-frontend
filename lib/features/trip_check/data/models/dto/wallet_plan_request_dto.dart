@@ -17,8 +17,6 @@ class WalletPlanRequestDto {
       'common': CommonTravelPlanDto(
         draft: draft,
         isDraft: isDraft,
-        // 지갑 기준은 식비 입력이 없지만 서버 최종 제출 시 필수값이라 0을 전송
-        foodBudget: 0,
       ).toJson(),
       if (budget != null) 'budgetRange': _budget(budget),
     };
