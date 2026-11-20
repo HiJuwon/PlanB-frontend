@@ -16,7 +16,7 @@ class ProfileSection extends StatelessWidget {
 
   final String name;
   final String email;
-  final ValueChanged<String>? onNameSubmitted; // 이름 변경 저장 시
+  final Future<bool> Function(String name)? onNameSubmitted; // 이름 변경 저장 시
 
   static const double _avatarGap = 16;     // 프로필 이미지 ~ 텍스트 간격
   static const double _avatarTopInset = 4; // 프로필 이미지를 이름 줄에 맞추는 상단 여백

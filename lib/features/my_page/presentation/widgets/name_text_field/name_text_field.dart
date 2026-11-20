@@ -8,7 +8,7 @@ import 'package:plan_b/features/my_page/presentation/widgets/name_text_field/nam
 import 'package:plan_b/features/my_page/presentation/widgets/name_text_field/name_text_field_input.dart';
 
 /// 이름 편집 필드 상태
-enum _NameFieldStatus { idle, typing, success }
+enum _NameFieldStatus { idle, typing, saving, success }
 
 /// 마이페이지 이름 편집 필드
 class NameTextField extends StatefulWidget {
@@ -19,7 +19,7 @@ class NameTextField extends StatefulWidget {
   });
 
   final String name;                       // 현재 이름
-  final ValueChanged<String>? onSubmitted; // 바뀐 이름 전달 (변경이 없거나 비어 있으면 호출 안 함)
+  final Future<bool> Function(String name)? onSubmitted;  // 바뀐 이름 전달 > 저장 성공 여부(true/false)를 돌려받음
 
   @override
   State<NameTextField> createState() => _NameTextFieldState();
@@ -85,7 +85,7 @@ class _NameTextFieldState extends State<NameTextField> {
     if (!_focusNode.hasFocus && _isTyping) _submit();
   }
 
-  void _submit() {
+    Future<void> _submit() async {
     if (!_isTyping) return;
     final String trimmed = _controller.text.trim();
 
@@ -97,9 +97,18 @@ class _NameTextFieldState extends State<NameTextField> {
     }
 
     _controller.text = trimmed;
-    widget.onSubmitted?.call(trimmed);
-    setState(() => _status = _NameFieldStatus.success);
+    setState(() => _status = _NameFieldStatus.saving);
 
+    final bool isSuccess = await widget.onSubmitted?.call(trimmed) ?? false;
+    if (!mounted) return;
+
+    if (!isSuccess) {
+      _controller.text = widget.name; // 실패: 원래 이름으로
+      setState(() => _status = _NameFieldStatus.idle);
+      return;
+    }
+
+    setState(() => _status = _NameFieldStatus.success);
     _successTimer?.cancel();
     _successTimer = Timer(_successDuration, () {
       if (mounted) setState(() => _status = _NameFieldStatus.idle);
@@ -154,7 +163,7 @@ class _NameTextFieldState extends State<NameTextField> {
             const SizedBox(width: _gap),
             NameTextFieldActionIcon(
               isSuccess: _status == _NameFieldStatus.success,
-              onTap: _startEditing,
+              onTap: _status == _NameFieldStatus.saving ? () {} : _startEditing,
             ),
           ],
         ],

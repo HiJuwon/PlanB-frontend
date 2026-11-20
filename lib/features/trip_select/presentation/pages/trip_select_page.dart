@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
+import 'package:plan_b/features/my_page/presentation/providers/my_profile_provider.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
 import 'package:plan_b/features/trip_select/presentation/providers/wallet_recommendation_provider.dart';
 import 'package:plan_b/features/trip_select/data/models/budget_level.dart';
@@ -39,9 +40,6 @@ class TripSelectPage extends ConsumerStatefulWidget {
 }
 
 class _TripSelectPageState extends ConsumerState<TripSelectPage> {
-  // TODO: 로그인 연동 후 사용자 이름으로 교체
-  static const String _userName = '주원';
-
   static const double _infoTopGap = 20;   // title_header ~ 여행 기본 정보
   static const double _sheetTopGap = 40;  // 여행 기본 정보 ~ 파란 시트
 
@@ -109,6 +107,10 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
 
   @override
   Widget build(BuildContext context) {
+    final String userName = ref.watch(
+      myProfileProvider.select((profile) => profile.valueOrNull?.name ?? ''),
+    );
+
     final TripCheckDraft draft = ref.watch(tripCheckDraftProvider);
 
     // 서버 값이 오기 전(로딩/실패/planId 없음)에는 입력값으로 먼저 보여줌
@@ -135,7 +137,11 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 상단 고정 타이틀 헤더 (스크롤 영역 밖)
-              const TitleHeader(title: '$_userName 님을 위한 여행 플랜 추천'),
+              TitleHeader(
+                title: userName.isEmpty
+                    ? '맞춤 여행 플랜 추천'
+                    : '$userName 님을 위한 여행 플랜 추천',
+              ),
 
               // 헤더 아래 영역만 스크롤
               Expanded(
