@@ -9,6 +9,7 @@ import 'package:plan_b/features/my_page/data/models/my_profile.dart';
 import 'package:plan_b/features/my_page/presentation/providers/my_profile_provider.dart';
 import 'package:plan_b/features/my_page/presentation/providers/push_notification_provider.dart';
 import 'package:plan_b/core/auth/auth_provider.dart';
+import 'package:plan_b/features/login/presentation/providers/login_controller.dart';
 import 'package:plan_b/shared/providers/global_loading_provider.dart';
 import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/shared/widgets/feedback/toast.dart';
@@ -32,10 +33,9 @@ class MyPage extends ConsumerWidget {
     final bool confirmed = await showLogoutModal(context);
     if (!confirmed || !context.mounted) return; // 돌아가기: 모달만 닫힘
 
-    // 서버 요청이 실패해도 AuthNotifier.logout()이 로컬 로그아웃까지 처리하므로 에러 토스트 없음
     await ref
         .read(globalLoadingProvider.notifier)
-        .run(() => ref.read(authProvider.notifier).logout());
+        .run(() => ref.read(loginControllerProvider).logout());
   }
 
   /// 회원탈퇴: 경고 모달 > (확인 시) 탈퇴 (계정 데이터 전부 삭제)
