@@ -16,7 +16,6 @@ _$$ConfirmedPlanDetailResponseDtoImplFromJson(Map<String, dynamic> json) =>
       memberCount: (json['memberCount'] as num?)?.toInt(),
       memberType: json['memberType'] as String?,
       budgetRange: json['budgetRange'] as String?,
-      planType: json['planType'] as String?,
       foodBudgetRange: json['foodBudgetRange'] as String?,
       lodging: json['lodging'] == null
           ? null
@@ -43,7 +42,6 @@ Map<String, dynamic> _$$ConfirmedPlanDetailResponseDtoImplToJson(
   'memberCount': instance.memberCount,
   'memberType': instance.memberType,
   'budgetRange': instance.budgetRange,
-  'planType': instance.planType,
   'foodBudgetRange': instance.foodBudgetRange,
   'lodging': instance.lodging,
   'flight': instance.flight,

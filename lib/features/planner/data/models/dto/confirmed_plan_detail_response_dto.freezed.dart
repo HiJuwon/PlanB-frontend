@@ -30,7 +30,6 @@ mixin _$ConfirmedPlanDetailResponseDto {
   int? get memberCount => throw _privateConstructorUsedError;
   String? get memberType => throw _privateConstructorUsedError;
   String? get budgetRange => throw _privateConstructorUsedError; // 지갑 기준만
-  String? get planType => throw _privateConstructorUsedError;
   String? get foodBudgetRange =>
       throw _privateConstructorUsedError; // TODO: 스웨거에 아직 없음 (백엔드 추가 요청). 목표 기준 식사 조건
   LodgingDto? get lodging => throw _privateConstructorUsedError;
@@ -68,7 +67,6 @@ abstract class $ConfirmedPlanDetailResponseDtoCopyWith<$Res> {
     int? memberCount,
     String? memberType,
     String? budgetRange,
-    String? planType,
     String? foodBudgetRange,
     LodgingDto? lodging,
     FlightDto? flight,
@@ -106,7 +104,6 @@ class _$ConfirmedPlanDetailResponseDtoCopyWithImpl<
     Object? memberCount = freezed,
     Object? memberType = freezed,
     Object? budgetRange = freezed,
-    Object? planType = freezed,
     Object? foodBudgetRange = freezed,
     Object? lodging = freezed,
     Object? flight = freezed,
@@ -143,10 +140,6 @@ class _$ConfirmedPlanDetailResponseDtoCopyWithImpl<
             budgetRange: freezed == budgetRange
                 ? _value.budgetRange
                 : budgetRange // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            planType: freezed == planType
-                ? _value.planType
-                : planType // ignore: cast_nullable_to_non_nullable
                       as String?,
             foodBudgetRange: freezed == foodBudgetRange
                 ? _value.foodBudgetRange
@@ -223,7 +216,6 @@ abstract class _$$ConfirmedPlanDetailResponseDtoImplCopyWith<$Res>
     int? memberCount,
     String? memberType,
     String? budgetRange,
-    String? planType,
     String? foodBudgetRange,
     LodgingDto? lodging,
     FlightDto? flight,
@@ -263,7 +255,6 @@ class __$$ConfirmedPlanDetailResponseDtoImplCopyWithImpl<$Res>
     Object? memberCount = freezed,
     Object? memberType = freezed,
     Object? budgetRange = freezed,
-    Object? planType = freezed,
     Object? foodBudgetRange = freezed,
     Object? lodging = freezed,
     Object? flight = freezed,
@@ -300,10 +291,6 @@ class __$$ConfirmedPlanDetailResponseDtoImplCopyWithImpl<$Res>
         budgetRange: freezed == budgetRange
             ? _value.budgetRange
             : budgetRange // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        planType: freezed == planType
-            ? _value.planType
-            : planType // ignore: cast_nullable_to_non_nullable
                   as String?,
         foodBudgetRange: freezed == foodBudgetRange
             ? _value.foodBudgetRange
@@ -346,7 +333,6 @@ class _$ConfirmedPlanDetailResponseDtoImpl
     this.memberCount,
     this.memberType,
     this.budgetRange,
-    this.planType,
     this.foodBudgetRange,
     this.lodging,
     this.flight,
@@ -375,8 +361,6 @@ class _$ConfirmedPlanDetailResponseDtoImpl
   final String? budgetRange;
   // 지갑 기준만
   @override
-  final String? planType;
-  @override
   final String? foodBudgetRange;
   // TODO: 스웨거에 아직 없음 (백엔드 추가 요청). 목표 기준 식사 조건
   @override
@@ -399,7 +383,7 @@ class _$ConfirmedPlanDetailResponseDtoImpl
 
   @override
   String toString() {
-    return 'ConfirmedPlanDetailResponseDto(confirmPlanId: $confirmPlanId, title: $title, startDate: $startDate, endDate: $endDate, memberCount: $memberCount, memberType: $memberType, budgetRange: $budgetRange, planType: $planType, foodBudgetRange: $foodBudgetRange, lodging: $lodging, flight: $flight, courses: $courses, lowTotalCost: $lowTotalCost, highTotalCost: $highTotalCost)';
+    return 'ConfirmedPlanDetailResponseDto(confirmPlanId: $confirmPlanId, title: $title, startDate: $startDate, endDate: $endDate, memberCount: $memberCount, memberType: $memberType, budgetRange: $budgetRange, foodBudgetRange: $foodBudgetRange, lodging: $lodging, flight: $flight, courses: $courses, lowTotalCost: $lowTotalCost, highTotalCost: $highTotalCost)';
   }
 
   @override
@@ -419,8 +403,6 @@ class _$ConfirmedPlanDetailResponseDtoImpl
                 other.memberType == memberType) &&
             (identical(other.budgetRange, budgetRange) ||
                 other.budgetRange == budgetRange) &&
-            (identical(other.planType, planType) ||
-                other.planType == planType) &&
             (identical(other.foodBudgetRange, foodBudgetRange) ||
                 other.foodBudgetRange == foodBudgetRange) &&
             (identical(other.lodging, lodging) || other.lodging == lodging) &&
@@ -443,7 +425,6 @@ class _$ConfirmedPlanDetailResponseDtoImpl
     memberCount,
     memberType,
     budgetRange,
-    planType,
     foodBudgetRange,
     lodging,
     flight,
@@ -481,7 +462,6 @@ abstract class _ConfirmedPlanDetailResponseDto
     final int? memberCount,
     final String? memberType,
     final String? budgetRange,
-    final String? planType,
     final String? foodBudgetRange,
     final LodgingDto? lodging,
     final FlightDto? flight,
@@ -507,8 +487,6 @@ abstract class _ConfirmedPlanDetailResponseDto
   String? get memberType;
   @override
   String? get budgetRange; // 지갑 기준만
-  @override
-  String? get planType;
   @override
   String? get foodBudgetRange; // TODO: 스웨거에 아직 없음 (백엔드 추가 요청). 목표 기준 식사 조건
   @override

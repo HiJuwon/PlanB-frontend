@@ -22,7 +22,6 @@ class ConfirmedPlanDetailResponseDto with _$ConfirmedPlanDetailResponseDto {
     int? memberCount,
     String? memberType,
     String? budgetRange,      // 지갑 기준만
-    String? planType,
     String? foodBudgetRange,  // TODO: 스웨거에 아직 없음 (백엔드 추가 요청). 목표 기준 식사 조건
     LodgingDto? lodging,
     FlightDto? flight,
@@ -69,12 +68,9 @@ extension ConfirmedPlanDetailResponseDtoMapper on ConfirmedPlanDetailResponseDto
     );
   }
 
-  /// planType이 오면 그대로 사용, 없으면 budgetRange 유무로 추정 (지갑 기준만 budgetRange가 있음)
-  TripSelectionType _tripType() => switch (planType) {
-        'WALLET' => TripSelectionType.budget,
-        'GOAL' => TripSelectionType.goal,
-        _ => budgetRange != null ? TripSelectionType.budget : TripSelectionType.goal,
-      };
+  /// budgetRange 유무로 지갑 기준인지, 목표 기준인지 플로우를 판단
+  TripSelectionType _tripType() =>
+      budgetRange != null ? TripSelectionType.budget : TripSelectionType.goal;
 }
 
 /// 26.08.10 - 26.08.18 (하루면 날짜 하나만)
