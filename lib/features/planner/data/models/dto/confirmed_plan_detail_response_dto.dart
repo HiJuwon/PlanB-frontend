@@ -21,8 +21,8 @@ class ConfirmedPlanDetailResponseDto with _$ConfirmedPlanDetailResponseDto {
     String? endDate,
     int? memberCount,
     String? memberType,
-    String? budgetRange,      // 지갑 기준만
-    String? foodBudgetRange,  // TODO: 스웨거에 아직 없음 (백엔드 추가 요청). 목표 기준 식사 조건
+    String? budgetRange,      // 지갑 기준만 사용
+    String? foodBudgetRange,  // 목표 기준만 사용
     LodgingDto? lodging,
     FlightDto? flight,
     @Default([]) List<CourseDto> courses,
