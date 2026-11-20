@@ -39,6 +39,7 @@ _$PlanSummaryDtoImpl _$$PlanSummaryDtoImplFromJson(
 ) => _$PlanSummaryDtoImpl(
   planId: (json['planId'] as num).toInt(),
   confirmedPlanId: (json['confirmedPlanId'] as num?)?.toInt(),
+  travelGuideId: (json['travelGuideId'] as num?)?.toInt(),
   title: json['title'] as String?,
   destination: $enumDecodeNullable(_$DestinationEnumMap, json['destination']),
   destinationImageUrl: json['destinationImageUrl'] as String?,
@@ -57,6 +58,7 @@ Map<String, dynamic> _$$PlanSummaryDtoImplToJson(
 ) => <String, dynamic>{
   'planId': instance.planId,
   'confirmedPlanId': instance.confirmedPlanId,
+  'travelGuideId': instance.travelGuideId,
   'title': instance.title,
   'destination': _$DestinationEnumMap[instance.destination],
   'destinationImageUrl': instance.destinationImageUrl,

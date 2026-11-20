@@ -265,6 +265,8 @@ PlanSummaryDto _$PlanSummaryDtoFromJson(Map<String, dynamic> json) {
 mixin _$PlanSummaryDto {
   int get planId => throw _privateConstructorUsedError;
   int? get confirmedPlanId => throw _privateConstructorUsedError;
+  int? get travelGuideId =>
+      throw _privateConstructorUsedError; // 월별 여행 준비 가이드 조회용
   String? get title =>
       throw _privateConstructorUsedError; // 서버에 모르는 여행지가 새로 생겨도 앱이 죽지 않고 null로 처리
   Destination? get destination => throw _privateConstructorUsedError;
@@ -296,6 +298,7 @@ abstract class $PlanSummaryDtoCopyWith<$Res> {
   $Res call({
     int planId,
     int? confirmedPlanId,
+    int? travelGuideId,
     String? title,
     Destination? destination,
     String? destinationImageUrl,
@@ -325,6 +328,7 @@ class _$PlanSummaryDtoCopyWithImpl<$Res, $Val extends PlanSummaryDto>
   $Res call({
     Object? planId = null,
     Object? confirmedPlanId = freezed,
+    Object? travelGuideId = freezed,
     Object? title = freezed,
     Object? destination = freezed,
     Object? destinationImageUrl = freezed,
@@ -344,6 +348,10 @@ class _$PlanSummaryDtoCopyWithImpl<$Res, $Val extends PlanSummaryDto>
             confirmedPlanId: freezed == confirmedPlanId
                 ? _value.confirmedPlanId
                 : confirmedPlanId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            travelGuideId: freezed == travelGuideId
+                ? _value.travelGuideId
+                : travelGuideId // ignore: cast_nullable_to_non_nullable
                       as int?,
             title: freezed == title
                 ? _value.title
@@ -399,6 +407,7 @@ abstract class _$$PlanSummaryDtoImplCopyWith<$Res>
   $Res call({
     int planId,
     int? confirmedPlanId,
+    int? travelGuideId,
     String? title,
     Destination? destination,
     String? destinationImageUrl,
@@ -427,6 +436,7 @@ class __$$PlanSummaryDtoImplCopyWithImpl<$Res>
   $Res call({
     Object? planId = null,
     Object? confirmedPlanId = freezed,
+    Object? travelGuideId = freezed,
     Object? title = freezed,
     Object? destination = freezed,
     Object? destinationImageUrl = freezed,
@@ -446,6 +456,10 @@ class __$$PlanSummaryDtoImplCopyWithImpl<$Res>
         confirmedPlanId: freezed == confirmedPlanId
             ? _value.confirmedPlanId
             : confirmedPlanId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        travelGuideId: freezed == travelGuideId
+            ? _value.travelGuideId
+            : travelGuideId // ignore: cast_nullable_to_non_nullable
                   as int?,
         title: freezed == title
             ? _value.title
@@ -494,6 +508,7 @@ class _$PlanSummaryDtoImpl implements _PlanSummaryDto {
   const _$PlanSummaryDtoImpl({
     required this.planId,
     this.confirmedPlanId,
+    this.travelGuideId,
     this.title,
     this.destination,
     this.destinationImageUrl,
@@ -512,6 +527,9 @@ class _$PlanSummaryDtoImpl implements _PlanSummaryDto {
   final int planId;
   @override
   final int? confirmedPlanId;
+  @override
+  final int? travelGuideId;
+  // 월별 여행 준비 가이드 조회용
   @override
   final String? title;
   // 서버에 모르는 여행지가 새로 생겨도 앱이 죽지 않고 null로 처리
@@ -541,7 +559,7 @@ class _$PlanSummaryDtoImpl implements _PlanSummaryDto {
 
   @override
   String toString() {
-    return 'PlanSummaryDto(planId: $planId, confirmedPlanId: $confirmedPlanId, title: $title, destination: $destination, destinationImageUrl: $destinationImageUrl, startDate: $startDate, endDate: $endDate, lowTotalCost: $lowTotalCost, highTotalCost: $highTotalCost, dDay: $dDay, hashtags: $hashtags)';
+    return 'PlanSummaryDto(planId: $planId, confirmedPlanId: $confirmedPlanId, travelGuideId: $travelGuideId, title: $title, destination: $destination, destinationImageUrl: $destinationImageUrl, startDate: $startDate, endDate: $endDate, lowTotalCost: $lowTotalCost, highTotalCost: $highTotalCost, dDay: $dDay, hashtags: $hashtags)';
   }
 
   @override
@@ -552,6 +570,8 @@ class _$PlanSummaryDtoImpl implements _PlanSummaryDto {
             (identical(other.planId, planId) || other.planId == planId) &&
             (identical(other.confirmedPlanId, confirmedPlanId) ||
                 other.confirmedPlanId == confirmedPlanId) &&
+            (identical(other.travelGuideId, travelGuideId) ||
+                other.travelGuideId == travelGuideId) &&
             (identical(other.title, title) || other.title == title) &&
             (identical(other.destination, destination) ||
                 other.destination == destination) &&
@@ -574,6 +594,7 @@ class _$PlanSummaryDtoImpl implements _PlanSummaryDto {
     runtimeType,
     planId,
     confirmedPlanId,
+    travelGuideId,
     title,
     destination,
     destinationImageUrl,
@@ -606,6 +627,7 @@ abstract class _PlanSummaryDto implements PlanSummaryDto {
   const factory _PlanSummaryDto({
     required final int planId,
     final int? confirmedPlanId,
+    final int? travelGuideId,
     final String? title,
     final Destination? destination,
     final String? destinationImageUrl,
@@ -624,6 +646,8 @@ abstract class _PlanSummaryDto implements PlanSummaryDto {
   int get planId;
   @override
   int? get confirmedPlanId;
+  @override
+  int? get travelGuideId; // 월별 여행 준비 가이드 조회용
   @override
   String? get title; // 서버에 모르는 여행지가 새로 생겨도 앱이 죽지 않고 null로 처리
   @override

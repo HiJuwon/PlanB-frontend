@@ -29,9 +29,9 @@ mixin _$ConfirmedPlanDetailResponseDto {
   String? get endDate => throw _privateConstructorUsedError;
   int? get memberCount => throw _privateConstructorUsedError;
   String? get memberType => throw _privateConstructorUsedError;
-  String? get budgetRange => throw _privateConstructorUsedError; // 지갑 기준만
+  String? get budgetRange => throw _privateConstructorUsedError; // 지갑 기준만 사용
   String? get foodBudgetRange =>
-      throw _privateConstructorUsedError; // TODO: 스웨거에 아직 없음 (백엔드 추가 요청). 목표 기준 식사 조건
+      throw _privateConstructorUsedError; // 목표 기준만 사용
   LodgingDto? get lodging => throw _privateConstructorUsedError;
   FlightDto? get flight => throw _privateConstructorUsedError;
   List<CourseDto> get courses => throw _privateConstructorUsedError;
@@ -359,10 +359,10 @@ class _$ConfirmedPlanDetailResponseDtoImpl
   final String? memberType;
   @override
   final String? budgetRange;
-  // 지갑 기준만
+  // 지갑 기준만 사용
   @override
   final String? foodBudgetRange;
-  // TODO: 스웨거에 아직 없음 (백엔드 추가 요청). 목표 기준 식사 조건
+  // 목표 기준만 사용
   @override
   final LodgingDto? lodging;
   @override
@@ -486,9 +486,9 @@ abstract class _ConfirmedPlanDetailResponseDto
   @override
   String? get memberType;
   @override
-  String? get budgetRange; // 지갑 기준만
+  String? get budgetRange; // 지갑 기준만 사용
   @override
-  String? get foodBudgetRange; // TODO: 스웨거에 아직 없음 (백엔드 추가 요청). 목표 기준 식사 조건
+  String? get foodBudgetRange; // 목표 기준만 사용
   @override
   LodgingDto? get lodging;
   @override
