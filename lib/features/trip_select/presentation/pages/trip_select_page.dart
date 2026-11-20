@@ -76,9 +76,9 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
 
   void _onConfirm() {
     if (_selectedPlanId == null) return;
-    // TODO: 선택한 플랜 서버 저장 & 플랜 생성은 완료 페이지에서 로딩과 함께 처리
-    // (실패하면 완료 페이지가 pop해서 여기로 돌아오므로 push 유지)
-       context.push(AppRoutes.tripSelectCompleted, extra: _selectedPlanId);
+    // _selectedPlanId = 선택한 티켓/영수증의 recommendationId (지갑/목표 공통)
+    // 서버 확정 요청은 완료 페이지가 로딩과 함께 처리 (실패하면 완료 페이지가 pop해서 여기로 돌아오므로 push 유지)
+    context.push(AppRoutes.tripSelectCompleted, extra: _selectedPlanId);
   }
 
   /// 지갑 기준: '다른 여행지도 보고싶어요' -> 4~6순위 추가 조회
