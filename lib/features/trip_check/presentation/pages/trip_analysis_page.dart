@@ -8,10 +8,12 @@ import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
+import 'package:plan_b/features/trip_select/presentation/providers/wallet_recommendation_provider.dart';
 import 'package:plan_b/shared/widgets/app_page.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/btn/cta.dart';
 import 'package:plan_b/shared/widgets/feedback/loading_spinner.dart';
+import 'package:plan_b/shared/widgets/feedback/gradient_loading_spinner.dart';
 import 'package:plan_b/shared/widgets/feedback/toast.dart';
 import 'package:plan_b/shared/widgets/header/title_header.dart';
 
@@ -64,14 +66,22 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
   }
 
   /// 여행 계획 분석 요청
+  /// - 지갑 기준: 플랜 최종 저장 -> AI 여행지 추천 생성까지 끝나야 분석 완료
+  /// - 추천 생성만 실패한 뒤 재시도하면 최종 저장은 생략되고(입력값 그대로) 추천만 다시 요청됨
   Future<void> _requestAnalysis(TripCheckDraft draft) async {
     final notifier = ref.read(tripCheckDraftProvider.notifier);
 
     switch (draft.tripType) {
       case TripSelectionType.budget:
         await notifier.saveWalletPlan(isDraft: false);
+        if (!mounted) return;
+
+        // 이전 추천이 남지 않도록 항상 새로 생성
+        ref.invalidate(walletRecommendationsProvider);
+        await ref.read(walletRecommendationsProvider.future);
       case TripSelectionType.goal:
         await notifier.saveGoalPlan(isDraft: false);
+        // TODO: 목표 기준 추천(/recommendations/goal) 연동
       case null:
         throw StateError('tripType이 선택되지 않았어요');
     }
@@ -115,6 +125,7 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
                 title: _isDone
                     ? '당신에게 딱 맞는\n여행 계획 분석 완료!'
                     : '당신에게 딱 맞는\n여행 계획 분석 중...',
+                subtitle: _isDone ? null : '결과가 나오기까지 조금 걸릴 수 있어요',
                 align: TitleHeaderAlign.center,
               ),
             ),
@@ -136,6 +147,8 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
 }
 
 /// 분석 중: 로딩 링 + 착륙 비행기
+/// - AI 여행 플랜 생성 대기 중일 때: 그라데이션 링이 계속 천천히 회전
+/// - 서버 응답 후: 회색 트랙 위 파란 호가 0 -> 100% 채워진 뒤 onFilled
 class _LoadingGraphic extends StatelessWidget {
   const _LoadingGraphic({
     super.key,
@@ -143,21 +156,25 @@ class _LoadingGraphic extends StatelessWidget {
     required this.onFilled,
   });
 
-  final bool isLoaded;         // true가 되면 링을 끝까지 채움
+  final bool isLoaded;         // 서버 응답 완료 여부
   final VoidCallback onFilled; // 링이 100% 채워지면 호출
 
   static const double _imageSize = 220;
+  static const Duration _fillDuration = Duration(milliseconds: 1200); // 응답 후 링 채우는 시간
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.center,
       children: [
-        LoadingSpinner(
-          isComplete: isLoaded,
-          onFilled: onFilled,
-          semanticsLabel: '여행 계획 분석 중',
-        ),
+        isLoaded
+            ? LoadingSpinner(
+                isComplete: true, // 마운트되자마자 0 -> 100% 채움
+                fillDuration: _fillDuration,
+                onFilled: onFilled,
+                semanticsLabel: '여행 계획 분석 마무리 중',
+              )
+            : const GradientLoadingSpinner(semanticsLabel: '여행 계획 분석 중'),
         Image.asset(
           'assets/img/img_airplane_landing.png',
           width: _imageSize,

@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
+import 'package:plan_b/core/theme/app_text_styles.dart';
+import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
+import 'package:plan_b/features/trip_select/presentation/providers/wallet_recommendation_provider.dart';
 import 'package:plan_b/features/trip_check/data/models/options/budget_range.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
@@ -13,6 +16,7 @@ import 'package:plan_b/features/trip_select/data/models/trip_basic_info.dart';
 import 'package:plan_b/features/trip_select/presentation/providers/trip_basic_info_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_select/data/dummy/trip_plan_dummy.dart';
+import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/plan_list_sheet.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/select_bottom_bar.dart';
 import 'package:plan_b/features/trip_select/presentation/widgets/select_page/trip_basic_info_section.dart';
@@ -34,12 +38,10 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
   // TODO: 로그인 연동 후 사용자 이름으로 교체
   static const String _userName = '주원';
 
-  static const int _initialTicketCount = 3;
   static const double _infoTopGap = 20;   // title_header ~ 여행 기본 정보
   static const double _sheetTopGap = 40;  // 여행 기본 정보 ~ 파란 시트
 
   String? _selectedPlanId;       // 하나만 선택
-  bool _showAllTickets = false;  // 지갑 기준: 4~6위 노출 여부
 
   void _onPlanSelected(String planId, bool selected) =>
       setState(() => _selectedPlanId = selected ? planId : null);
@@ -54,6 +56,9 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
       primaryText: '여행 조건 다시 선택',
     );
     if (!confirmed || !mounted) return;
+
+    // 최종 제출된 플랜은 수정할 수 없으므로, 다시 입력한 조건은 새 플랜으로 저장
+    ref.read(tripCheckDraftProvider.notifier).startReselect();
 
     final String route = switch (tripType) {
       TripSelectionType.budget => AppRoutes.budgetFirstBasicInfo,
@@ -142,29 +147,45 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
     );
   }
 
-  /// 지갑 기준: trip_plan_ticket
+  /// 지갑 기준: trip_plan_ticket (AI 추천 TOP 1~3)
+  /// 분석 페이지에서 이미 생성된 결과를 바로 사용 (재시도/직접 진입 시에만 로딩)
   Widget _buildTicketSheet() {
-    final plans = _showAllTickets
-        ? dummyBudgetFirstPlans
-        : dummyBudgetFirstPlans.take(_initialTicketCount);
+    final AsyncValue<List<TripPlan>> recommendations =
+        ref.watch(walletRecommendationsProvider);
 
     return PlanListSheet(
       title: '당신을 위한 여행지 TOP 3',
       subtitle: '마음에 드는 여행지 티켓을 선택하세요.',
-      children: [
-        for (final plan in plans)
-          TripPlanTicket(
-            key: ValueKey(plan.id), // 열림 상태가 다른 티켓으로 옮겨가지 않도록
-            plan: plan,
-            isSelected: _selectedPlanId == plan.id,
-            onSelectedChanged: (selected) => _onPlanSelected(plan.id, selected),
+      children: recommendations.when(
+        data: (plans) => [
+          for (final plan in plans)
+            TripPlanTicket(
+              key: ValueKey(plan.id), // 열림 상태가 다른 티켓으로 옮겨가지 않도록
+              plan: plan,
+              isSelected: _selectedPlanId == plan.id,
+              onSelectedChanged: (selected) => _onPlanSelected(plan.id, selected),
+            ),
+          // TODO: 4~6순위(GET /recommendations/wallet/more) 연동 시 '다른 여행지도 보고싶어요' 버튼 복구
+        ],
+        // 화면에 있는 동안 전역 로딩 오버레이 표시, 데이터가 오면 자동으로 꺼짐
+        loading: () => const [ShowGlobalLoading()],
+        error: (_, __) => [
+          Text(
+            '여행지 추천을 불러오지 못했어요.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium16,
           ),
-        if (!_showAllTickets)
           Btn(
-            text: '다른 여행지도 보고싶어요',
-            onPressed: () => setState(() => _showAllTickets = true),
+            text: '다시 시도',
+            variant: BtnVariant.primary,
+            iconPosition: BtnIconPosition.trailing,
+            onPressed: () {
+              setState(() => _selectedPlanId = null);
+              ref.invalidate(walletRecommendationsProvider);
+            },
           ),
-      ],
+        ],
+      ),
     );
   }
 

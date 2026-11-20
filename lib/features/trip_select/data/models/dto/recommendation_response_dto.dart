@@ -1,0 +1,164 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
+import 'package:plan_b/shared/models/destination.dart';
+
+part 'recommendation_response_dto.freezed.dart';
+part 'recommendation_response_dto.g.dart';
+
+/// POST /api/v1/plans/{planId}/recommendations/wallet 응답의 data
+/// (목표 기준 /recommendations/goal 도 같은 응답 구조임)
+@freezed
+class RecommendationResponseDto with _$RecommendationResponseDto {
+  const factory RecommendationResponseDto({
+    @Default([]) List<RecommendationItemDto> recommendations,
+  }) = _RecommendationResponseDto;
+
+  factory RecommendationResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$RecommendationResponseDtoFromJson(json);
+}
+
+@freezed
+class RecommendationItemDto with _$RecommendationItemDto {
+  const factory RecommendationItemDto({
+    required int recommendationId,
+    String? recommendationValue, // RANK_1~6 / LEVEL_HIGH/MEDIUM/LOW
+    // 모르는 여행지가 오면: 앱이 죽지 않고 null로 처리
+    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    Destination? destination,
+    num? lowTotalCost,
+    num? highTotalCost,
+    LodgingDto? lodging,
+    FlightDto? flight,
+    @Default([]) List<CourseDto> courses,
+  }) = _RecommendationItemDto;
+
+  factory RecommendationItemDto.fromJson(Map<String, dynamic> json) =>
+      _$RecommendationItemDtoFromJson(json);
+}
+
+@freezed
+class LodgingDto with _$LodgingDto {
+  const factory LodgingDto({
+    String? lodgingType, // HOTEL, HOSTEL, RENTAL, GUESTHOUSE, RESORT, POOL_VILLA
+    int? nights,
+    String? roomType,
+    num? lowCost,
+    num? highCost,
+  }) = _LodgingDto;
+
+  factory LodgingDto.fromJson(Map<String, dynamic> json) =>
+      _$LodgingDtoFromJson(json);
+}
+
+@freezed
+class FlightDto with _$FlightDto {
+  const factory FlightDto({
+    String? flightType,  // LOW_COST, MAJOR
+    String? flightRoute, // DIRECT, TRANSFER
+    bool? isRoundFlight,
+    num? lowCost,
+    num? highCost,
+  }) = _FlightDto;
+
+  factory FlightDto.fromJson(Map<String, dynamic> json) =>
+      _$FlightDtoFromJson(json);
+}
+
+@freezed
+class CourseDto with _$CourseDto {
+  const factory CourseDto({
+    String? content,
+    num? cost,
+  }) = _CourseDto;
+
+  factory CourseDto.fromJson(Map<String, dynamic> json) =>
+      _$CourseDtoFromJson(json);
+}
+
+// 서버 -> 화면 모양으로 변환
+
+extension RecommendationResponseDtoMapper on RecommendationResponseDto {
+  /// 지갑 기준: RANK 순으로 정렬한 여행지 티켓 목록
+  List<TripPlan> toWalletTripPlans() =>
+      recommendations.map((dto) => dto.toTripPlan()).toList()
+        ..sort((a, b) => a.rank.compareTo(b.rank));
+}
+
+extension RecommendationItemDtoMapper on RecommendationItemDto {
+    TripPlan toTripPlan() => TripPlan(
+      // 선택 후 추천 계획 결정(POST /plans/{planId}/confirm)에 recommendationId를 그대로 보냄
+      id: recommendationId.toString(),
+      rank: _rank(recommendationValue),
+      destination: destination,
+      tags: [if (destination != null) destination!.label], // TODO: 서버 hashtags 추가되면 교체할 예정.
+      highlights: courses
+          .map((c) => TripPlanCostItem(title: c.content ?? '', cost: _formatCost(c.cost, c.cost)))
+          .toList(),
+      accommodation: TripPlanCostItem(
+        title: _lodgingTitle(lodging),
+        cost: _formatCost(lodging?.lowCost, lodging?.highCost),
+      ),
+      flight: TripPlanCostItem(
+        title: _flightTitle(flight),
+        cost: _formatCost(flight?.lowCost, flight?.highCost),
+      ),
+      totalCost: _formatCost(lowTotalCost, highTotalCost),
+      summary: '', // TODO: 서버 summary 추가되면 교체할 예정.
+    );
+}
+
+/// 'RANK_2' -> 2 (형식이 다르면 0)
+int _rank(String? value) =>
+    int.tryParse(value?.replaceFirst('RANK_', '') ?? '') ?? 0;
+
+/// 호스텔 패밀리룸 (6박)
+String _lodgingTitle(LodgingDto? lodging) {
+  if (lodging == null) return '-';
+  final type = switch (lodging.lodgingType) {
+    'HOTEL' => '호텔',
+    'HOSTEL' => '호스텔',
+    'RENTAL' => '펜션',
+    'GUESTHOUSE' => '게스트하우스',
+    'RESORT' => '리조트',
+    'POOL_VILLA' => '풀빌라',
+    _ => null,
+  };
+  final name = [type, lodging.roomType]
+      .whereType<String>()
+      .where((s) => s.isNotEmpty)
+      .join(' ');
+  final nights = lodging.nights != null ? ' (${lodging.nights}박)' : '';
+  return name.isEmpty ? '-' : '$name$nights';
+}
+
+/// 저가항공 직항 왕복
+String _flightTitle(FlightDto? flight) {
+  if (flight == null) return '-';
+  final parts = [
+    switch (flight.flightType) {
+      'LOW_COST' => '저가항공',
+      'MAJOR' => '주요항공',
+      _ => null,
+    },
+    switch (flight.flightRoute) {
+      'DIRECT' => '직항',
+      'TRANSFER' => '경유',
+      _ => null,
+    },
+    switch (flight.isRoundFlight) {
+      true => '왕복',
+      false => '편도',
+      null => null,
+    },
+  ].whereType<String>();
+  return parts.isEmpty ? '-' : parts.join(' ');
+}
+
+/// 500000, 700000 -> '50-70만원' / 같거나 하나만 있으면 '약 15만원'
+String _formatCost(num? low, num? high) {
+  String man(num won) => (won / 10000).round().toString();
+  if (low == null && high == null) return '';
+  if (low == null || high == null || low == high) return '약 ${man(low ?? high!)}만원';
+  return '${man(low)}-${man(high)}만원';
+}

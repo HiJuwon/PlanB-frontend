@@ -26,21 +26,42 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
   // 플로우 번호: 새 플로우가 시작되면 증가 -> 이전 플로우의 늦은 응답은 반영하지 않는다
   int _flowId = 0;
 
+  // true면 다음 저장 때 기존 planId를 수정하지 않고 새 플랜을 생성한다(POST)
+  // 서버는 최종 제출된 플랜의 수정을 막고 있어서(404 '임시 저장된 계획이 아닙니다' 라고 뜬다), 여행 고르기에서 조건을 다시 선택할 때 사용함.
+  bool _createNewPlan = false;
+
+  // 마지막으로 최종 제출(isDraft: false)에 성공한 입력값 (planId 포함)
+  // - null이 아니면 지금 planId는 최종 제출된 플랜이라 수정(PATCH)할 수 없음
+  //   - 입력값이 그대로면: 저장 요청 생략 (추천 생성 재시도 시 저장 성공 상태 유지)
+  //   - 입력값이 바뀌었으면: 새 플랜 생성(POST)
+  TripCheckDraft? _submittedDraft;
+
+  /// 여행 고르기 -> '여행 조건 다시 선택'
+  /// 입력값은 그대로 두고, 다음 저장부터 새 플랜으로 생성한다
+  void startReselect() => _createNewPlan = true;
+
+  /// 새 플로우 시작: 이전 플로우의 늦은 응답 무시 + 저장 관련 상태 초기화
+  void _startNewFlow() {
+    _flowId++;
+    _createNewPlan = false;
+    _submittedDraft = null;
+  }
+
   @override
   TripCheckDraft build() {
-    _flowId++;
+    _startNewFlow();
     return const TripCheckDraft();
   }
 
   /// 플로우 시작 시 전체 초기화
   void reset() {
-    _flowId++;
+    _startNewFlow();
     state = const TripCheckDraft();
   }
 
   /// 저장된 조건으로 복원 (플래너 '여행 플랜 다시 선택하기' -> 여행 고르기 재진입)
   void restore(TripCheckDraft draft) {
-    _flowId++;
+    _startNewFlow();
     state = draft;
   }
 
@@ -48,7 +69,7 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
   /// 기준이 바뀌면 이후 단계 입력은 다른 플로우 값이므로 함께 초기화
   void selectTripType(TripSelectionType type) {
     if (state.tripType == type) return;
-    _flowId++;
+    _startNewFlow();
     state = TripCheckDraft(tripType: type);
   }
 
@@ -74,10 +95,11 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
 
   /// 지갑 기준 플랜 저장
   /// - planId 없음 -> 생성(POST) / 있음 -> 수정(PATCH)
+  /// - 최종 제출된 플랜: 입력값이 그대로면 요청 생략, 바뀌었으면 새 플랜 생성
   /// - isDraft: true -> 단계별 임시저장 / false -> 최종 제출
   /// - 실패 시 ApiException을 그대로 던짐 (화면에서 처리)
   Future<void> saveWalletPlan({required bool isDraft}) {
-    return _enqueueSave((planId) async {
+    return _enqueueSave(isDraft: isDraft, (planId) async {
       final repository = ref.read(tripCheckRepositoryProvider);
       final request = WalletPlanRequestDto(draft: state, isDraft: isDraft);
       final res = planId == null
@@ -89,7 +111,7 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
 
   /// 목표 기준 플랜 저장 (동작은 saveWalletPlan과 같음)
   Future<void> saveGoalPlan({required bool isDraft}) {
-    return _enqueueSave((planId) async {
+    return _enqueueSave(isDraft: isDraft, (planId) async {
       final repository = ref.read(tripCheckRepositoryProvider);
       final request = GoalPlanRequestDto(draft: state, isDraft: isDraft);
       final res = planId == null
@@ -100,13 +122,33 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
   }
 
   /// 저장 요청을 대기열에 넣어 한 번에 하나씩 순서대로 처리 (지갑/목표 공통)
-  Future<void> _enqueueSave(Future<int> Function(int? planId) send) {
+  Future<void> _enqueueSave(
+    Future<int> Function(int? planId) send, {
+    required bool isDraft,
+  }) {
     final flowId = _flowId;
     final run = _saveQueue.then((_) async {
       if (flowId != _flowId) return;
 
-      final planId = await send(state.planId);
+      final submitted = _submittedDraft;
+
+      // 최종 제출된 뒤로 입력값이 그대로면 다시 보낼 필요 없음
+      // (예: 추천 생성만 실패해서 분석을 다시 시도 -> 저장 성공 상태를 유지하고 추천만 다시 요청)
+      if (!_createNewPlan && submitted != null && submitted == state) return;
+
+      // 새 플랜 생성(POST)
+      // - 여행 고르기에서 조건을 다시 선택한 경우
+      // - 최종 제출된 플랜의 입력값이 바뀐 경우 (최종 제출된 플랜은 수정 불가)
+      final createNew = _createNewPlan || submitted != null;
+
+      final sent = state; // 이번 요청에 실린 입력값
+      final planId = await send(createNew ? null : sent.planId);
       if (flowId != _flowId) return;
+
+      // 저장 성공: 새 플랜 생성 완료(실패하면 플래그가 남아 다음 저장 때 다시 생성 시도)
+      _createNewPlan = false;
+      // 최종 제출이면 보낸 입력값을 기억, 임시저장이면 아직 수정 가능한 플랜
+      _submittedDraft = isDraft ? null : sent.copyWith(planId: planId);
 
       // 요청 중 사용자가 값을 바꿨을 수 있으니 현재 state에 planId만 반영
       state = state.copyWith(planId: planId);
