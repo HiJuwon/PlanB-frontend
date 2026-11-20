@@ -105,17 +105,17 @@ extension RecommendationItemDtoMapper on RecommendationItemDto {
       destination: destination,
       tags: [if (destination != null) destination!.label], // TODO: 서버 hashtags 추가되면 교체할 예정.
       highlights: courses
-          .map((c) => TripPlanCostItem(title: c.content ?? '', cost: _formatCost(c.cost, c.cost)))
+          .map((c) => TripPlanCostItem(title: c.content ?? '', cost: formatCostRange(c.cost, c.cost)))
           .toList(),
       accommodation: TripPlanCostItem(
-        title: _lodgingTitle(lodging),
-        cost: _formatCost(lodging?.lowCost, lodging?.highCost),
+        title: lodgingTitle(lodging),
+        cost: formatCostRange(lodging?.lowCost, lodging?.highCost),
       ),
       flight: TripPlanCostItem(
-        title: _flightTitle(flight),
-        cost: _formatCost(flight?.lowCost, flight?.highCost),
+        title: flightTitle(flight),
+        cost: formatCostRange(flight?.lowCost, flight?.highCost),
       ),
-      totalCost: _formatCost(lowTotalCost, highTotalCost),
+      totalCost: formatCostRange(lowTotalCost, highTotalCost),
       summary: '', // TODO: 서버 summary 추가되면 교체할 예정.
     );
 }
@@ -133,7 +133,7 @@ BudgetLevel? _budgetLevel(String? value) => switch (value) {
     };
 
 /// 호스텔 패밀리룸 (6박)
-String _lodgingTitle(LodgingDto? lodging) {
+String lodgingTitle(LodgingDto? lodging) {
   if (lodging == null) return '-';
   final type = switch (lodging.lodgingType) {
     'HOTEL' => '호텔',
@@ -153,7 +153,7 @@ String _lodgingTitle(LodgingDto? lodging) {
 }
 
 /// 저가항공 직항 왕복
-String _flightTitle(FlightDto? flight) {
+String flightTitle(FlightDto? flight) {
   if (flight == null) return '-';
   final parts = [
     switch (flight.flightType) {
@@ -176,7 +176,7 @@ String _flightTitle(FlightDto? flight) {
 }
 
 /// 500000, 700000 -> '50-70만원' / 같거나 하나만 있으면 '약 15만원'
-String _formatCost(num? low, num? high) {
+String formatCostRange(num? low, num? high) {
   String man(num won) => (won / 10000).round().toString();
   if (low == null && high == null) return '';
   if (low == null || high == null || low == high) return '약 ${man(low ?? high!)}만원';
