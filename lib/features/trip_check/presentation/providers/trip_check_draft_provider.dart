@@ -26,21 +26,32 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
   // 플로우 번호: 새 플로우가 시작되면 증가 -> 이전 플로우의 늦은 응답은 반영하지 않는다
   int _flowId = 0;
 
+  // true면 다음 저장 때 기존 planId를 수정하지 않고 새 플랜을 생성한다(POST)
+  // 서버는 최종 제출된 플랜의 수정을 막고 있어서(404 '임시 저장된 계획이 아닙니다' 라고 뜬다), 여행 고르기에서 조건을 다시 선택할 때 사용함.
+  bool _createNewPlan = false;
+
+  /// 여행 고르기 -> '여행 조건 다시 선택'
+  /// 입력값은 그대로 두고, 다음 저장부터 새 플랜으로 생성한다
+  void startReselect() => _createNewPlan = true;
+
   @override
   TripCheckDraft build() {
     _flowId++;
+    _createNewPlan = false;
     return const TripCheckDraft();
   }
 
   /// 플로우 시작 시 전체 초기화
   void reset() {
     _flowId++;
+    _createNewPlan = false;
     state = const TripCheckDraft();
   }
 
   /// 저장된 조건으로 복원 (플래너 '여행 플랜 다시 선택하기' -> 여행 고르기 재진입)
   void restore(TripCheckDraft draft) {
     _flowId++;
+    _createNewPlan = false;
     state = draft;
   }
 
@@ -49,6 +60,7 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
   void selectTripType(TripSelectionType type) {
     if (state.tripType == type) return;
     _flowId++;
+    _createNewPlan = false;
     state = TripCheckDraft(tripType: type);
   }
 
@@ -105,8 +117,13 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
     final run = _saveQueue.then((_) async {
       if (flowId != _flowId) return;
 
-      final planId = await send(state.planId);
+      // 조건 다시 선택 후 첫 저장이면 planId 없이 보내서 새 플랜 생성(POST)
+      final planId = await send(_createNewPlan ? null : state.planId);
       if (flowId != _flowId) return;
+
+      // 새 플랜 생성 성공 -> 이후 저장은 이 플랜을 수정(PATCH)
+      // (실패하면 플래그가 남아 있어서 다음 저장 때 다시 생성 시도)
+      _createNewPlan = false;
 
       // 요청 중 사용자가 값을 바꿨을 수 있으니 현재 state에 planId만 반영
       state = state.copyWith(planId: planId);

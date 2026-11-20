@@ -57,6 +57,9 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
     );
     if (!confirmed || !mounted) return;
 
+    // 최종 제출된 플랜은 수정할 수 없으므로, 다시 입력한 조건은 새 플랜으로 저장
+    ref.read(tripCheckDraftProvider.notifier).startReselect();
+
     final String route = switch (tripType) {
       TripSelectionType.budget => AppRoutes.budgetFirstBasicInfo,
       TripSelectionType.goal => AppRoutes.goalFirstBasicInfo,
