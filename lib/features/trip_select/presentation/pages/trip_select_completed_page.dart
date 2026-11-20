@@ -19,7 +19,7 @@ import 'package:plan_b/shared/widgets/header/title_header.dart';
 class TripSelectCompletedPage extends ConsumerStatefulWidget {
   const TripSelectCompletedPage({super.key, required this.recommendationId});
 
-  /// 여행 고르기에서 선택한 플랜 id
+  /// 여행 고르기에서 선택한 티켓/영수증의 recommendationId
   final String? recommendationId;
 
   @override
@@ -69,6 +69,10 @@ class _TripSelectCompletedPageState
 
   /// 선택한 추천 계획 확정 (실패하면 예외를 던져서 _runSetup이 토스트 + pop 처리)
   Future<void> _requestPlanSetup(String? recommendationId) async {
+    // 요청 중 이 페이지가 사라져도 (ex. 인증 만료로 redirect 등) 홈 목록을 갱신할 수 있도록
+    // 위젯 ref 대신 앱 전체 ProviderContainer를 미리 잡아 둠
+    final ProviderContainer container = ProviderScope.containerOf(context, listen: false);
+
     final int? planId = ref.read(tripCheckDraftProvider).planId;
     final int? recId = int.tryParse(recommendationId ?? '');
     if (planId == null || recId == null) {
@@ -81,7 +85,7 @@ class _TripSelectCompletedPageState
         );
 
     // 홈 '나의 여행 플랜' 목록에 새 플랜이 보이도록 다시 조회
-    ref.invalidate(homePlansProvider);
+    container.invalidate(homePlansProvider);
   }
 
   /// 여행 플랜이 만들어졌으므로 맞춤 여행 체크, 여행 고르기 스택을 모두 비우고 홈으로
