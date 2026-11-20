@@ -48,14 +48,14 @@ extension PlanDetailResponseDtoMapper on PlanDetailResponseDto {
               end: (end != null && !end.isBefore(start)) ? end : start,
             ),
       peopleCount: memberCount,
-      companionType: _companion(memberType),
-      maxBudget: _budget(budgetRange),
+      companionType: companionTypeFromServer(memberType),
+      maxBudget: budgetRangeFromServer(budgetRange),
     );
   }
 }
 
 /// CommonTravelPlanDto._member의 역변환
-CompanionType? _companion(String? value) => switch (value) {
+CompanionType? companionTypeFromServer(String? value) => switch (value) {
       'ALONE' => CompanionType.solo,
       'FAMILY' => CompanionType.family,
       'FRIEND' => CompanionType.friends,
@@ -66,7 +66,7 @@ CompanionType? _companion(String? value) => switch (value) {
     };
 
 /// WalletPlanRequestDto._budget의 역변환
-BudgetRange? _budget(String? value) => switch (value) {
+BudgetRange? budgetRangeFromServer(String? value) => switch (value) {
       'UNDER_100' => BudgetRange.upTo100,
       'UNDER_200' => BudgetRange.upTo200,
       'UNDER_300' => BudgetRange.upTo300,
