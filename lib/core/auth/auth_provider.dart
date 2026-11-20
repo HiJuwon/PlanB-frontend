@@ -47,6 +47,14 @@ class AuthNotifier extends Notifier<AuthState> {
     state = const AuthState(isLoggedIn: false);
   }
 
+  /// 회원탈퇴: 서버 탈퇴 성공 시에만 토큰 삭제 -> 로그아웃 상태로 변경
+  /// 실패하면 ApiException을 그대로 던짐 (로그인 상태 유지.)
+  Future<void> withdraw() async {
+    await ref.read(sessionRepositoryProvider).withdraw();
+    await ref.read(tokenStorageProvider).clear(); // 토큰 + 로컬 프로필(deleteAll)
+    state = const AuthState(isLoggedIn: false);
+  }
+
   /// 리프레시 토큰까지 만료됨 (인터셉터가 토큰을 지운 뒤 호출)
   void sessionExpired() => state = const AuthState(isLoggedIn: false);
 }
