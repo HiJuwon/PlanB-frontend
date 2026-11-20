@@ -37,12 +37,24 @@ class MyPage extends ConsumerWidget {
         .run(() => ref.read(loginControllerProvider).logout());
   }
 
-  /// 회원탈퇴: 경고 모달 > (확인 시) 탈퇴 (계정 데이터 전부 삭제)
-  Future<void> _onDeleteAccountTap(BuildContext context) async {
+  /// 회원탈퇴: 경고 모달 -> (확인 시) 서버 탈퇴 -> 성공 시 라우터가 로그인 화면으로 이동
+  /// 실패 시 로그인 상태 유지 + 토스트 알림.
+  Future<void> _onDeleteAccountTap(BuildContext context, WidgetRef ref) async {
     final bool confirmed = await showDeleteAccountModal(context);
-    if (!confirmed || !context.mounted) return; // 돌아가기: 모달만 닫힘
+    if (!confirmed || !context.mounted) return; // 돌아가기 (모달만 닫힘)
 
-    // TODO: 회원탈퇴 API 연동 + 로컬 데이터 삭제 + 로그인 화면으로 이동
+    try {
+      await ref
+          .read(globalLoadingProvider.notifier)
+          .run(() => ref.read(loginControllerProvider).withdraw());
+    } catch (e) {
+      if (!context.mounted) return; // 세션 만료로 이미 로그인 화면으로 간 경우
+      showToast(
+        context,
+        text: e is ApiException ? e.message : '회원탈퇴에 실패했어요.\n다시 시도해주세요',
+        type: ToastType.warning,
+      );
+    }
   }
 
   /// 이름 변경: 서버 저장 > 실패 시 토스트. 위젯에는 성공 여부 반환
@@ -100,7 +112,7 @@ class MyPage extends ConsumerWidget {
             isPushEnabled: isPushEnabled,
             onPushChanged: ref.read(pushNotificationProvider.notifier).setEnabled,
             onLogoutTap: () => _onLogoutTap(context, ref),
-            onDeleteAccountTap: () => _onDeleteAccountTap(context),
+            onDeleteAccountTap: () => _onDeleteAccountTap(context, ref),
           ),
           const SizedBox(height: _contentBottomGap),
         ],
