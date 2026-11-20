@@ -47,6 +47,16 @@ class LoginController {
     ]);
     await _ref.read(authProvider.notifier).logout();
   }
+
+  /// 회원탈퇴: PlanB 서버 탈퇴 -> (성공 시) 소셜 SDK 로그아웃(실패해도 무시)
+  /// 서버 탈퇴가 실패했는데 SDK만 로그아웃되는 일이 없도록, SDK는 건드리지 않고 에러를 그대로 던짐
+  Future<void> withdraw() async {
+    await _ref.read(authProvider.notifier).withdraw();
+    await Future.wait([
+      _ref.read(kakaoLoginServiceProvider).logout().catchError((_) {}),
+      _ref.read(googleLoginServiceProvider).logout().catchError((_) {}),
+    ]);
+  }
 }
 
 final loginControllerProvider = Provider((ref) => LoginController(ref));
