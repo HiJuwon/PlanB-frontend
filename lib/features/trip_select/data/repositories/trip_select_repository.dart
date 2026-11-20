@@ -7,6 +7,7 @@ import 'package:plan_b/features/trip_select/data/models/dto/plan_detail_response
 import 'package:plan_b/features/trip_select/data/models/trip_basic_info.dart';
 import 'package:plan_b/features/trip_select/data/models/dto/recommendation_response_dto.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
+import 'package:plan_b/features/trip_select/data/models/budget_level.dart';
 
 class TripSelectRepository {
   TripSelectRepository(this._dio);
@@ -33,6 +34,18 @@ class TripSelectRepository {
       ),
       (data) => RecommendationResponseDto.fromJson(data as Map<String, dynamic>)
           .toWalletTripPlans(),
+    );
+  }
+
+  /// 목표 기준 AI 예산 추천 생성 (고/중/저 3단계)
+  Future<List<BudgetLevelPlan>> createGoalRecommendations(int planId) {
+    return apiRequest(
+      () => _dio.post(
+        '/api/v1/plans/$planId/recommendations/goal',
+        options: Options(receiveTimeout: _recommendationTimeout),
+      ),
+      (data) => RecommendationResponseDto.fromJson(data as Map<String, dynamic>)
+          .toGoalBudgetPlans(),
     );
   }
 }
