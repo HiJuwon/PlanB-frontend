@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:plan_b/core/auth/auth_provider.dart';
 import 'package:plan_b/features/trip_check/data/models/dto/wallet_plan_request_dto.dart';
 import 'package:plan_b/features/trip_check/data/models/dto/goal_plan_request_dto.dart';
 import 'package:plan_b/features/trip_check/data/repositories/trip_check_repository.dart';
@@ -49,7 +50,9 @@ class TripCheckDraftNotifier extends Notifier<TripCheckDraft> {
 
   @override
   TripCheckDraft build() {
-    _startNewFlow();
+    // 로그아웃/다른 계정 로그인 시 이전 계정의 입력값이 남지 않도록 초기화
+    ref.watch(authProvider.select((auth) => auth.isLoggedIn));
+    _startNewFlow(); // 이전 플로우의 늦은 저장 응답도 무시됨
     return const TripCheckDraft();
   }
 

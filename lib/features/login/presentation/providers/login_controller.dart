@@ -37,6 +37,16 @@ class LoginController {
           isNewUser: res.newUser,
         );
   }
+
+  /// 로그아웃: 소셜 SDK 로그아웃(실패해도 무시) > PlanB 로그아웃
+  /// 어떤 방식으로 로그인했는지 저장하지 않으므로 둘 다 시도.
+  Future<void> logout() async {
+    await Future.wait([
+      _ref.read(kakaoLoginServiceProvider).logout().catchError((_) {}),
+      _ref.read(googleLoginServiceProvider).logout().catchError((_) {}),
+    ]);
+    await _ref.read(authProvider.notifier).logout();
+  }
 }
 
 final loginControllerProvider = Provider((ref) => LoginController(ref));

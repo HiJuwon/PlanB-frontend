@@ -13,6 +13,9 @@ class GoogleLoginService {
     return idToken;
   }
 
+  /// 구글 로그인 상태 해제 (다음 로그인 때 계정 선택 화면 표시)
+  Future<void> logout() => GoogleSignIn.instance.signOut();
+
   /// 사용자가 로그인을 취소했는지 여부
   static bool isCanceled(Object e) =>
       e is GoogleSignInException && e.code == GoogleSignInExceptionCode.canceled;

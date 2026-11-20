@@ -4,9 +4,15 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:plan_b/core/auth/auth_provider.dart';
+
 class SelectedPlanIdNotifier extends Notifier<String?> {
   @override
-  String? build() => null; // 선택된 플랜 없을 때
+  String? build() {
+    // 로그아웃 시 이전 계정의 선택 플랜 초기화
+    ref.watch(authProvider.select((auth) => auth.isLoggedIn));
+    return null; // 선택된 플랜 없을 때
+  }
 
   void select(String planId) => state = planId;
 

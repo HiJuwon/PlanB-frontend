@@ -9,6 +9,9 @@ class KakaoLoginService {
     return token.accessToken;
   }
 
+  /// 카카오 SDK 토큰 삭제 (다음 로그인 때 다시 인증)
+  Future<void> logout() => UserApi.instance.logout();
+
   Future<OAuthToken> _loginWithTalkOrAccount() async {
     if (await isKakaoTalkInstalled()) {
       try {

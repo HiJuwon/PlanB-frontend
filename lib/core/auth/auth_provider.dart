@@ -36,9 +36,12 @@ class AuthNotifier extends Notifier<AuthState> {
   /// 사용자가 직접 로그아웃
   Future<void> logout() async {
     try {
-      await ref.read(sessionRepositoryProvider).logout();
+      await ref
+          .read(sessionRepositoryProvider)
+          .logout()
+          .timeout(const Duration(seconds: 5)); // 서버 응답이 늦어도 오래 기다리지 않음
     } catch (_) {
-      // 서버 요청이 실패해도 앱에서는 로그아웃 처리
+      // 서버 요청이 실패해도 앱에서는 로그아웃 처리 (TimeoutException 포함)
     }
     await ref.read(tokenStorageProvider).clear();
     state = const AuthState(isLoggedIn: false);
