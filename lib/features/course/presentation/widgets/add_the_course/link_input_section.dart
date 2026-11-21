@@ -10,12 +10,14 @@ class LinkInputSection extends StatelessWidget {
     super.key,
     required this.controllers,
     required this.onChanged,
+    required this.onFieldFocusLost,
     required this.onAddPressed,
     this.autofocusTarget,
   });
 
   final List<TextEditingController> controllers; // 필드 개수 = controller 개수
   final ValueChanged<String> onChanged;          // 입력이 바뀔 때 (CTA 활성화 갱신용)
+  final ValueChanged<TextEditingController> onFieldFocusLost;
   final VoidCallback onAddPressed;               // '링크 추가'
   final TextEditingController? autofocusTarget;  // 새로 연 필드
 
@@ -35,6 +37,7 @@ class LinkInputSection extends StatelessWidget {
                 controller: controller,
                 autofocus: identical(controller, autofocusTarget),
                 onChanged: onChanged,
+                onFocusLost: () => onFieldFocusLost(controller),
               ),
           ],
         ),

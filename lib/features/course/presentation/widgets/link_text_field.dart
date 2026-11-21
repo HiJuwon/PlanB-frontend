@@ -12,6 +12,7 @@ class LinkTextField extends StatefulWidget {
     this.controller,
     this.onChanged,
     this.onSubmitted,
+    this.onFocusLost,
     this.hintText = 'https://...',
     this.autofocus = false,
   });
@@ -19,6 +20,7 @@ class LinkTextField extends StatefulWidget {
   final TextEditingController? controller; // null이면 내부에서 만들어 사용
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted; // 키보드 완료 버튼을 누를 때
+  final VoidCallback? onFocusLost;         // 입력 후 포커스가 빠질 때 (바깥 탭, 키보드 완료, 다른 필드 탭 등)
   final String hintText;
   final bool autofocus;                    // true면 화면에 나타나자마자 입력 시작
 
@@ -60,8 +62,12 @@ class _LinkTextFieldState extends State<LinkTextField> {
     super.dispose();
   }
 
-  // 포커스가 바뀌면 테두리, 말줄임 표시를 다시 그림
-  void _onFocusChanged() => setState(() {});
+  // 포커스가 바뀌면 테두리, 말줄임 표시를 다시 그리고,
+  // 포커스가 빠졌으면 바깥에 알림 (링크 형식, 중복 검사용)
+  void _onFocusChanged() {
+    setState(() {});
+    if (!_focusNode.hasFocus) widget.onFocusLost?.call();
+  }
 
   // 입력 중이 아닐 때 외부에서 값이 바뀌어도 말줄임 텍스트가 갱신되게 함
   void _onTextChanged() {

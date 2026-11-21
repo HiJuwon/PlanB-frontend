@@ -36,6 +36,8 @@ class _AddTheCourseViewState extends State<_AddTheCourseView> {
   static const double _contentBottomGap = 24; // 안내 박스 ~ 스크롤 끝
   static const double _ctaBottomGap = 16;     // CTA ~ 로컬 탭바
   static const double _ctaHorizontalPadding = 24; // AppPage 좌우 패딩을 0으로 둬서 CTA에 직접 적용하는 여백값
+  static const String _invalidFormatMessage = '링크는 https:// 또는\nhttp://로 시작해야 해요';
+  static const String _duplicateMessage = '같은 링크가 이미 입력되어 있어요';
 
   final List<TextEditingController> _controllers = [TextEditingController()];
   TextEditingController? _autofocusTarget; // '링크 추가'로 새로 연 필드에만 focus
@@ -61,7 +63,7 @@ class _AddTheCourseViewState extends State<_AddTheCourseView> {
     if (_controllers.length >= _maxLinkCount) {
       showToast(
         context,
-        text: '링크는 최대 $_maxLinkCount개까지\n입력할 수 있어요',
+        text: '링크는 최대 $_maxLinkCount개까지 입력 가능해요',
         type: ToastType.alert,
       );
       return;
@@ -74,26 +76,40 @@ class _AddTheCourseViewState extends State<_AddTheCourseView> {
     });
   }
 
-  /// '붙여넣기 완료': 링크 형식 / 중복 확인 후 코스 정보 추출 화면으로 보낸다
+  /// 입력 필드에서 포커스가 빠질 때: 그 필드의 링크 형식 > 중복 순서로 바로 검사
+  void _onLinkFocusLost(TextEditingController controller) {
+    // 뒤로가기로 페이지를 나가면서 포커스가 빠진 경우는 검사하지 않음
+    if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? true)) return;
+
+    final String link = controller.text.trim();
+    if (link.isEmpty) return; // 빈 필드는 검사하지 않음
+
+    if (!_isHttpUrl(link)) {
+      _showWarning(_invalidFormatMessage);
+      return;
+    }
+
+    final bool isDuplicate = _controllers.any(
+      (other) => !identical(other, controller) && other.text.trim() == link,
+    );
+    if (isDuplicate) _showWarning(_duplicateMessage);
+  }
+
+  void _showWarning(String text) =>
+      showToast(context, text: text, type: ToastType.warning);
+
+  /// '붙여넣기 완료': 마지막으로 전체 링크 형식, 중복 확인 후 코스 정보 추출 화면으로
   void _submit() {
     FocusScope.of(context).unfocus();
     final List<String> links = _links;
 
     if (links.any((link) => !_isHttpUrl(link))) {
-      showToast(
-        context,
-        text: '링크는 https:// 또는\nhttp://로 시작해야 해요',
-        type: ToastType.warning,
-      );
+      _showWarning(_invalidFormatMessage);
       return;
     }
 
     if (links.toSet().length != links.length) {
-      showToast(
-        context,
-        text: '같은 링크가 이미 입력되어 있어요',
-        type: ToastType.warning,
-      );
+      _showWarning(_duplicateMessage);
       return;
     }
 
@@ -141,6 +157,7 @@ class _AddTheCourseViewState extends State<_AddTheCourseView> {
               controllers: _controllers,
               autofocusTarget: _autofocusTarget,
               onChanged: (_) => setState(() {}), // CTA 활성화 갱신
+              onFieldFocusLost: _onLinkFocusLost,
               onAddPressed: _addLinkField,
             ),
           ),
