@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_todo_type.dart';
+import 'package:plan_b/features/monthly_guide/presentation/widgets/monthly_view_item/monthly_budget_status.dart';
 
 /// 월별 가이드 할 일 항목의 텍스트 영역
 class MonthlyViewItemContent extends StatelessWidget {
@@ -54,36 +55,7 @@ class MonthlyViewItemContent extends StatelessWidget {
 
       case MonthlyTodoType.budget:
         if (!showBudgetStatus || budgetStatus == null) return const [];
-        return [_BudgetStatus(status: budgetStatus!)];
+        return [MonthlyBudgetStatus(status: budgetStatus!)];
     }
-  }
-}
-
-/// "목표 누적" 라벨 + 누적 금액
-class _BudgetStatus extends StatelessWidget {
-  const _BudgetStatus({required this.status});
-
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '목표 누적',
-          style: AppTextStyles.captionMedium12.copyWith(
-            color: AppColors.gray500,
-          ),
-        ),
-        Text(
-          status,
-          style: AppTextStyles.captionMedium12.copyWith(
-            color: AppColors.gray800,
-          ),
-        ),
-      ],
-    );
   }
 }
