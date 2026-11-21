@@ -83,4 +83,22 @@ class MonthlyGuide {
         periods: [for (final period in periods) period.toggleTodo(todoId)],
         currentIndex: currentIndex,
       );
+
+  /// 전체 타임라인 기간을 붙인 새 가이드
+  /// - 이번 기간은 월별 조회 값을 그대로 씀 (누적액, 남은 기간 수가 서버 계산값)
+  /// - 타임라인에서 이번 기간을 못 찾으면 이번 기간만 있는 그대로 둠
+  MonthlyGuide withTimeline(List<MonthlyGuidePeriod> timeline) {
+    final MonthlyGuidePeriod current = currentPeriod;
+    final int index =
+        timeline.indexWhere((period) => period.startDate == current.startDate);
+    if (index == -1) return this;
+
+    return MonthlyGuide(
+      planId: planId,
+      daysLeft: daysLeft,
+      totalBudget: totalBudget,
+      periods: [...timeline]..[index] = current,
+      currentIndex: index,
+    );
+  }
 }

@@ -1,6 +1,7 @@
 // 플랜 id로 월별 여행 준비 가이드 조회 + 할 일 완료 체크
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
@@ -9,6 +10,7 @@ import 'package:plan_b/features/monthly_guide/data/repositories/monthly_guide_re
 import 'package:plan_b/features/monthly_guide/data/models/monthly_guide.dart';
 import 'package:plan_b/features/monthly_guide/presentation/providers/guide_creator_provider.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
+import 'package:plan_b/features/monthly_guide/data/models/dto/travel_guide_response_dto.dart';
 
 /// 홈에서 선택한 플랜(confirmedPlanId)의 월별 가이드 id (가이드가 없으면 null)
 /// - autoDispose 아님: 의존하는 두 provider도 유지되는 provider라서, read로 읽어도 중간에 폐기되지 않도록
@@ -26,14 +28,36 @@ class MonthlyGuideNotifier
 
   @override
   Future<MonthlyGuide> build(String planId) async {
-    // 가이드 id 확보 (없으면 생성) 후 조회
+    // 가이드 id 확보 (없으면 생성)
     final int guideId = await _resolveGuideId(planId);
+    final MonthlyGuideRepository repository = ref.read(monthlyGuideRepositoryProvider);
 
-    final MonthlyGuide guide = await ref
-        .read(monthlyGuideRepositoryProvider)
-        .getGuide(guideId: guideId, planId: planId);
+    // 타임라인 조회를 먼저 시작해서 월별 조회와 동시에 진행
+    // 타임라인이 실패해도 월별 보기는 보여주도록 null로 처리
+    final Future<AllTimelineGuideResponseDto?> timelineRequest = repository
+        .getTimeline(guideId)
+        .then<AllTimelineGuideResponseDto?>((timeline) => timeline)
+        .catchError((Object e) {
+      debugPrint('전체 타임라인 조회 실패 (이번 기간만 표시): $e');
+      return null;
+    });
+
+    final MonthlyGuide guide =
+        await repository.getGuide(guideId: guideId, planId: planId);
+    final AllTimelineGuideResponseDto? timeline = await timelineRequest;
     _fetchedDate = _today();
-    return guide;
+
+    if (timeline == null) return guide;
+
+    // 타임라인 변환이 실패해도(기간 날짜 누락 등) 월별 보기는 보여주도록 이번 기간만 반환
+    try {
+      return guide.withTimeline(
+        timeline.toMonthlyGuidePeriods(totalCost: guide.totalBudget),
+      );
+    } catch (e) {
+      debugPrint('전체 타임라인 변환 실패 (이번 기간만 표시): $e');
+      return guide;
+    }
   }
 
   /// 가이드 id 확보: 홈 목록에 있으면 사용, 없으면(생성 실패 / 기존 플랜) 생성

@@ -1163,3 +1163,184 @@ abstract class _TravelGuideTodoDto implements TravelGuideTodoDto {
   _$$TravelGuideTodoDtoImplCopyWith<_$TravelGuideTodoDtoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
+
+AllTimelineGuideResponseDto _$AllTimelineGuideResponseDtoFromJson(
+  Map<String, dynamic> json,
+) {
+  return _AllTimelineGuideResponseDto.fromJson(json);
+}
+
+/// @nodoc
+mixin _$AllTimelineGuideResponseDto {
+  List<TravelGuidePeriodDto> get periods => throw _privateConstructorUsedError;
+
+  /// Serializes this AllTimelineGuideResponseDto to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of AllTimelineGuideResponseDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $AllTimelineGuideResponseDtoCopyWith<AllTimelineGuideResponseDto>
+  get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AllTimelineGuideResponseDtoCopyWith<$Res> {
+  factory $AllTimelineGuideResponseDtoCopyWith(
+    AllTimelineGuideResponseDto value,
+    $Res Function(AllTimelineGuideResponseDto) then,
+  ) =
+      _$AllTimelineGuideResponseDtoCopyWithImpl<
+        $Res,
+        AllTimelineGuideResponseDto
+      >;
+  @useResult
+  $Res call({List<TravelGuidePeriodDto> periods});
+}
+
+/// @nodoc
+class _$AllTimelineGuideResponseDtoCopyWithImpl<
+  $Res,
+  $Val extends AllTimelineGuideResponseDto
+>
+    implements $AllTimelineGuideResponseDtoCopyWith<$Res> {
+  _$AllTimelineGuideResponseDtoCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of AllTimelineGuideResponseDto
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? periods = null}) {
+    return _then(
+      _value.copyWith(
+            periods: null == periods
+                ? _value.periods
+                : periods // ignore: cast_nullable_to_non_nullable
+                      as List<TravelGuidePeriodDto>,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$AllTimelineGuideResponseDtoImplCopyWith<$Res>
+    implements $AllTimelineGuideResponseDtoCopyWith<$Res> {
+  factory _$$AllTimelineGuideResponseDtoImplCopyWith(
+    _$AllTimelineGuideResponseDtoImpl value,
+    $Res Function(_$AllTimelineGuideResponseDtoImpl) then,
+  ) = __$$AllTimelineGuideResponseDtoImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({List<TravelGuidePeriodDto> periods});
+}
+
+/// @nodoc
+class __$$AllTimelineGuideResponseDtoImplCopyWithImpl<$Res>
+    extends
+        _$AllTimelineGuideResponseDtoCopyWithImpl<
+          $Res,
+          _$AllTimelineGuideResponseDtoImpl
+        >
+    implements _$$AllTimelineGuideResponseDtoImplCopyWith<$Res> {
+  __$$AllTimelineGuideResponseDtoImplCopyWithImpl(
+    _$AllTimelineGuideResponseDtoImpl _value,
+    $Res Function(_$AllTimelineGuideResponseDtoImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of AllTimelineGuideResponseDto
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? periods = null}) {
+    return _then(
+      _$AllTimelineGuideResponseDtoImpl(
+        periods: null == periods
+            ? _value._periods
+            : periods // ignore: cast_nullable_to_non_nullable
+                  as List<TravelGuidePeriodDto>,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AllTimelineGuideResponseDtoImpl
+    implements _AllTimelineGuideResponseDto {
+  const _$AllTimelineGuideResponseDtoImpl({
+    final List<TravelGuidePeriodDto> periods = const [],
+  }) : _periods = periods;
+
+  factory _$AllTimelineGuideResponseDtoImpl.fromJson(
+    Map<String, dynamic> json,
+  ) => _$$AllTimelineGuideResponseDtoImplFromJson(json);
+
+  final List<TravelGuidePeriodDto> _periods;
+  @override
+  @JsonKey()
+  List<TravelGuidePeriodDto> get periods {
+    if (_periods is EqualUnmodifiableListView) return _periods;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_periods);
+  }
+
+  @override
+  String toString() {
+    return 'AllTimelineGuideResponseDto(periods: $periods)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AllTimelineGuideResponseDtoImpl &&
+            const DeepCollectionEquality().equals(other._periods, _periods));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(_periods));
+
+  /// Create a copy of AllTimelineGuideResponseDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AllTimelineGuideResponseDtoImplCopyWith<_$AllTimelineGuideResponseDtoImpl>
+  get copyWith =>
+      __$$AllTimelineGuideResponseDtoImplCopyWithImpl<
+        _$AllTimelineGuideResponseDtoImpl
+      >(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AllTimelineGuideResponseDtoImplToJson(this);
+  }
+}
+
+abstract class _AllTimelineGuideResponseDto
+    implements AllTimelineGuideResponseDto {
+  const factory _AllTimelineGuideResponseDto({
+    final List<TravelGuidePeriodDto> periods,
+  }) = _$AllTimelineGuideResponseDtoImpl;
+
+  factory _AllTimelineGuideResponseDto.fromJson(Map<String, dynamic> json) =
+      _$AllTimelineGuideResponseDtoImpl.fromJson;
+
+  @override
+  List<TravelGuidePeriodDto> get periods;
+
+  /// Create a copy of AllTimelineGuideResponseDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AllTimelineGuideResponseDtoImplCopyWith<_$AllTimelineGuideResponseDtoImpl>
+  get copyWith => throw _privateConstructorUsedError;
+}

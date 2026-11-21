@@ -33,6 +33,15 @@ class MonthlyGuideRepository {
           .toMonthlyGuide(planId),
     );
   }
+
+  /// 전체 타임라인 가이드 조회 (확정일 ~ 출발 전 전체 기간)
+  /// - 기간별 누적액 계산에 총 예산(월별 조회 응답)이 필요해서 화면 모델 변환은 provider에서 월별 조회와 합칠 때 함
+  Future<AllTimelineGuideResponseDto> getTimeline(int guideId) {
+    return apiRequest(
+      () => _dio.get('/api/v1/guides/$guideId/timeline'),
+      (data) => AllTimelineGuideResponseDto.fromJson(data as Map<String, dynamic>),
+    );
+  }
 }
 
 final monthlyGuideRepositoryProvider =

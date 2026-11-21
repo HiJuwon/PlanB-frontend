@@ -97,3 +97,17 @@ Map<String, dynamic> _$$TravelGuideTodoDtoImplToJson(
   'cost': instance.cost,
   'isCompleted': instance.isCompleted,
 };
+
+_$AllTimelineGuideResponseDtoImpl _$$AllTimelineGuideResponseDtoImplFromJson(
+  Map<String, dynamic> json,
+) => _$AllTimelineGuideResponseDtoImpl(
+  periods:
+      (json['periods'] as List<dynamic>?)
+          ?.map((e) => TravelGuidePeriodDto.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+);
+
+Map<String, dynamic> _$$AllTimelineGuideResponseDtoImplToJson(
+  _$AllTimelineGuideResponseDtoImpl instance,
+) => <String, dynamic>{'periods': instance.periods};
