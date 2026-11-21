@@ -2,6 +2,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
 import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
 import 'package:plan_b/features/monthly_guide/data/dummy/monthly_guide_dummy.dart';
@@ -38,19 +39,25 @@ class MonthlyGuideNotifier
 
   /// 가이드 id 확보: 홈 목록에 있으면 사용, 없으면(생성 실패 / 기존 플랜) 생성
   Future<int> _resolveGuideId(String planId) async {
-    // watch가 아닌 read (아래에서 homePlansProvider를 invalidate해도 가이드를 다시 불러오지 않도록)
+    // watch가 아닌 read (homePlansProvider가 갱신돼도 가이드를 다시 불러오지 않도록)
     final int? savedId = await ref.read(selectedTravelGuideIdProvider.future);
     if (savedId != null) return savedId;
 
     final int? confirmedPlanId = int.tryParse(planId);
     if (confirmedPlanId == null) throw StateError('확정된 플랜 id가 아님: $planId');
 
-    final int createdId =
-        await ref.read(guideCreatorProvider).ensureGuide(confirmedPlanId);
+    try {
+      // homePlansProvider 갱신은 GuideCreator가 성공/실패와 관계없이 처리
+      return await ref.read(guideCreatorProvider).ensureGuide(confirmedPlanId);
+    } on ApiException catch (e) {
+      // 이미 생성된 가이드(중복 생성 충돌): 갱신된 홈 목록에서 기존 id를 다시 찾음
+      // TODO: 서버의 중복 생성 응답(상태 코드 / 에러 코드)에 맞게 조건 수정
+      if (e.statusCode != 409) rethrow;
 
-    // 다음 진입 때는 홈 목록에 travelGuideId가 있도록 갱신
-    ref.invalidate(homePlansProvider);
-    return createdId;
+      final int? existingId = await ref.read(selectedTravelGuideIdProvider.future);
+      if (existingId == null) rethrow;
+      return existingId;
+    }
   }
 
   /// 할 일 완료 체크 토글
