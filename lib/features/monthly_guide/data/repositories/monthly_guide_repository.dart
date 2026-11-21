@@ -50,6 +50,14 @@ class MonthlyGuideRepository {
       (_) {},
     );
   }
+
+  /// 월별 저축 체크/해제
+  Future<void> toggleSaving(int savingId) {
+    return apiRequest(
+      () => _dio.patch('/api/v1/guides/savings/$savingId'),
+      (_) {},
+    );
+  }
 }
 
 final monthlyGuideRepositoryProvider =
