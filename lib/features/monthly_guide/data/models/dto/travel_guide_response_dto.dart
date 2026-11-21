@@ -70,20 +70,24 @@ class TravelGuideTodoDto with _$TravelGuideTodoDto {
       _$TravelGuideTodoDtoFromJson(json);
 }
 
+/// GET /api/v1/guides/{guideId}/timeline
+@freezed
+class AllTimelineGuideResponseDto with _$AllTimelineGuideResponseDto {
+  const factory AllTimelineGuideResponseDto({
+    @Default([]) List<TravelGuidePeriodDto> periods, // 확정일 ~ 출발 전 전체 기간
+  }) = _AllTimelineGuideResponseDto;
+
+  factory AllTimelineGuideResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$AllTimelineGuideResponseDtoFromJson(json);
+}
+
 // 서버 -> UI 모양 변환
 
 extension TravelGuideResponseDtoMapper on TravelGuideResponseDto {
-  /// 조회 API는 이번 기간 하나만 주므로 periods에 이번 기간만 담음
-  /// (전체 기간은 타임라인 API 연동 시 채움)
+  /// 조회 API는 이번 기간 하나만 주므로 periods에 이번 기간만 담음 (전체 기간은 타임라인 조회 후 MonthlyGuide.withTimeline으로 합침)
   MonthlyGuide toMonthlyGuide(String planId) {
     final TravelGuidePeriodDto? current = period;
-    final DateTime? start = DateTime.tryParse(current?.periodStart ?? '');
-    final DateTime? end = DateTime.tryParse(current?.periodEnd ?? '');
-    if (current == null || start == null || end == null) {
-      throw StateError('가이드 응답에 이번 기간 정보가 없음');
-    }
-
-    final TravelGuideSavingDto? saving = current.saving;
+    if (current == null) throw StateError('가이드 응답에 이번 기간 정보가 없음');
 
     return MonthlyGuide(
       planId: planId,
@@ -91,27 +95,73 @@ extension TravelGuideResponseDtoMapper on TravelGuideResponseDto {
       totalBudget: (totalCost ?? 0).round(),
       currentIndex: 0,
       periods: [
-        MonthlyGuidePeriod(
-          // 저축 목표가 없으면 마지막 자투리 기간으로 봄 (lessThanMonth는 예산 목표를 숨김)
-          type: saving == null
-              ? MonthlyPeriodType.lessThanMonth
-              : MonthlyPeriodType.regular,
-          startDate: start,
-          endDate: end,
+        current.toMonthlyGuidePeriod(
           remainingMonths: remainingMonths ?? 0,
-          budgetTodo: saving == null
-              ? null
-              : MonthlyTodo(
-                  id: 'saving-${saving.savingId}',
-                  type: MonthlyTodoType.budget,
-                  title: '${_man(saving.amount ?? monthlySavingAmount)}만원 모으기',
-                  budgetStatus:
-                      '${_man(accumulatedSavingAmount)}만원 / ${_man(totalCost)}만원',
-                  isCompleted: saving.isCompleted,
-                ),
-          reservationTodos: [for (final todo in current.todos) todo.toMonthlyTodo()],
+          accumulatedSavingAmount: accumulatedSavingAmount,
+          totalCost: totalCost,
+          fallbackSavingAmount: monthlySavingAmount,
         ),
       ],
+    );
+  }
+}
+
+extension AllTimelineGuideResponseDtoMapper on AllTimelineGuideResponseDto {
+  /// 전체 기간 (시간순)
+  /// - 응답에 기간별 누적액, 남은 기간 수가 없어서 직접 계산
+  /// - totalCost: 누적액 문구(N만원 / 총액)에 쓰는 총 예산 (월별 조회 응답 값)
+  List<MonthlyGuidePeriod> toMonthlyGuidePeriods({required num totalCost}) {
+    // 순서가 보장되지 않을 수 있어 시작일 기준 정렬 ("2026-11-22" 형식이라 문자열 비교로 충분)
+    final List<TravelGuidePeriodDto> sorted = [...periods]
+      ..sort((a, b) => (a.periodStart ?? '').compareTo(b.periodStart ?? ''));
+
+    final List<MonthlyGuidePeriod> result = [];
+    num accumulated = 0;
+    for (final (i, period) in sorted.indexed) {
+      accumulated += period.saving?.amount ?? 0;
+      result.add(period.toMonthlyGuidePeriod(
+        remainingMonths: sorted.length - i, // 이 기간 포함 남은 기간 수
+        accumulatedSavingAmount: accumulated,
+        totalCost: totalCost,
+      ));
+    }
+    return result;
+  }
+}
+
+extension TravelGuidePeriodDtoMapper on TravelGuidePeriodDto {
+  /// 기간 1개 -> 화면 모델 (월별 & 타임라인 공통)
+  MonthlyGuidePeriod toMonthlyGuidePeriod({
+    required int remainingMonths,
+    required num? accumulatedSavingAmount,
+    required num? totalCost,
+    num? fallbackSavingAmount, // saving.amount가 없을 때 쓸 월 저축 목표
+  }) {
+    final DateTime? start = DateTime.tryParse(periodStart ?? '');
+    final DateTime? end = DateTime.tryParse(periodEnd ?? '');
+    if (start == null || end == null) {
+      throw StateError('가이드 기간 날짜 형식 오류: $periodStart ~ $periodEnd');
+    }
+
+    final TravelGuideSavingDto? goal = saving;
+
+    return MonthlyGuidePeriod(
+      // 저축 목표가 없으면 마지막 자투리 기간 (lessThanMonth는 예산 목표를 숨김)
+      type: goal == null ? MonthlyPeriodType.lessThanMonth : MonthlyPeriodType.regular,
+      startDate: start,
+      endDate: end,
+      remainingMonths: remainingMonths,
+      budgetTodo: goal == null
+          ? null
+          : MonthlyTodo(
+              id: 'saving-${goal.savingId}',
+              type: MonthlyTodoType.budget,
+              title: '${_man(goal.amount ?? fallbackSavingAmount)}만원 모으기',
+              budgetStatus:
+                  '${_man(accumulatedSavingAmount)}만원 / ${_man(totalCost)}만원',
+              isCompleted: goal.isCompleted,
+            ),
+      reservationTodos: [for (final todo in todos) todo.toMonthlyTodo()],
     );
   }
 }
