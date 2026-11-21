@@ -91,6 +91,16 @@ int? todoPeriodIdOf(String todoId) => todoId.startsWith(_todoIdPrefix)
     ? int.tryParse(todoId.substring(_todoIdPrefix.length))
     : null;
 
+/// 화면 모델 저축 목표 id <-> 서버 savingId
+const String _savingIdPrefix = 'saving-';
+
+String budgetTodoIdOf(int savingId) => '$_savingIdPrefix$savingId';
+
+/// 저축 목표 id가 아니면(준비 항목 등) null
+int? savingIdOf(String todoId) => todoId.startsWith(_savingIdPrefix)
+    ? int.tryParse(todoId.substring(_savingIdPrefix.length))
+    : null;
+
 // 서버 -> UI 모양 변환
 
 extension TravelGuideResponseDtoMapper on TravelGuideResponseDto {
@@ -164,7 +174,7 @@ extension TravelGuidePeriodDtoMapper on TravelGuidePeriodDto {
       budgetTodo: goal == null
           ? null
           : MonthlyTodo(
-              id: 'saving-${goal.savingId}',
+              id: budgetTodoIdOf(goal.savingId),
               type: MonthlyTodoType.budget,
               title: '${_man(goal.amount ?? fallbackSavingAmount)}만원 모으기',
               budgetStatus:

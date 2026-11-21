@@ -92,22 +92,23 @@ class MonthlyGuideNotifier
     }
   }
 
-  /// 할 일 완료 체크 토글
+  /// 할 일 완료 체크 토글 (준비 항목 / 저축 목표 공통)
   /// - 화면을 먼저 바꾸고 서버에 저장. 실패하면 이 항목만 되돌린 뒤 예외를 다시 던짐 (페이지에서 토스트)
   Future<void> toggleTodo(String todoId) async {
     final MonthlyGuide? guide = state.valueOrNull;
     if (guide == null || _pendingTodoIds.contains(todoId)) return;
 
+    // 저장할 API가 없는 id면 화면도 바꾸지 않음 (서버와 어긋나지 않도록)
+    final Future<void> Function()? save = _saveRequestOf(todoId);
+    if (save == null) return;
+
     // 월별 / 타임라인 어느 보기에서 체크해도 같은 할 일이 바뀌도록 전체 기간에서 찾음
     state = AsyncData(guide.toggleTodo(todoId));
-
-    final int? todoPeriodId = todoPeriodIdOf(todoId);
-    if (todoPeriodId == null) return; // TODO: 저축 체크 API 연동 (PATCH /guides/savings/{savingId})
 
     final int generation = _generation;
     _pendingTodoIds.add(todoId);
     try {
-      await ref.read(monthlyGuideRepositoryProvider).toggleTodo(todoPeriodId);
+      await save();
     } catch (_) {
       // 그 사이 다른 항목이 바뀌었을 수 있어 스냅샷 대신 이 항목만 다시 뒤집음
       // 요청 중에 새로 조회했거나 화면을 나갔다면 서버 값이 기준이므로 되돌리지 않음
@@ -119,6 +120,19 @@ class MonthlyGuideNotifier
     } finally {
       _pendingTodoIds.remove(todoId);
     }
+  }
+
+  /// 할 일 id의 접두어로 부를 체크 API 고르기
+  Future<void> Function()? _saveRequestOf(String todoId) {
+    final MonthlyGuideRepository repository = ref.read(monthlyGuideRepositoryProvider);
+
+    final int? todoPeriodId = todoPeriodIdOf(todoId);
+    if (todoPeriodId != null) return () => repository.toggleTodo(todoPeriodId);
+
+    final int? savingId = savingIdOf(todoId);
+    if (savingId != null) return () => repository.toggleSaving(savingId);
+
+    return null;
   }
 
   /// 마지막 조회 이후 날짜가 바뀌었으면 다시 조회 (D-day, 이번 기간이 바뀌었을 수 있음)
