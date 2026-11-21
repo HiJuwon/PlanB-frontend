@@ -23,6 +23,9 @@ RecommendationResponseDto _$RecommendationResponseDtoFromJson(
 
 /// @nodoc
 mixin _$RecommendationResponseDto {
+  // 모르는 상태값이 오면: 앱이 죽지 않고 null로 처리 (Repository에서 실패로 처리)
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+  RecommendationStatus? get status => throw _privateConstructorUsedError;
   List<RecommendationItemDto> get recommendations =>
       throw _privateConstructorUsedError;
 
@@ -43,7 +46,11 @@ abstract class $RecommendationResponseDtoCopyWith<$Res> {
     $Res Function(RecommendationResponseDto) then,
   ) = _$RecommendationResponseDtoCopyWithImpl<$Res, RecommendationResponseDto>;
   @useResult
-  $Res call({List<RecommendationItemDto> recommendations});
+  $Res call({
+    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    RecommendationStatus? status,
+    List<RecommendationItemDto> recommendations,
+  });
 }
 
 /// @nodoc
@@ -63,9 +70,13 @@ class _$RecommendationResponseDtoCopyWithImpl<
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? recommendations = null}) {
+  $Res call({Object? status = freezed, Object? recommendations = null}) {
     return _then(
       _value.copyWith(
+            status: freezed == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                      as RecommendationStatus?,
             recommendations: null == recommendations
                 ? _value.recommendations
                 : recommendations // ignore: cast_nullable_to_non_nullable
@@ -85,7 +96,11 @@ abstract class _$$RecommendationResponseDtoImplCopyWith<$Res>
   ) = __$$RecommendationResponseDtoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({List<RecommendationItemDto> recommendations});
+  $Res call({
+    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    RecommendationStatus? status,
+    List<RecommendationItemDto> recommendations,
+  });
 }
 
 /// @nodoc
@@ -105,9 +120,13 @@ class __$$RecommendationResponseDtoImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? recommendations = null}) {
+  $Res call({Object? status = freezed, Object? recommendations = null}) {
     return _then(
       _$RecommendationResponseDtoImpl(
+        status: freezed == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as RecommendationStatus?,
         recommendations: null == recommendations
             ? _value._recommendations
             : recommendations // ignore: cast_nullable_to_non_nullable
@@ -121,12 +140,17 @@ class __$$RecommendationResponseDtoImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$RecommendationResponseDtoImpl implements _RecommendationResponseDto {
   const _$RecommendationResponseDtoImpl({
+    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue) this.status,
     final List<RecommendationItemDto> recommendations = const [],
   }) : _recommendations = recommendations;
 
   factory _$RecommendationResponseDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$RecommendationResponseDtoImplFromJson(json);
 
+  // 모르는 상태값이 오면: 앱이 죽지 않고 null로 처리 (Repository에서 실패로 처리)
+  @override
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+  final RecommendationStatus? status;
   final List<RecommendationItemDto> _recommendations;
   @override
   @JsonKey()
@@ -138,7 +162,7 @@ class _$RecommendationResponseDtoImpl implements _RecommendationResponseDto {
 
   @override
   String toString() {
-    return 'RecommendationResponseDto(recommendations: $recommendations)';
+    return 'RecommendationResponseDto(status: $status, recommendations: $recommendations)';
   }
 
   @override
@@ -146,6 +170,7 @@ class _$RecommendationResponseDtoImpl implements _RecommendationResponseDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$RecommendationResponseDtoImpl &&
+            (identical(other.status, status) || other.status == status) &&
             const DeepCollectionEquality().equals(
               other._recommendations,
               _recommendations,
@@ -156,6 +181,7 @@ class _$RecommendationResponseDtoImpl implements _RecommendationResponseDto {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    status,
     const DeepCollectionEquality().hash(_recommendations),
   );
 
@@ -178,12 +204,18 @@ class _$RecommendationResponseDtoImpl implements _RecommendationResponseDto {
 
 abstract class _RecommendationResponseDto implements RecommendationResponseDto {
   const factory _RecommendationResponseDto({
+    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    final RecommendationStatus? status,
     final List<RecommendationItemDto> recommendations,
   }) = _$RecommendationResponseDtoImpl;
 
   factory _RecommendationResponseDto.fromJson(Map<String, dynamic> json) =
       _$RecommendationResponseDtoImpl.fromJson;
 
+  // 모르는 상태값이 오면: 앱이 죽지 않고 null로 처리 (Repository에서 실패로 처리)
+  @override
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+  RecommendationStatus? get status;
   @override
   List<RecommendationItemDto> get recommendations;
 
