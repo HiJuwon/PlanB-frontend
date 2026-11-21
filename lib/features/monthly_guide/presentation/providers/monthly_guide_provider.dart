@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
 import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
-import 'package:plan_b/features/monthly_guide/data/dummy/monthly_guide_dummy.dart';
+import 'package:plan_b/features/monthly_guide/data/repositories/monthly_guide_repository.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_guide.dart';
 import 'package:plan_b/features/monthly_guide/presentation/providers/guide_creator_provider.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
@@ -22,19 +22,15 @@ final selectedTravelGuideIdProvider = FutureProvider<int?>((ref) async {
 
 class MonthlyGuideNotifier
     extends AutoDisposeFamilyAsyncNotifier<MonthlyGuide, String> {
+  
   @override
   Future<MonthlyGuide> build(String planId) async {
-    // 가이드 id 확보 (없으면 생성)
-    // TODO: 조회 API 연동 시 반환값을 guideId로 받아서 사용
-    await _resolveGuideId(planId);
+    // 가이드 id 확보 (없으면 생성) 후 조회
+    final int guideId = await _resolveGuideId(planId);
 
-    // TODO: 서버 API 연동 (GET /api/v1/guides/$guideId 로 월별 가이드 조회)
-    await Future<void>.delayed(const Duration(milliseconds: 500)); // 임시: 서버 응답 대기 흉내
-    final MonthlyGuide? guide = dummyMonthlyGuideOf(planId);
-
-    // 없는 id를 다른 플랜으로 대체하지 않고 오류로 처리 (플래너와 동일)
-    if (guide == null) throw StateError('월별 가이드 데이터에 없는 플랜 id: $planId');
-    return guide;
+    return ref
+        .read(monthlyGuideRepositoryProvider)
+        .getGuide(guideId: guideId, planId: planId);
   }
 
   /// 가이드 id 확보: 홈 목록에 있으면 사용, 없으면(생성 실패 / 기존 플랜) 생성
