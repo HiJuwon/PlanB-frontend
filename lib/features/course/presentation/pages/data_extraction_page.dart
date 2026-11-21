@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
-import 'package:plan_b/features/course/data/dummy/daily_course_dummy.dart';
-import 'package:plan_b/features/course/data/models/daily_course.dart';
 import 'package:plan_b/features/course/data/models/extracted_course.dart';
 import 'package:plan_b/features/course/presentation/providers/extracted_course_provider.dart';
 import 'package:plan_b/features/course/presentation/providers/my_course_provider.dart';
@@ -35,18 +33,21 @@ class _DataExtractionPageState extends ConsumerState<DataExtractionPage> {
   final Set<String> _addingIds = {}; // 추가 요청 중인 코스
   final Set<String> _addedIds = {};  // 이미 추가한 코스
 
-  /// '+' 버튼: 내 플랜에 코스 추가 > 나의 여행 코스 갱신 > 토스트
+  /// '+' 버튼: 내 플랜에 코스 추가 요청 > 버튼 상태, 토스트 처리
+  /// (요청과 나의 여행 코스 갱신은 MyCourseNotifier가 처리: 화면을 닫아도 반영됨)
   Future<void> _addCourse(ExtractedCourse course) async {
     final String? planId = ref.read(selectedPlanIdProvider);
     if (planId == null) return;
 
+    // await 전에 notifier를 잡아둠 (화면이 닫힌 뒤에는 ref를 쓸 수 없음)
+    final MyCourseNotifier notifier =
+        ref.read(myCourseProvider(planId).notifier);
+
     setState(() => _addingIds.add(course.id));
     try {
-      final List<DailyCourse> updated = await _requestAddCourse(planId, course);
-      if (!mounted) return;
+      await notifier.addExtractedCourse(course);
+      if (!mounted) return; // 화면이 닫혔으면 토스트, 버튼 상태만 생략 (반영은 이미 완료)
 
-      // 뒤에 있는 나의 여행 코스 화면에 반영 (하이라이트 카드로 표시됨)
-      ref.read(myCourseProvider(planId).notifier).reflectExtracted(updated);
       setState(() => _addedIds.add(course.id));
       showToast(context, text: '코스를 내 플랜에 추가했어요');
     } catch (_) {
@@ -59,16 +60,6 @@ class _DataExtractionPageState extends ConsumerState<DataExtractionPage> {
     } finally {
       if (mounted) setState(() => _addingIds.remove(course.id));
     }
-  }
-
-  /// 코스 추가 요청 > 이동 거리 기준으로 반영된 일일 코스 목록 응답
-  // TODO: 서버 API 연동 (planId + 추출 코스 전송 > 새 일일 코스 / 기존 일일 코스에 추가 판단 결과 응답)
-  Future<List<DailyCourse>> _requestAddCourse(
-    String planId,
-    ExtractedCourse course,
-  ) async {
-    await Future<void>.delayed(const Duration(milliseconds: 300)); // 임시: 서버 응답 대기 흉내
-    return dummyDailyCoursesWithNewCourse; // 임시: '새 일일 코스로 추가됨' 결과
   }
 
   @override
