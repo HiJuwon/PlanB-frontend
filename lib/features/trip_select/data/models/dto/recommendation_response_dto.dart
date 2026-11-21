@@ -7,11 +7,20 @@ import 'package:plan_b/shared/models/destination.dart';
 part 'recommendation_response_dto.freezed.dart';
 part 'recommendation_response_dto.g.dart';
 
-/// POST /api/v1/plans/{planId}/recommendations/wallet, /goal 응답의 data
-/// (지갑 기준: RANK_1~3 / 목표 기준: LEVEL_HIGH, MEDIUM, LOW)
+/// 추천 생성 상태 (서버: PENDING / DONE / FAILED)
+@JsonEnum(fieldRename: FieldRename.screamingSnake)
+enum RecommendationStatus { pending, done, failed }
+
+/// POST/GET /api/v1/plans/{planId}/recommendations/wallet, /goal 응답의 data
+/// - status: PENDING(생성 중) / DONE(완료, recommendations 포함) / FAILED(생성 실패)
+/// - 지갑 기준: RANK_1~3 / 목표 기준: LEVEL_HIGH, MEDIUM, LOW
+/// - GET /recommendations/wallet/more(4~6순위)도 같은 구조
 @freezed
 class RecommendationResponseDto with _$RecommendationResponseDto {
   const factory RecommendationResponseDto({
+    // 모르는 상태값이 오면: 앱이 죽지 않고 null로 처리 (Repository에서 실패로 처리)
+    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    RecommendationStatus? status,
     @Default([]) List<RecommendationItemDto> recommendations,
   }) = _RecommendationResponseDto;
 

@@ -9,6 +9,11 @@ part of 'recommendation_response_dto.dart';
 _$RecommendationResponseDtoImpl _$$RecommendationResponseDtoImplFromJson(
   Map<String, dynamic> json,
 ) => _$RecommendationResponseDtoImpl(
+  status: $enumDecodeNullable(
+    _$RecommendationStatusEnumMap,
+    json['status'],
+    unknownValue: JsonKey.nullForUndefinedEnumValue,
+  ),
   recommendations:
       (json['recommendations'] as List<dynamic>?)
           ?.map(
@@ -20,7 +25,16 @@ _$RecommendationResponseDtoImpl _$$RecommendationResponseDtoImplFromJson(
 
 Map<String, dynamic> _$$RecommendationResponseDtoImplToJson(
   _$RecommendationResponseDtoImpl instance,
-) => <String, dynamic>{'recommendations': instance.recommendations};
+) => <String, dynamic>{
+  'status': _$RecommendationStatusEnumMap[instance.status],
+  'recommendations': instance.recommendations,
+};
+
+const _$RecommendationStatusEnumMap = {
+  RecommendationStatus.pending: 'PENDING',
+  RecommendationStatus.done: 'DONE',
+  RecommendationStatus.failed: 'FAILED',
+};
 
 _$RecommendationItemDtoImpl _$$RecommendationItemDtoImplFromJson(
   Map<String, dynamic> json,
