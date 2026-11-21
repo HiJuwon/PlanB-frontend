@@ -13,12 +13,14 @@ class LinkTextField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.hintText = 'https://...',
+    this.autofocus = false,
   });
 
   final TextEditingController? controller; // null이면 내부에서 만들어 사용
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted; // 키보드 완료 버튼을 누를 때
   final String hintText;
+  final bool autofocus;                    // true면 화면에 나타나자마자 입력 시작
 
   @override
   State<LinkTextField> createState() => _LinkTextFieldState();
@@ -98,6 +100,7 @@ class _LinkTextFieldState extends State<LinkTextField> {
                 TextField(
                   controller: _controller,
                   focusNode: _focusNode,
+                  autofocus: widget.autofocus,
                   maxLines: 1,
                   keyboardType: TextInputType.url,
                   textInputAction: TextInputAction.done,

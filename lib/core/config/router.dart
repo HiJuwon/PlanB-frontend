@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/config/shell/global_shell.dart';
 import 'package:plan_b/core/config/shell/local_shell.dart';
+import 'package:plan_b/features/course/presentation/pages/add_the_course_page.dart';
 import 'package:plan_b/features/course/presentation/pages/course_page.dart';
 import 'package:plan_b/features/login/presentation/login.dart';
 import 'package:plan_b/features/monthly_guide/presentation/monthly_guide_page.dart';
@@ -130,8 +131,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                             routes: [
                               GoRoute(
                                 path: AppPaths.courseAdd,
-                                builder: (context, state) =>
-                                    const TodoPage('코스 추가'),
+                                builder: (context, state) => const AddTheCoursePage(),
                                 routes: [
                                   GoRoute(
                                     path: AppPaths.courseExtraction,
