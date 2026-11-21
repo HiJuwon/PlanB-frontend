@@ -13,8 +13,10 @@ import 'package:plan_b/features/monthly_guide/data/models/monthly_guide.dart';
 import 'package:plan_b/features/monthly_guide/presentation/providers/monthly_guide_provider.dart';
 import 'package:plan_b/features/monthly_guide/presentation/widgets/btn_swap_guide_view.dart';
 import 'package:plan_b/features/monthly_guide/presentation/widgets/monthly_month_view.dart';
+import 'package:plan_b/features/monthly_guide/presentation/widgets/monthly_timeline_view.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
+import 'package:plan_b/shared/widgets/background/bg_bottom_anchored_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_top_ellipse.dart';
 import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
 import 'package:plan_b/shared/widgets/nav/top_app_bar.dart';
@@ -27,14 +29,37 @@ class MonthlyGuidePage extends ConsumerStatefulWidget {
 }
 
 class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
-  static const double _contentTopGap = 24;    // 상단바 ~ 요약 박스 간격
-  static const double _contentBottomGap = 24; // 마지막 콘텐츠 ~ 로컬 탭바 간격
-  static const double _swapButtonGap = 16;    // 보기 전환 버튼 ~ 로컬 탭바 간격
   static const double _horizontalPadding = 24;
+  static const double _contentBottomGap = 24; // 마지막 콘텐츠 ~ 로컬 탭바(또는 보기 전환 버튼) 간격
+  static const double _swapButtonGap = 16;    // 보기 전환 버튼 ~ 로컬 탭바 간격
+  static const double _swapButtonHeight = 44; // btn_swap_guide_view 높이
+
+  // 월별 보기
+  static const double _monthTopGap = 24;      // 상단바 ~ 요약 박스 간격
+  // 전체 타임라인 보기
+  static const double _timelineTopGap = 28;
+  static const double _timelineRightPadding = 32;
 
   GuideViewType _viewType = GuideViewType.monthlyGuide; // 현재 보기
 
   void _toggleView() => setState(() => _viewType = _viewType.toggled);
+
+  /// 보기별 콘텐츠 여백
+  EdgeInsets _contentPadding(EdgeInsets inset) => switch (_viewType) {
+        GuideViewType.monthlyGuide => EdgeInsets.fromLTRB(
+            _horizontalPadding,
+            _monthTopGap,
+            _horizontalPadding,
+            inset.bottom + _contentBottomGap,
+          ),
+        // 마지막 기간이 보기 전환 버튼에 가리지 않도록 버튼 높이만큼 더 띄움
+        GuideViewType.timeline => EdgeInsets.fromLTRB(
+            _horizontalPadding,
+            _timelineTopGap,
+            _timelineRightPadding,
+            inset.bottom + _swapButtonGap + _swapButtonHeight + _contentBottomGap,
+          ),
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +68,10 @@ class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
 
     // 보기를 전환해도 월별 가이드 상태(완료 체크)가 유지되도록 페이지가 provider를 계속 구독
     // - 보기 전환 중: 페이지가 구독 중이라 폐기되지 않음
-    // - 플랜 화면(로컬 Shell)을 벗어나면: 구독이 끊겨 autoDispose로 폐기 → 다시 들어오면 새로 조회
+    // - 플랜 화면(로컬 Shell)을 벗어나면: 구독이 끊겨 autoDispose로 폐기 > 다시 들어오면 새로 조회
     // - listen이라 데이터가 바뀌어도 페이지 전체가 다시 그려지지는 않음
     if (planId != null) {
-      ref.listen(monthlyGuideProvider(planId), (_, _){});
+      ref.listen(monthlyGuideProvider(planId), (_, _) {});
     }
 
     return Scaffold(
@@ -65,8 +90,12 @@ class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
           return Stack(
             fit: StackFit.expand,
             children: [
-              const BgTopEllipse(),
-              const BgBottomEllipse(),
+              // 배경: 월별 보기는 위+아래 ellipse, 전체 타임라인은 하단에 붙은 ellipse 하나만 표시.
+              if (_viewType == GuideViewType.monthlyGuide) ...[
+                const BgTopEllipse(),
+                const BgBottomEllipse(),
+              ] else
+                const BgBottomAnchoredEllipse(),
 
               // 콘텐츠: 상단바 아래에서 시작, 스크롤하면 상단바 경계에서 잘림 / 로컬 탭바 뒤로는 지나감
               Positioned(
@@ -75,16 +104,13 @@ class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
                 right: 0,
                 bottom: 0,
                 child: SingleChildScrollView(
+                  // 보기마다 스크롤 위치를 따로 (전환하면 각 보기의 처음 위치에서 시작)
+                  key: ValueKey(_viewType),
                   clipBehavior: Clip.hardEdge,
-                  padding: EdgeInsets.fromLTRB(
-                    _horizontalPadding,
-                    _contentTopGap,
-                    _horizontalPadding,
-                    inset.bottom + _contentBottomGap,
-                  ),
+                  padding: _contentPadding(inset),
                   child: planId == null
                       ? const SizedBox.shrink()
-                      : _buildContent(planId),
+                      : _GuideContent(planId: planId, viewType: _viewType),
                 ),
               ),
 
@@ -103,48 +129,37 @@ class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
       ),
     );
   }
-
-  Widget _buildContent(String planId) {
-    return switch (_viewType) {
-      GuideViewType.monthlyGuide => _MonthlyGuideContent(planId: planId),
-      GuideViewType.timeline => const _TimelinePlaceholder(),
-    };
-  }
 }
 
-/// 월별 가이드 데이터 조회 + 월별 보기
-class _MonthlyGuideContent extends ConsumerWidget {
-  const _MonthlyGuideContent({required this.planId});
+/// 월별 가이드 데이터 조회 + 현재 보기(월별 / 전체 타임라인)
+class _GuideContent extends ConsumerWidget {
+  const _GuideContent({required this.planId, required this.viewType});
 
   final String planId;
+  final GuideViewType viewType;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<MonthlyGuide> asyncGuide =
         ref.watch(monthlyGuideProvider(planId));
 
+    void toggleTodo(String todoId) =>
+        ref.read(monthlyGuideProvider(planId).notifier).toggleTodo(todoId);
+
     return asyncGuide.when(
       loading: () => const ShowGlobalLoading(),
       error: (_, _) => const _MessageText('월별 여행 준비 가이드를 불러오지 못했어요.'),
-      data: (guide) => MonthlyMonthView(
-        guide: guide,
-        onTodoToggled: (todoId) =>
-            ref.read(monthlyGuideProvider(planId).notifier).toggleTodo(todoId),
-      ),
+      data: (guide) => switch (viewType) {
+        GuideViewType.monthlyGuide =>
+          MonthlyMonthView(guide: guide, onTodoToggled: toggleTodo),
+        GuideViewType.timeline =>
+          MonthlyTimelineView(guide: guide, onTodoToggled: toggleTodo),
+      },
     );
   }
 }
 
-/// 전체 타임라인 보기 자리 (임시)
-class _TimelinePlaceholder extends StatelessWidget {
-  const _TimelinePlaceholder();
-
-  @override
-  Widget build(BuildContext context) =>
-      const _MessageText('전체 타임라인');
-}
-
-/// 오류 및 임시 안내 문구 (플래너 및 코스 페이지와 같은 스타일)
+/// 오류 안내 문구
 class _MessageText extends StatelessWidget {
   const _MessageText(this.message);
 

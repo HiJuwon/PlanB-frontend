@@ -24,9 +24,8 @@ class MonthlyGuideNotifier
     final MonthlyGuide? guide = state.valueOrNull;
     if (guide == null) return;
 
-    state = AsyncData(
-      guide.copyWith(currentPeriod: guide.currentPeriod.toggleTodo(todoId)),
-    );
+    // 월별 / 타임라인 어느 보기에서 체크해도 같은 할 일이 바뀌도록 전체 기간에서 찾음
+    state = AsyncData(guide.toggleTodo(todoId));
   }
 }
 

@@ -52,13 +52,18 @@ class MonthlyGuide {
     required this.planId,
     required this.daysLeft,
     required this.totalBudget,
-    required this.currentPeriod,
+    required this.periods,
+    required this.currentIndex,
   });
 
   final String planId;
   final int daysLeft;      // 여행 시작일까지 남은 일수
   final int totalBudget;   // 목표 총 예산 (원)
-  final MonthlyGuidePeriod currentPeriod; // 오늘이 속한 기간
+  final List<MonthlyGuidePeriod> periods; // 확정일 ~ 출발 전날까지 전체 기간 (시간순)
+  final int currentIndex;  // periods 중 오늘이 속한 기간의 위치
+
+  /// 오늘이 속한 기간 (월별 보기 카드)
+  MonthlyGuidePeriod get currentPeriod => periods[currentIndex];
 
   /// 여행까지 남은 기간: D-n / D-Day / D+n
   String get dDayLabel {
@@ -70,10 +75,12 @@ class MonthlyGuide {
   /// 목표 총 예산
   String get totalBudgetLabel => '약 ${(totalBudget / 10000).round()}만원';
 
-  MonthlyGuide copyWith({MonthlyGuidePeriod? currentPeriod}) => MonthlyGuide(
+  /// id가 같은 할 일의 완료 여부를 뒤집은 새 가이드 (할 일 id는 전체 기간에서 고유)
+  MonthlyGuide toggleTodo(String todoId) => MonthlyGuide(
         planId: planId,
         daysLeft: daysLeft,
         totalBudget: totalBudget,
-        currentPeriod: currentPeriod ?? this.currentPeriod,
+        periods: [for (final period in periods) period.toggleTodo(todoId)],
+        currentIndex: currentIndex,
       );
 }
