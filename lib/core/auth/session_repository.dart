@@ -13,9 +13,13 @@ class SessionRepository {
   Future<void> logout() => _dio.post('/api/v1/auth/logout');
 
   /// 회원탈퇴 (응답 본문 없음, 실패 시 ApiException)
+  /// 서버가 계정을 삭제한 뒤 늦게 응답해도 실패로 처리하지 않도록, 이 요청만 수신 시간 제한 해제했음.
   Future<void> withdraw() {
     return apiRequest<void>(
-      () => _dio.post('/api/v1/auth/withdraw'),
+      () => _dio.post(
+        '/api/v1/auth/withdraw',
+        options: Options(receiveTimeout: Duration.zero), // 제한 없음
+      ),
       (_) {},
     );
   }
