@@ -8,6 +8,7 @@ import 'package:plan_b/features/course/data/models/dto/course_list_response_dto.
 import 'package:plan_b/features/course/data/models/extracted_course.dart';
 import 'package:plan_b/features/course/data/models/dto/link_extract_request_dto.dart';
 import 'package:plan_b/features/course/data/models/dto/link_extract_response_dto.dart';
+import 'package:plan_b/features/course/data/models/dto/link_course_save_request_dto.dart';
 
 class CourseRepository {
   CourseRepository(this._dio);
@@ -50,6 +51,25 @@ class CourseRepository {
       if (e.code == _noCourseFoundCode) return const [];
       rethrow;
     }
+  }
+
+  /// 링크에서 고른 코스 후보를 나의 여행 코스로 추가
+  /// 응답 data가 없으므로 성공 여부만 확인 (실패하면 ApiException)
+  Future<void> addLinkedCourses(
+    int confirmedPlanId, {
+    required String extractId,
+    required List<int> indexes,
+  }) {
+    return apiRequest(
+      () => _dio.post(
+        '/api/v1/plans/confirm/$confirmedPlanId/courses',
+        data: LinkCourseSaveRequestDto(
+          extractId: extractId,
+          indexes: indexes,
+        ).toJson(),
+      ),
+      (_) {},
+    );
   }
 }
 
