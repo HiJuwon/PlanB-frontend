@@ -1,5 +1,6 @@
 // 여행 고르기 -> 여행 플랜 세팅 완료 페이지
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_select/data/repositories/trip_select_repository.dart';
+import 'package:plan_b/features/monthly_guide/presentation/providers/guide_creator_provider.dart';
 
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/shared/widgets/app_page.dart';
@@ -36,6 +38,9 @@ class _TripSelectCompletedPageState
   static const Duration _minLoadingDuration = Duration(seconds: 2);
 
   static const Duration _switchDuration = Duration(milliseconds: 300); // 세팅중 -> 완료 전환 모션
+
+  // 가이드 생성 응답을 기다리는 최대 시간 (넘으면 홈 이동, 요청은 계속 진행)
+  static const Duration _guideWaitLimit = Duration(seconds: 5); // 5초로 제한함
 
   bool _isLoaded = false; // 서버 응답 완료: 링을 끝까지 채우기 시작
   bool _isDone = false;   // 링이 다 채워짐: 완료 상태
@@ -67,7 +72,7 @@ class _TripSelectCompletedPageState
     }
   }
 
-  /// 선택한 추천 계획 확정 (실패하면 예외를 던져서 _runSetup이 토스트 + pop 처리)
+  /// 선택한 추천 계획 확정 + 월별 가이드 생성
   Future<void> _requestPlanSetup(String? recommendationId) async {
     // 요청 중 이 페이지가 사라져도 (ex. 인증 만료로 redirect 등) 홈 목록을 갱신할 수 있도록
     // 위젯 ref 대신 앱 전체 ProviderContainer를 미리 잡아 둠
@@ -79,12 +84,26 @@ class _TripSelectCompletedPageState
       throw StateError('확정할 플랜 정보가 없음 (planId: $planId, recommendationId: $recommendationId)');
     }
 
-    await ref.read(tripSelectRepositoryProvider).confirmPlan(
+    final int confirmedPlanId = await ref.read(tripSelectRepositoryProvider).confirmPlan(
           planId: planId,
           recommendationId: recId,
         );
 
-    // 홈 '나의 여행 플랜' 목록에 새 플랜이 보이도록 다시 조회
+    // 월별 가이드 생성
+    // - 실패해도 세팅 실패로 처리하지 않음 (pop하면 confirm이 중복으로 나감)
+    // - 실패한 플랜은 월별 가이드 탭 진입 시 다시 생성
+    try {
+      await container
+          .read(guideCreatorProvider)
+          .ensureGuide(confirmedPlanId)
+          .timeout(_guideWaitLimit);
+    } on TimeoutException {
+      debugPrint('월별 가이드 생성 응답 지연: 홈으로 이동 (요청은 계속 진행)');
+    } catch (e) {
+      debugPrint('월별 가이드 생성 실패 (가이드 탭 진입 시 재시도): $e');
+    }
+
+    // 홈 '나의 여행 플랜' 목록에 새 플랜과 travelGuideId가 보이도록 다시 조회
     container.invalidate(homePlansProvider);
   }
 
