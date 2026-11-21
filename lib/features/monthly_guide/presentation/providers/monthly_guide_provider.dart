@@ -22,15 +22,18 @@ final selectedTravelGuideIdProvider = FutureProvider<int?>((ref) async {
 
 class MonthlyGuideNotifier
     extends AutoDisposeFamilyAsyncNotifier<MonthlyGuide, String> {
-  
+  DateTime? _fetchedDate; // 마지막으로 조회한 날짜
+
   @override
   Future<MonthlyGuide> build(String planId) async {
     // 가이드 id 확보 (없으면 생성) 후 조회
     final int guideId = await _resolveGuideId(planId);
 
-    return ref
+    final MonthlyGuide guide = await ref
         .read(monthlyGuideRepositoryProvider)
         .getGuide(guideId: guideId, planId: planId);
+    _fetchedDate = _today();
+    return guide;
   }
 
   /// 가이드 id 확보: 홈 목록에 있으면 사용, 없으면(생성 실패 / 기존 플랜) 생성
@@ -64,6 +67,19 @@ class MonthlyGuideNotifier
 
     // 월별 / 타임라인 어느 보기에서 체크해도 같은 할 일이 바뀌도록 전체 기간에서 찾음
     state = AsyncData(guide.toggleTodo(todoId));
+  }
+
+  /// 마지막 조회 이후 날짜가 바뀌었으면 다시 조회 (D-day, 이번 기간이 바뀌었을 수 있음)
+  void refreshIfDayChanged() {
+    final DateTime? fetched = _fetchedDate;
+    if (fetched == null || fetched == _today()) return;
+    ref.invalidateSelf();
+  }
+
+  /// 시간을 버린 오늘 날짜
+  static DateTime _today() {
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
   }
 }
 

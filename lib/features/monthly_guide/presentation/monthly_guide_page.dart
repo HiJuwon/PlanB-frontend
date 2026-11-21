@@ -42,6 +42,27 @@ class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
 
   GuideViewType _viewType = GuideViewType.monthlyGuide; // 현재 보기
 
+  // 앱이 다시 열렸을 때 날짜가 바뀌었으면 가이드 다시 조회
+  late final AppLifecycleListener _lifecycleListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycleListener = AppLifecycleListener(onResume: _refreshIfDayChanged);
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    super.dispose();
+  }
+
+  void _refreshIfDayChanged() {
+    final String? planId = ref.read(selectedPlanIdProvider);
+    if (planId == null) return;
+    ref.read(monthlyGuideProvider(planId).notifier).refreshIfDayChanged();
+  }
+
   void _toggleView() => setState(() => _viewType = _viewType.toggled);
 
   /// 보기별 콘텐츠 여백
