@@ -20,12 +20,28 @@ class MyCourseNotifier
   }
 
   /// 추출된 코스를 내 플랜에 추가 (코스 정보 추출 화면의 '+' 버튼)
-  /// TODO: 코스 추가 API(POST /api/v1/plans/confirm/{confirmedPlanId}/courses) 연동
-  ///  - 추출 API 연동 후 course.extractId / course.index로 요청
-  ///  - 성공하면 나의 여행 코스를 다시 조회해서 state 갱신
-  /// 연동 전에는 조회한 목록(state)을 건드리지 않고 실패로 처리 (화면에서 실패 토스트)
   Future<void> addExtractedCourse(ExtractedCourse course) async {
-    throw UnimplementedError('코스 추가 API 연동 전');
+    final int? confirmedPlanId = int.tryParse(arg);
+    if (confirmedPlanId == null) throw StateError('확정된 플랜 id가 아님: $arg');
+
+    // 요청하는 동안에는 구독하는 화면이 없어져도 provider가 정리되지 않도록 유지
+    final KeepAliveLink keepAlive = ref.keepAlive();
+    try {
+      final CourseRepository repository = ref.read(courseRepositoryProvider);
+
+      await repository.addLinkedCourses(
+        confirmedPlanId,
+        extractId: course.extractId,
+        indexes: [course.index],
+      );
+
+      // 추가 성공 > 서버에 반영된 실제 목록으로 갱신
+      final List<DailyCourse> updated =
+          await repository.getMyCourses(confirmedPlanId);
+      state = AsyncData(_sortByCost(updated));
+    } finally {
+      keepAlive.close();
+    }
   }
 
   /// 일일 코스 정렬: 예상 비용이 낮은 순서
