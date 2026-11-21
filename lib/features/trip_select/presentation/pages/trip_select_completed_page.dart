@@ -1,5 +1,6 @@
 // 여행 고르기 -> 여행 플랜 세팅 완료 페이지
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +38,9 @@ class _TripSelectCompletedPageState
   static const Duration _minLoadingDuration = Duration(seconds: 2);
 
   static const Duration _switchDuration = Duration(milliseconds: 300); // 세팅중 -> 완료 전환 모션
+
+  // 가이드 생성 응답을 기다리는 최대 시간 (넘으면 홈 이동, 요청은 계속 진행)
+  static const Duration _guideWaitLimit = Duration(seconds: 5); // 5초로 제한함
 
   bool _isLoaded = false; // 서버 응답 완료: 링을 끝까지 채우기 시작
   bool _isDone = false;   // 링이 다 채워짐: 완료 상태
@@ -89,7 +93,12 @@ class _TripSelectCompletedPageState
     // - 실패해도 세팅 실패로 처리하지 않음 (pop하면 confirm이 중복으로 나감)
     // - 실패한 플랜은 월별 가이드 탭 진입 시 다시 생성
     try {
-      await container.read(guideCreatorProvider).ensureGuide(confirmedPlanId);
+      await container
+          .read(guideCreatorProvider)
+          .ensureGuide(confirmedPlanId)
+          .timeout(_guideWaitLimit);
+    } on TimeoutException {
+      debugPrint('월별 가이드 생성 응답 지연: 홈으로 이동 (요청은 계속 진행)');
     } catch (e) {
       debugPrint('월별 가이드 생성 실패 (가이드 탭 진입 시 재시도): $e');
     }
