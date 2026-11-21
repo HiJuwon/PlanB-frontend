@@ -41,11 +41,28 @@ class LoginController {
   /// 로그아웃: 소셜 SDK 로그아웃(실패해도 무시) > PlanB 로그아웃
   /// 어떤 방식으로 로그인했는지 저장하지 않으므로 둘 다 시도.
   Future<void> logout() async {
-    await Future.wait([
-      _ref.read(kakaoLoginServiceProvider).logout().catchError((_) {}),
-      _ref.read(googleLoginServiceProvider).logout().catchError((_) {}),
-    ]);
+    await _logoutSocialSdks();
     await _ref.read(authProvider.notifier).logout();
+  }
+
+  /// 회원탈퇴: PlanB 서버 탈퇴 -> (성공 시) 소셜 SDK 로그아웃(실패해도 무시)
+  Future<void> withdraw() async {
+    await _ref.read(authProvider.notifier).withdraw();
+    await _logoutSocialSdks();
+  }
+
+  /// 카카오/구글 SDK 로그아웃. 로그인하지 않은 쪽은 에러가 나므로 무시
+  Future<void> _logoutSocialSdks() async {
+    await Future.wait([
+      _ignoreError(() => _ref.read(kakaoLoginServiceProvider).logout()),
+      _ignoreError(() => _ref.read(googleLoginServiceProvider).logout()),
+    ]);
+  }
+
+  static Future<void> _ignoreError(Future<void> Function() task) async {
+    try {
+      await task();
+    } catch (_) {}
   }
 }
 

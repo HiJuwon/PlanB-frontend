@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:plan_b/core/storage/token_storage.dart';
 
 class AuthInterceptor extends QueuedInterceptor { // Interceptor → QueuedInterceptor (함정 2)
@@ -48,13 +49,18 @@ class AuthInterceptor extends QueuedInterceptor { // Interceptor → QueuedInter
         case _ReissueSuccess(:final token):
           newToken = token;
 
-        // 리프레시 토큰이 없거나 서버가 무효라고 응답 → 토큰 삭제 후 로그아웃
+        // 리프레시 토큰이 없거나 서버가 무효라고 응답 -> 토큰 삭제 후 로그아웃
+        // 삭제가 실패해도 세션 만료 처리와 에러 전달은 반드시 진행 (handler를 호출하지 않으면 요청이 멈춤)
         case _ReissueInvalid():
-          await storage.clear();
+          try {
+            await storage.clear();
+          } catch (e) {
+            debugPrint('세션 만료 후 토큰 삭제 실패: $e');
+          }
           onSessionExpired?.call();
           return handler.next(err);
 
-        // 일시적인 실패(타임아웃, 네트워크 끊김, 5xx 등) → 토큰은 그대로 두고 에러만 전달
+        // 일시적인 실패(타임아웃, 네트워크 끊김, 5xx 등) -> 토큰은 그대로 두고 에러만 전달
         // 다음 요청에서 401이 나면 다시 재발급을 시도할 수 있음
         case _ReissueTransientFailure():
           return handler.next(err);
