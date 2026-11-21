@@ -10,7 +10,9 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/config/shell/global_shell.dart';
 import 'package:plan_b/core/config/shell/local_shell.dart';
+import 'package:plan_b/features/course/presentation/pages/add_the_course_page.dart';
 import 'package:plan_b/features/course/presentation/pages/course_page.dart';
+import 'package:plan_b/features/course/presentation/pages/data_extraction_page.dart';
 import 'package:plan_b/features/login/presentation/login.dart';
 import 'package:plan_b/features/monthly_guide/presentation/monthly_guide_page.dart';
 import 'package:plan_b/features/my_page/presentation/my_page.dart';
@@ -19,7 +21,6 @@ import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 
 import 'package:plan_b/features/home/presentation/home_page.dart';
 import 'package:plan_b/core/config/pages/not_found_page.dart';
-import 'package:plan_b/core/config/pages/todo_page.dart';
 import 'package:plan_b/features/trip_check/presentation/pages/budget_first/budget_first_basic_info_page.dart';
 import 'package:plan_b/features/trip_check/presentation/pages/budget_first/budget_first_budget_page.dart';
 import 'package:plan_b/features/trip_check/presentation/pages/budget_first/budget_first_details_page.dart';
@@ -130,13 +131,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                             routes: [
                               GoRoute(
                                 path: AppPaths.courseAdd,
-                                builder: (context, state) =>
-                                    const TodoPage('코스 추가'),
+                                builder: (context, state) => const AddTheCoursePage(),
                                 routes: [
                                   GoRoute(
                                     path: AppPaths.courseExtraction,
-                                    builder: (context, state) =>
-                                        const TodoPage('코스 정보 추출'),
+                                    builder: (context, state) => DataExtractionPage(
+                                      links: state.extra is List<String> ? state.extra! as List<String> : const [],
+                                    ),
                                   ),
                                 ],
                               ),

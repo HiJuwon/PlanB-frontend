@@ -1,0 +1,24 @@
+import 'package:plan_b/features/course/data/models/course_category.dart';
+
+/// 웹 링크에서 추출한 코스 정보
+/// TODO: API 스펙 확정 전이라 UI 기준으로만 구조화함 (스웨거 확인 후 DTO 매핑 추가 예정)
+class ExtractedCourse {
+  const ExtractedCourse({
+    required this.id,
+    required this.category,
+    required this.title,
+    required this.caption,
+    required this.sourceUrl,
+    required this.estimatedCost,
+  });
+
+  final String id;
+  final CourseCategory category;
+  final String title;
+  final String caption;
+  final String sourceUrl;
+  final int estimatedCost;
+
+  /// 카드 하단 예상 비용 문구
+  String get budgetLabel => '예상 비용 약 ${(estimatedCost / 10000).round()}만원';
+}
