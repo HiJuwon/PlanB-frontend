@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
 import 'package:plan_b/features/trip_select/data/repositories/trip_select_repository.dart';
-import 'package:plan_b/features/monthly_guide/data/repositories/monthly_guide_repository.dart';
+import 'package:plan_b/features/monthly_guide/presentation/providers/guide_creator_provider.dart';
 
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/shared/widgets/app_page.dart';
@@ -68,7 +68,7 @@ class _TripSelectCompletedPageState
     }
   }
 
-  /// 선택한 추천 계획 확정 (실패하면 예외를 던져서 _runSetup이 토스트 + pop 처리)
+  /// 선택한 추천 계획 확정 + 월별 가이드 생성
   Future<void> _requestPlanSetup(String? recommendationId) async {
     // 요청 중 이 페이지가 사라져도 (ex. 인증 만료로 redirect 등) 홈 목록을 갱신할 수 있도록
     // 위젯 ref 대신 앱 전체 ProviderContainer를 미리 잡아 둠
@@ -80,22 +80,21 @@ class _TripSelectCompletedPageState
       throw StateError('확정할 플랜 정보가 없음 (planId: $planId, recommendationId: $recommendationId)');
     }
 
-    // 반환값(confirmedPlanId)을 받아서 가이드 생성에 사용
     final int confirmedPlanId = await ref.read(tripSelectRepositoryProvider).confirmPlan(
           planId: planId,
           recommendationId: recId,
         );
 
     // 월별 가이드 생성
-    // - 실패해도 플랜은 이미 확정됐으므로 세팅 성공으로 처리 (월별 가이드 탭 진입 시 다시 생성)
-    // - await 이후라 페이지가 사라졌을 수 있으므로 ref 대신 container 사용
+    // - 실패해도 세팅 실패로 처리하지 않음 (pop하면 confirm이 중복으로 나감)
+    // - 실패한 플랜은 월별 가이드 탭 진입 시 다시 생성
     try {
-      await container.read(monthlyGuideRepositoryProvider).createGuide(confirmedPlanId);
+      await container.read(guideCreatorProvider).ensureGuide(confirmedPlanId);
     } catch (e) {
       debugPrint('월별 가이드 생성 실패 (가이드 탭 진입 시 재시도): $e');
     }
 
-    // 가이드 생성 후 목록을 다시 조회해야 새 플랜의 travelGuideId까지 받아옴
+    // 홈 '나의 여행 플랜' 목록에 새 플랜과 travelGuideId가 보이도록 다시 조회
     container.invalidate(homePlansProvider);
   }
 
