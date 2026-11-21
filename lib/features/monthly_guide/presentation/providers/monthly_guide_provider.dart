@@ -26,8 +26,17 @@ class MonthlyGuideNotifier
     extends AutoDisposeFamilyAsyncNotifier<MonthlyGuide, String> {
   DateTime? _fetchedDate; // 마지막으로 조회한 날짜
 
+  /// 요청 중인 할 일 id (같은 항목을 연달아 눌러 요청이 겹치지 않도록)
+  final Set<String> _pendingTodoIds = {};
+
+  /// build가 다시 실행되거나 폐기될 때마다 바뀌는 값
+  /// (요청 중에 새로 조회했다면 실패해도 되돌리지 않기 위해)
+  int _generation = 0;
+
   @override
   Future<MonthlyGuide> build(String planId) async {
+    ref.onDispose(() => _generation++); // 다시 조회 / 폐기 시 이전 요청의 되돌리기 무효화
+
     // 가이드 id 확보 (없으면 생성)
     final int guideId = await _resolveGuideId(planId);
     final MonthlyGuideRepository repository = ref.read(monthlyGuideRepositoryProvider);
@@ -84,13 +93,32 @@ class MonthlyGuideNotifier
   }
 
   /// 할 일 완료 체크 토글
-  // TODO: 서버 API 연동 (완료 상태 저장 후 갱신된 가이드 응답)
-  void toggleTodo(String todoId) {
+  /// - 화면을 먼저 바꾸고 서버에 저장. 실패하면 이 항목만 되돌린 뒤 예외를 다시 던짐 (페이지에서 토스트)
+  Future<void> toggleTodo(String todoId) async {
     final MonthlyGuide? guide = state.valueOrNull;
-    if (guide == null) return;
+    if (guide == null || _pendingTodoIds.contains(todoId)) return;
 
     // 월별 / 타임라인 어느 보기에서 체크해도 같은 할 일이 바뀌도록 전체 기간에서 찾음
     state = AsyncData(guide.toggleTodo(todoId));
+
+    final int? todoPeriodId = todoPeriodIdOf(todoId);
+    if (todoPeriodId == null) return; // TODO: 저축 체크 API 연동 (PATCH /guides/savings/{savingId})
+
+    final int generation = _generation;
+    _pendingTodoIds.add(todoId);
+    try {
+      await ref.read(monthlyGuideRepositoryProvider).toggleTodo(todoPeriodId);
+    } catch (_) {
+      // 그 사이 다른 항목이 바뀌었을 수 있어 스냅샷 대신 이 항목만 다시 뒤집음
+      // 요청 중에 새로 조회했거나 화면을 나갔다면 서버 값이 기준이므로 되돌리지 않음
+      final MonthlyGuide? current = state.valueOrNull;
+      if (generation == _generation && current != null) {
+        state = AsyncData(current.toggleTodo(todoId));
+      }
+      rethrow;
+    } finally {
+      _pendingTodoIds.remove(todoId);
+    }
   }
 
   /// 마지막 조회 이후 날짜가 바뀌었으면 다시 조회 (D-day, 이번 기간이 바뀌었을 수 있음)

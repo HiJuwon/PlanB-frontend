@@ -81,6 +81,16 @@ class AllTimelineGuideResponseDto with _$AllTimelineGuideResponseDto {
       _$AllTimelineGuideResponseDtoFromJson(json);
 }
 
+/// 화면 모델 할 일 id <-> 서버 todoPeriodId
+const String _todoIdPrefix = 'todo-';
+
+String todoIdOf(int todoPeriodId) => '$_todoIdPrefix$todoPeriodId';
+
+/// 준비 항목 id가 아니면(저축 목표 등) null
+int? todoPeriodIdOf(String todoId) => todoId.startsWith(_todoIdPrefix)
+    ? int.tryParse(todoId.substring(_todoIdPrefix.length))
+    : null;
+
 // 서버 -> UI 모양 변환
 
 extension TravelGuideResponseDtoMapper on TravelGuideResponseDto {
@@ -168,8 +178,7 @@ extension TravelGuidePeriodDtoMapper on TravelGuidePeriodDto {
 
 extension TravelGuideTodoDtoMapper on TravelGuideTodoDto {
   MonthlyTodo toMonthlyTodo() => MonthlyTodo(
-        // 저축 id와 겹치지 않도록 접두어를 붙임 (toggleTodo가 전체에서 id로 찾음)
-        id: 'todo-$todoPeriodId',
+        id: todoIdOf(todoPeriodId),
         type: MonthlyTodoType.reservation,
         title: _title(),
         caption: cost == null ? null : '약 ${_man(cost)}만원 내외',
