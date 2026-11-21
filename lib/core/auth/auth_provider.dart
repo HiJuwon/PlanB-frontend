@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:plan_b/core/auth/session_repository.dart';
 import 'package:plan_b/core/storage/token_storage.dart';
@@ -43,15 +44,24 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (_) {
       // 서버 요청이 실패해도 앱에서는 로그아웃 처리 (TimeoutException 포함)
     }
-    await ref.read(tokenStorageProvider).clear();
-    state = const AuthState(isLoggedIn: false);
+    await _endSession();
   }
 
   /// 회원탈퇴: 서버 탈퇴 성공 시에만 토큰 삭제 -> 로그아웃 상태로 변경
   /// 실패하면 ApiException을 그대로 던짐 (로그인 상태 유지.)
   Future<void> withdraw() async {
     await ref.read(sessionRepositoryProvider).withdraw();
-    await ref.read(tokenStorageProvider).clear(); // 토큰 + 로컬 프로필(deleteAll)
+    await _endSession();
+  }
+
+  /// 토큰 + 로컬 프로필 삭제(deleteAll) 후 로그아웃 상태로 변경
+  /// 저장소 삭제가 실패해도 로그아웃 상태로는 반드시 바꾸고, 예외는 호출자에게 넘기지 않음 (서버 작업은 이미 끝났으므로 호출자가 실패로 처리하면 안 됨)
+  Future<void> _endSession() async {
+    try {
+      await ref.read(tokenStorageProvider).clear();
+    } catch (e) {
+      debugPrint('로컬 세션 삭제 실패: $e');
+    }
     state = const AuthState(isLoggedIn: false);
   }
 
