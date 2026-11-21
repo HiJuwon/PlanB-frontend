@@ -5,14 +5,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plan_b/features/course/data/dummy/daily_course_dummy.dart';
 import 'package:plan_b/features/course/data/models/daily_course.dart';
 import 'package:plan_b/features/course/data/models/extracted_course.dart';
+import 'package:plan_b/features/course/data/repositories/course_repository.dart';
 
 class MyCourseNotifier
     extends AutoDisposeFamilyAsyncNotifier<List<DailyCourse>, String> {
   @override
   Future<List<DailyCourse>> build(String planId) async {
-    // TODO: 서버 API 연동 (planId로 일일 코스 목록 조회)
-    await Future<void>.delayed(const Duration(milliseconds: 500)); // 임시: 서버 응답 대기 흉내
-    return _sortByCost(dummyDailyCourses);
+    final int? confirmedPlanId = int.tryParse(planId);
+    // 숫자가 아니면 조회할 수 없으므로 오류로 처리 (페이지 에러 UI)
+    if (confirmedPlanId == null) throw StateError('확정된 플랜 id가 아님: $planId');
+
+    final List<DailyCourse> courses =
+        await ref.read(courseRepositoryProvider).getMyCourses(confirmedPlanId);
+    return _sortByCost(courses);
   }
 
   /// 추출된 코스를 내 플랜에 추가 (코스 정보 추출 화면의 '+' 버튼)
