@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
 import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
-import 'package:plan_b/features/monthly_guide/data/dummy/monthly_guide_dummy.dart';
+import 'package:plan_b/features/monthly_guide/data/repositories/monthly_guide_repository.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_guide.dart';
 import 'package:plan_b/features/monthly_guide/presentation/providers/guide_creator_provider.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
@@ -22,18 +22,17 @@ final selectedTravelGuideIdProvider = FutureProvider<int?>((ref) async {
 
 class MonthlyGuideNotifier
     extends AutoDisposeFamilyAsyncNotifier<MonthlyGuide, String> {
+  DateTime? _fetchedDate; // 마지막으로 조회한 날짜
+
   @override
   Future<MonthlyGuide> build(String planId) async {
-    // 가이드 id 확보 (없으면 생성)
-    // TODO: 조회 API 연동 시 반환값을 guideId로 받아서 사용
-    await _resolveGuideId(planId);
+    // 가이드 id 확보 (없으면 생성) 후 조회
+    final int guideId = await _resolveGuideId(planId);
 
-    // TODO: 서버 API 연동 (GET /api/v1/guides/$guideId 로 월별 가이드 조회)
-    await Future<void>.delayed(const Duration(milliseconds: 500)); // 임시: 서버 응답 대기 흉내
-    final MonthlyGuide? guide = dummyMonthlyGuideOf(planId);
-
-    // 없는 id를 다른 플랜으로 대체하지 않고 오류로 처리 (플래너와 동일)
-    if (guide == null) throw StateError('월별 가이드 데이터에 없는 플랜 id: $planId');
+    final MonthlyGuide guide = await ref
+        .read(monthlyGuideRepositoryProvider)
+        .getGuide(guideId: guideId, planId: planId);
+    _fetchedDate = _today();
     return guide;
   }
 
@@ -68,6 +67,19 @@ class MonthlyGuideNotifier
 
     // 월별 / 타임라인 어느 보기에서 체크해도 같은 할 일이 바뀌도록 전체 기간에서 찾음
     state = AsyncData(guide.toggleTodo(todoId));
+  }
+
+  /// 마지막 조회 이후 날짜가 바뀌었으면 다시 조회 (D-day, 이번 기간이 바뀌었을 수 있음)
+  void refreshIfDayChanged() {
+    final DateTime? fetched = _fetchedDate;
+    if (fetched == null || fetched == _today()) return;
+    ref.invalidateSelf();
+  }
+
+  /// 시간을 버린 오늘 날짜
+  static DateTime _today() {
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
   }
 }
 
