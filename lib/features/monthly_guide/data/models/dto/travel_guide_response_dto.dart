@@ -171,11 +171,32 @@ extension TravelGuideTodoDtoMapper on TravelGuideTodoDto {
         // 저축 id와 겹치지 않도록 접두어를 붙임 (toggleTodo가 전체에서 id로 찾음)
         id: 'todo-$todoPeriodId',
         type: MonthlyTodoType.reservation,
-        title: content ?? '',
+        title: _title(),
         caption: cost == null ? null : '약 ${_man(cost)}만원 내외',
         isCompleted: isCompleted,
       );
+
+  /// 준비 항목 제목
+  /// - COURSE: content가 장소/활동 이름이라 그대로 사용
+  /// - LODGING: content가 숙소 종류 코드(HOSTEL 등)라 '호스텔 예약' 형태로
+  /// - FLIGHT: content가 없어서(null) 고정 문구
+  String _title() => switch (detailType) {
+        'LODGING' => '${_lodgingTypeLabel(content) ?? '숙소'} 예약',
+        'FLIGHT' => '항공권 예매',
+        _ => content ?? '',
+      };
 }
+
+/// 숙소 종류 코드 → 표시 이름 (모르는 코드면 null)
+String? _lodgingTypeLabel(String? type) => switch (type) {
+      'HOTEL' => '호텔',
+      'HOSTEL' => '호스텔',
+      'RENTAL' => '펜션',
+      'GUESTHOUSE' => '게스트하우스',
+      'RESORT' => '리조트',
+      'POOL_VILLA' => '풀빌라',
+      _ => null,
+    };
 
 /// 원 -> 만원 (반올림)
 int _man(num? won) => ((won ?? 0) / 10000).round();
