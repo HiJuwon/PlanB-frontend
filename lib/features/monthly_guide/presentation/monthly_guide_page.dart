@@ -20,6 +20,7 @@ import 'package:plan_b/shared/widgets/background/bg_bottom_anchored_ellipse.dart
 import 'package:plan_b/shared/widgets/background/bg_top_ellipse.dart';
 import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
 import 'package:plan_b/shared/widgets/nav/top_app_bar.dart';
+import 'package:plan_b/shared/widgets/feedback/toast.dart';
 
 class MonthlyGuidePage extends ConsumerStatefulWidget {
   const MonthlyGuidePage({super.key});
@@ -164,8 +165,18 @@ class _GuideContent extends ConsumerWidget {
     final AsyncValue<MonthlyGuide> asyncGuide =
         ref.watch(monthlyGuideProvider(planId));
 
-    void toggleTodo(String todoId) =>
-        ref.read(monthlyGuideProvider(planId).notifier).toggleTodo(todoId);
+    Future<void> toggleTodo(String todoId) async {
+      try {
+        await ref.read(monthlyGuideProvider(planId).notifier).toggleTodo(todoId);
+      } catch (_) {
+        if (!context.mounted) return;
+        showToast(
+          context,
+          text: '체크 상태를 저장하지 못했어요.\n다시 시도해 주세요.',
+          type: ToastType.warning,
+        );
+      }
+    }
 
     return asyncGuide.when(
       loading: () => const ShowGlobalLoading(),

@@ -42,6 +42,14 @@ class MonthlyGuideRepository {
       (data) => AllTimelineGuideResponseDto.fromJson(data as Map<String, dynamic>),
     );
   }
+
+  /// 여행 준비 Todo 체크/해제
+  Future<void> toggleTodo(int todoPeriodId) {
+    return apiRequest(
+      () => _dio.patch('/api/v1/guides/todos/$todoPeriodId'),
+      (_) {},
+    );
+  }
 }
 
 final monthlyGuideRepositoryProvider =
