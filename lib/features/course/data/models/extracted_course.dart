@@ -1,10 +1,11 @@
 import 'package:plan_b/features/course/data/models/course_category.dart';
 
 /// 웹 링크에서 추출한 코스 정보
-/// TODO: API 스펙 확정 전이라 UI 기준으로만 구조화함 (스웨거 확인 후 DTO 매핑 추가 예정)
 class ExtractedCourse {
   const ExtractedCourse({
     required this.id,
+    required this.extractId,
+    required this.index,
     required this.category,
     required this.title,
     required this.caption,
@@ -13,6 +14,8 @@ class ExtractedCourse {
   });
 
   final String id;
+  final String extractId;
+  final int index;
   final CourseCategory category;
   final String title;
   final String caption;

@@ -2,9 +2,10 @@
 import 'package:dio/dio.dart';
 
 class ApiException implements Exception {
-  ApiException(this.message, {this.statusCode});
+  ApiException(this.message, {this.statusCode, this.code});
   final String message;
   final int? statusCode;
+  final String? code; // 서버 에러 코드 (예: CONTENT004)
 
   @override
   String toString() => message;
@@ -27,9 +28,13 @@ Future<T> apiRequest<T>(
     final serverMessage = body is Map && body['message'] is String
         ? body['message'] as String
         : null;
+    final serverCode = body is Map && body['code'] is String
+        ? body['code'] as String
+        : null;
     throw ApiException(
       serverMessage ?? '네트워크 오류가 발생했어요',
       statusCode: e.response?.statusCode,
+      code: serverCode,
     );
   }
 }
