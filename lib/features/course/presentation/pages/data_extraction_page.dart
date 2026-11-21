@@ -94,7 +94,7 @@ class _DataExtractionPageState extends ConsumerState<DataExtractionPage> {
                   ),
                   data: (courses) => courses.isEmpty
                       ? const _ExtractionMessage(
-                          text: '링크에서 예산에 맞는 코스를 못 찾았어요.',
+                          text: '링크에서 추가할 수 있는 코스를 찾지 못했어요.',
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
