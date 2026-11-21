@@ -48,9 +48,16 @@ class MonthlyGuideNotifier
     _fetchedDate = _today();
 
     if (timeline == null) return guide;
-    return guide.withTimeline(
-      timeline.toMonthlyGuidePeriods(totalCost: guide.totalBudget),
-    );
+
+    // 타임라인 변환이 실패해도(기간 날짜 누락 등) 월별 보기는 보여주도록 이번 기간만 반환
+    try {
+      return guide.withTimeline(
+        timeline.toMonthlyGuidePeriods(totalCost: guide.totalBudget),
+      );
+    } catch (e) {
+      debugPrint('전체 타임라인 변환 실패 (이번 기간만 표시): $e');
+      return guide;
+    }
   }
 
   /// 가이드 id 확보: 홈 목록에 있으면 사용, 없으면(생성 실패 / 기존 플랜) 생성
