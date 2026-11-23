@@ -48,6 +48,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'planB',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light,  // 앱 전체에 공용 테마 적용
       routerConfig: ref.watch(routerProvider),
       // 전역 로딩 오버레이: 모든 화면 및 모달 위에 표시.
