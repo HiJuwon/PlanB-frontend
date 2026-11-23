@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:plan_b/features/login/data/kakao_login_service.dart';
 import 'package:plan_b/features/login/data/google_login_service.dart';
 import 'package:plan_b/features/login/presentation/providers/login_controller.dart';
 
+import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/login/presentation/widgets/cta_social_login.dart';
@@ -50,13 +52,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (mounted) {
         showToast(
           context,
-          text: '로그인에 실패했어요.\n잠시 후 다시 시도해 주세요.',
+          text: '로그인에 실패했어요.\n잠시 후 다시 시도해 주세요.\n${_errorDetail(e)}',
           type: ToastType.warning,
         );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  /// 실패 원인 표시: 서버 에러면 상태 코드, SDK 에러면 에러 코드
+  static String _errorDetail(Object e) {
+    if (e is ApiException) {
+      final status = e.statusCode?.toString() ?? '응답 없음';
+      return '(서버 $status: ${e.message})';
+    }
+    if (e is PlatformException) return '(SDK ${e.code})';
+    return '(${e.runtimeType})';
   }
 
   void _loginWithKakao() => _login(
