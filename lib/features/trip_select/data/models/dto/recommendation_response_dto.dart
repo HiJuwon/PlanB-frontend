@@ -13,8 +13,8 @@ enum RecommendationStatus { pending, done, failed }
 
 /// POST/GET /api/v1/plans/{planId}/recommendations/wallet, /goal 응답의 data
 /// - status: PENDING(생성 중) / DONE(완료, recommendations 포함) / FAILED(생성 실패)
-/// - 지갑 기준: RANK_1~3 / 목표 기준: LEVEL_HIGH, MEDIUM, LOW
-/// - GET /recommendations/wallet/more(4~6순위)도 같은 구조
+/// - 지갑 기준: RANK_1~3 (/wallet/more 추가 조회는 RANK_4~6, 같은 DTO로 파싱하며 status는 사용 안 함)
+/// - 목표 기준: LEVEL_HIGH, MEDIUM, LOW
 @freezed
 class RecommendationResponseDto with _$RecommendationResponseDto {
   const factory RecommendationResponseDto({
