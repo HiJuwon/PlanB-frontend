@@ -2,23 +2,25 @@
 
 > 내 예산과 목표에 맞춰 AI가 여행 플랜을 추천하고, 출발 전까지의 준비 및 저축까지 함께 관리해 주는 여행 플래너 앱 **PlanB**
 
-<!-- 프로젝트 대표 이미지 자리 -->
-
 <br>
+
+<img alt="project thumbnail" src="https://github.com/user-attachments/assets/db230fb5-2a2b-4354-a9b0-78f0f71696d2" />
+
+<br><br>
 
 ## 📌 프로젝트 설명
 
 **PlanB**는 사용자의 예산에 최적화된 '실현 가능한' 여행을 설계하는
 AI 기반 스케줄링 플랫폼입니다.
-- 사용자는 **지갑 기준(예산 먼저)** 또는 **목표 기준(여행지 먼저)** 중 하나를 골라 여행 조건을 입력하고
-- AI가 조건에 맞는 여행 플랜을 추천합니다.
-- 플랜을 확정하면 출발일까지 **월별 준비 가이드**와 **나의 여행 코스**를 따라가며 여행을 준비할 수 있습니다.
+1. 사용자는 **지갑 기준(예산 먼저)** 또는 **목표 기준(여행지 먼저)** 중 하나를 골라 여행 조건을 입력하고
+2. AI가 조건에 맞는 여행 플랜을 추천합니다.
+3. 플랜을 확정하면 출발일까지 **월별 준비 가이드**와 **나의 여행 코스**를 따라가며 여행을 준비할 수 있습니다.
 
 <br>
 
-## ✨ 주요 플로우 및 기능
+## ✨ 기능 목록
 
-| 기능 | 설명 |
+| &nbsp;기능&nbsp; | 설명 |
 | --- | --- |
 | 1. 로그인 | 카카오 / 구글 소셜 로그인 (토큰 기반 세션 유지 및 자동 갱신) |
 | 2. 맞춤 여행 체크 | 여행 계획 기준(지갑 기준 / 목표 기준) 선택 → 기본 정보, 예산, 세부 여행 취향을 단계별로 입력 |
@@ -90,10 +92,9 @@ main        배포용 브랜치
      └─ feature/#이슈번호-작업내용   기능 단위 작업 브랜치
 ```
 
-- 작업 시작 전 **이슈를 먼저 생성**하고, 이슈 번호로 브랜치를 생성합니다.
-  - 예) `feature/#97-get-timeline-guide-api`
-- 작업이 끝나면 `develop`을 base로 PR을 올리고, 리뷰 후 머지합니다.
-- `develop`이 안정화되면 `main`에 반영합니다.
+1. 작업 시작 전 **이슈를 먼저 생성**하고, 이슈 번호로 브랜치를 생성합니다. (ex. `feature/#97-get-timeline-guide-api`)
+2. 작업이 끝나면 `develop`을 base로 PR을 올리고, 리뷰 후 머지합니다.
+3. `develop`이 안정화되면 `main`에 반영합니다.
 
 ### 커밋 컨벤션
 `#이슈번호 [태그] 작업 내용`
@@ -108,11 +109,6 @@ main        배포용 브랜치
 | `[REFACTOR]` | 리팩토링 |
 | `[CHORE]` | 기타 잡다한 수정 (불필요한 코드 삭제 등) |
 | `[SETTING]` | 프로젝트 및 환경 세팅 |
-
-### PR 규칙
-- base 브랜치는 `develop`
-- PR 제목은 형식에 맞게, 라벨 등록
-- 관련 이슈(`Closed #번호`), 주요 업데이트 항목, 스크린샷/실행 영상 첨부하여 작성할 것.
 
 <br>
 
@@ -166,95 +162,53 @@ features/<feature>/
 
 <br>
 
-## 🚏 라우팅 전략
+## 🧩 핵심 설계
 
-`go_router`를 사용하며, `routerProvider` 하나에서 `GoRouter`를 생성합니다.
+### 1. 라우팅 전략: Shell로 탭 구조를 분리
 
-자세한 설계 배경은 👉 [라우팅 전략 문서 (Notion)](https://app.notion.com/p/4144e2264bfc80d2b3e4fd7c4605c809) 참고.
+`go_router` 기반으로 화면을 세 종류로 나눴습니다.
+자세한 내용은 ([라우트 규칙 노션](https://app.notion.com/p/4144e2264bfc80d2b3e4fd7c4605c809)) 참고.
 
-### 1. 화면을 3종류로 구분
-| 구분 | 화면&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 방식 |
-| --- | --- | --- |
-| **글로벌 Shell** (하단 글로벌 탭) | - 홈<br>- 새 플랜 생성<br>- 마이페이지 | `StatefulShellRoute.indexedStack` |
-| **로컬 Shell** (개별 플랜 내부 탭) | - 나의 여행 플래너<br>- 월별 여행 준비 가이드<br>- 나의 여행 코스 | 홈 하위의 `StatefulShellRoute.indexedStack`, 루트 내비게이터에 올려 글로벌 탭바를 덮음 |
-| **탭바 없는 화면** | - 로그인<br>- 맞춤 여행 체크<br>- 여행 고르기 | 루트 내비게이터의 일반 `GoRoute` |
+|구분|화면|방식|
+|---|---|---|
+|글로벌 Shell|홈, 마이페이지|`StatefulShellRoute.indexedStack`|
+|로컬 Shell|플래너, 월별 가이드, 여행 코스|홈 하위 Shell, 글로벌 탭바를 덮음|
+|탭바 없는 화면|로그인, 맞춤 여행 체크, 여행 고르기|루트 내비게이터의 `GoRoute`|
 
-- `indexedStack`을 사용하여, **탭을 오가도 각 탭의 화면 스택과 스크롤 위치가 유지**됩니다.
+- 탭을 오가도 각 탭의 화면 스택과 스크롤 위치가 유지됩니다.
+- 경로는 `app_routes.dart`에서 상수로 관리하고, 로그인 상태에 따라 `redirect`로 접근을 제어합니다.
+- 단계형 플로우(맞춤 여행 체크)는 `push`로 쌓아 뒤로가기로 이전 단계에 돌아갈 수 있게 합니다.
 
-### 2. 경로 상수 관리 (`app_routes.dart`)
-- `AppRoutes`: 화면 이동(`context.go` / `push`)에 쓰는 **전체 경로**
-- `AppPaths`: `router.dart`에서 하위 라우트를 정의할 때만 쓰는 **하위 경로 상수**
-- `AppRouteExtras`: 라우트 이동 시 `extra`로 넘기는 값
+### 2. 데이터 관리 전략: 불변 모델 하나로 입력 관리
 
-```
-/login
-/home
-  └─ /home/plan/planner, monthly-guide, course(/add/extraction)
-/my-page
-/trip-check
-  ├─ /type
-  ├─ /budget-first/basic-info, budget, details
-  ├─ /goal-first/basic-info, details, food-budget
-  └─ /analysis
-/trip-select
-  └─ /completed
-```
+여러 화면에 걸친 맞춤 여행 체크 입력값을 불변(freezed) 모델 `TripCheckDraft` 하나에 모아 관리합니다.
 
-### 3. redirect 규칙
-- 로그인 상태(`authProvider`)가 바뀌면 `refreshListenable`로 redirect를 다시 계산
-- 비로그인 → `/login`
-- 로그인 화면에서 로그인 완료 → 신규 회원은 `/trip-check`(온보딩), 기존 회원은 `/home`
-- 선택된 플랜 없이 `/home/plan/...` 진입 → `/home`
-- 정의되지 않은 경로 → `NotFoundPage`
-
-### 4. 이동 방식
-- 맞춤 여행 체크처럼 **단계가 이어지는 플로우는 `push`** 로 쌓아 뒤로가기 시 이전 단계로 돌아갈 수 있게 합니다. (`go`를 쓰면 중간 단계가 스택에서 빠짐)
+- **단일 상태 소스**: 플로우 전체가 Riverpod Notifier 하나를 공유해, 화면 간 값 전달이 필요 없습니다.
+- **불변 + `copyWith`**: 상태 변경은 Notifier 메서드에서만 일어나 추적이 쉽습니다.
+- **모델과 DTO 분리**: 화면은 `TripCheckDraft`만 다루고, 서버 요청 시에만 DTO로 변환합니다.
 
 <br>
 
-## 🗃 데이터 관리 전략 — 불변 모델 하나로 입력 관리
+## 🏛️ 시스템 아키텍쳐
 
-맞춤 여행 체크는 여러 화면에 걸쳐 입력을 받지만, **입력값은 `TripCheckDraft`라는 불변(freezed) 모델 하나에 모아** 관리합니다.
-
-```dart
-@freezed
-class TripCheckDraft with _$TripCheckDraft {
-  const factory TripCheckDraft({
-    TripSelectionType? tripType,   // 지갑 기준 / 목표 기준
-    int? planId,                   // 서버에 저장된 플랜 id
-    Destination? destination,
-    DateTimeRange? travelPeriod,
-    int? peopleCount,
-    CompanionType? companionType,
-    BudgetRange? maxBudget,        // 지갑 기준 플로우
-    MealBudget? mealBudget,        // 목표 기준 플로우
-    @Default({}) Set<TravelStyle> travelStyles,
-    ...
-  }) = _TripCheckDraft;
-}
-```
-
-- **단일 상태 소스**: 플로우 전체가 `tripCheckDraftProvider`(Riverpod `Notifier`) 하나를 공유합니다. 화면마다 상태를 따로 두지 않아 단계 간 값 전달이 필요 없습니다.
-- **불변 + `copyWith`**: 화면은 값을 직접 바꾸지 않고 Notifier의 메서드를 호출하고, Notifier는 `state = state.copyWith(...)`로 새 객체를 만듭니다. 변경 지점이 한곳에 모여 추적이 쉽습니다.
-- **플로우 단위 초기화**: 인트로에서 시작할 때 `reset()`, 여행 기준(지갑/목표)이 바뀌면 이후 입력을 초기화, 로그아웃·계정 변경 시에도 초기화합니다.
-- **복원**: 플래너에서 "여행 플랜 다시 선택하기" 시 저장된 조건으로 `restore()` 합니다.
-- **안전한 임시 저장**: 저장 요청은 대기열로 순서대로 처리하고, 플로우 번호로 이전 플로우의 늦은 응답은 무시합니다.
-- **모델과 DTO 분리**: 화면은 `TripCheckDraft`만 다루고, 서버 요청 시에만 지갑/목표 기준 요청 DTO로 변환합니다.
+<img alt="system_architecture" src="https://github.com/user-attachments/assets/5fc5fd11-b0bf-422c-855e-f5bee4c72591" />
 
 <br>
 
 ## 👥 Contributor
 
-<!-- 팀원 사진 / 이름 / 역할 / GitHub -->
-| 이름 | 역할 | Github |
-| :--- | :--- | :--- |
-| 염주원 | - 프로젝트 기획<br>- UXUI 설계<br>- 프론트엔드(flutter) 개발 | [link](https://github.com/HiJuwon) |
+| 염주원 [Github](https://github.com/HiJuwon) |
+| :---: |
+| <img src="https://github.com/HiJuwon.png" width="200" height="200"/> |
+| Product Design, Flutter Development |
 
 
 <br>
 
 ## 🔗 기타
 
-- 📋 PlanB Frontend Kanban: [planB Project Board](https://github.com/orgs/PlanBproject-dev/projects/1)
+📋 PlanB Frontend Kanban: [link](https://github.com/orgs/PlanBproject-dev/projects/1)
 
-<!-- ending 이미지 넣기 -->
+<br><br>
+
+<img alt="footer image" src="https://github.com/user-attachments/assets/2d217d4a-a04e-447f-b158-9f42b48a5669" />
