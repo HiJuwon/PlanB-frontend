@@ -5,15 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class BgTopEllipse extends StatelessWidget {
-  const BgTopEllipse({super.key});
+  const BgTopEllipse({super.key, this.top = defaultTop});
 
-  static const double _top = -101;
+  static const double defaultTop = -101;
   static const double _height = 596;
+
+  final double top;
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: _top,
+      top: top,
       left: 0,
       right: 0,
       height: _height,
