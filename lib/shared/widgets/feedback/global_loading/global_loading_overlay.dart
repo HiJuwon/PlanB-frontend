@@ -35,7 +35,7 @@ class GlobalLoadingOverlay extends StatelessWidget {
                     Text(
                       text,
                       textAlign: TextAlign.center,
-                      style: AppTextStyles.bodyMedium16.copyWith(color: AppColors.gray800),
+                      style: AppTextStyles.bodyMedium16.copyWith(color: AppColors.white),
                     ),
                   ],
                 ),
