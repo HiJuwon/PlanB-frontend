@@ -77,7 +77,7 @@ GOOGLE_SERVER_CLIENT_ID=
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-### 5. 실행
+### 5. Flutter 앱 실행
 ```bash
 flutter run
 ```
@@ -166,8 +166,8 @@ features/<feature>/
 
 ### 1. 라우팅 전략: Shell로 탭 구조를 분리
 
-`go_router` 기반으로 화면을 세 종류로 나눴습니다.
-자세한 내용은 ([라우트 규칙 노션](https://app.notion.com/p/4144e2264bfc80d2b3e4fd7c4605c809)) 참고.
+- `go_router` 기반으로 화면을 세 종류로 나눴습니다.
+- 자세한 내용은 [라우트 규칙 노션](https://app.notion.com/p/4144e2264bfc80d2b3e4fd7c4605c809) 참고
 
 |구분|화면|방식|
 |---|---|---|
