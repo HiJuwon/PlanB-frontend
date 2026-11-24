@@ -172,6 +172,11 @@ extension TravelGuidePeriodDtoMapper on TravelGuidePeriodDto {
       startDate: start,
       endDate: end,
       remainingMonths: remainingMonths,
+      // 지난 기간에서 넘어온 준비 항목 (isCarriedOver: true)
+      carryoverTodos: [
+        for (final todo in todos)
+          if (todo.isCarriedOver) todo.toMonthlyTodo(),
+      ],
       budgetTodo: goal == null
           ? null
           : MonthlyTodo(
@@ -182,7 +187,10 @@ extension TravelGuidePeriodDtoMapper on TravelGuidePeriodDto {
                   '${_man(accumulatedSavingAmount)}만원 / ${_man(totalCost)}만원',
               isCompleted: goal.isCompleted,
             ),
-      reservationTodos: [for (final todo in todos) todo.toMonthlyTodo()],
+      reservationTodos: [
+        for (final todo in todos)
+          if (!todo.isCarriedOver) todo.toMonthlyTodo(),
+      ],
     );
   }
 }
