@@ -9,10 +9,14 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.title,
     this.onBack,
+    this.showBack = true,
+    this.trailing,
   });
 
   final String? title;  // null이면 제목 없이 뒤로가기 버튼만 표시
   final VoidCallback? onBack;   // null이면 이전 화면으로 pop
+  final bool showBack;  // false면 좌측 뒤로가기 숨김 (예: 신규 회원 온보딩 인트로)
+  final Widget? trailing; // 우측 상단에 둘 위젯 (예: '건너뛰기' 텍스트 버튼)
 
   static const double _height = 56; // 높이는 고정값 56으로 설정
 
@@ -45,27 +49,34 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
 
-            Positioned(
-              left: 12,
-              child: Semantics(
-                button: true,
-                label: '뒤로가기',
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onBack ?? () => Navigator.maybePop(context),
-                  child: SizedBox.square(
-                    dimension: 48,
-                    child: Center(
-                      child: SvgPicture.asset(
-                        'assets/icons/ic_arrow_back_24px.svg',
-                        width: 24,
-                        height: 24,
+            if (showBack)
+              Positioned(
+                left: 12,
+                child: Semantics(
+                  button: true,
+                  label: '뒤로가기',
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onBack ?? () => Navigator.maybePop(context),
+                    child: SizedBox.square(
+                      dimension: 48,
+                      child: Center(
+                        child: SvgPicture.asset(
+                          'assets/icons/ic_arrow_back_24px.svg',
+                          width: 24,
+                          height: 24,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
+            
+            if (trailing != null)
+              Positioned(
+                right: 12,
+                child: trailing!,
+              ),
           ],
         ),
       ),
