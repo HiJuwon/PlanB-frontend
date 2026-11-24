@@ -54,7 +54,7 @@ class AuthNotifier extends Notifier<AuthState> {
     await _endSession();
   }
 
-  /// 토큰 + 로컬 프로필 삭제(deleteAll) 후 로그아웃 상태로 변경
+  /// 토큰 삭제 후 로그아웃 상태로 변경
   /// 저장소 삭제가 실패해도 로그아웃 상태로는 반드시 바꾸고, 예외는 호출자에게 넘기지 않음 (서버 작업은 이미 끝났으므로 호출자가 실패로 처리하면 안 됨)
   Future<void> _endSession() async {
     try {

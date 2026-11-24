@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:plan_b/core/auth/auth_provider.dart';
-import 'package:plan_b/core/storage/profile_storage.dart';
 import 'package:plan_b/features/login/data/kakao_login_service.dart';
 import 'package:plan_b/features/login/data/google_login_service.dart';
 import 'package:plan_b/features/login/data/login_repository.dart';
@@ -25,12 +24,9 @@ class LoginController {
     await _startSession(res);
   }
 
-  /// 프로필 저장 > 토큰 저장 및 로그인 상태로 변경 (프로필을 먼저 저장해야 로그인 직후 화면에서 바로 읽을 수 있음)
+  /// 토큰 저장 및 로그인 상태로 변경
+  /// 로그인 상태가 되면 myProfileProvider가 /user/me로 유저 프로필을 조회함
   Future<void> _startSession(JwtLoginResponse res) async {
-    await _ref.read(profileStorageProvider).saveProfile(
-          nickname: res.nickname,
-          email: res.email,
-        );
     await _ref.read(authProvider.notifier).signIn(
           accessToken: res.jwtAccessToken,
           refreshToken: res.jwtRefreshToken,
