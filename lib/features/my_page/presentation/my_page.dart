@@ -94,10 +94,25 @@ class MyPage extends ConsumerWidget {
 
           // 프로필 (이름 + 이메일)
           asyncProfile.when(
+            // 다시 시도할 때 이전 에러 대신 로딩을 보여주기 위함 (기본값 true면 에러 화면이 그대로 남음)
+            skipLoadingOnRefresh: false,
             loading: () => const ShowGlobalLoading(),
-            error: (_, _) => Text(
-              '프로필을 불러오지 못했어요.',
-              style: AppTextStyles.bodyMedium16.copyWith(color: AppColors.gray400),
+            // 조회 실패: 다시 시도하면 /user/me 재조회
+            error: (_, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '프로필을 불러오지 못했어요.',
+                  style: AppTextStyles.bodyMedium16.copyWith(color: AppColors.gray400),
+                ),
+                TextButton(
+                  onPressed: () => ref.invalidate(myProfileProvider),
+                  child: Text(
+                    '다시 시도',
+                    style: AppTextStyles.labelMedium14.copyWith(color: AppColors.blue500),
+                  ),
+                ),
+              ],
             ),
             data: (profile) => ProfileSection(
               name: profile.name,

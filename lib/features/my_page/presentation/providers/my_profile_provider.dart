@@ -25,7 +25,10 @@ class MyProfileNotifier extends AsyncNotifier<MyProfile> {
   /// 이름 변경: 화면 먼저 반영 > 서버 요청 (실패 시 되돌림)
   Future<void> updateName(String name) async {
     final MyProfile? current = state.valueOrNull;
-    if (current == null) return;
+    // 프로필 조회 실패/로딩 중: 성공으로 처리되지 않도록 실패로 알림
+    if (current == null) {
+      throw ApiException('프로필을 불러오지 못해 이름을 변경할 수 없어요.');
+    }
 
     final String? error = NicknameUpdateRequestDto.validate(name);
     if (error != null) throw ApiException(error);
