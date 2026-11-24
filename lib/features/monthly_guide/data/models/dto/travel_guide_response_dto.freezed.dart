@@ -868,6 +868,8 @@ TravelGuideTodoDto _$TravelGuideTodoDtoFromJson(Map<String, dynamic> json) {
 mixin _$TravelGuideTodoDto {
   int get todoPeriodId =>
       throw _privateConstructorUsedError; // Todo 체크 API(PATCH /guides/todos/{todoPeriodId})용
+  bool get isCarriedOver =>
+      throw _privateConstructorUsedError; // true: 지난 기간에서 못 한 항목이 이번 기간으로 이월됨
   int? get todoId => throw _privateConstructorUsedError;
   int? get recommendationDetailId => throw _privateConstructorUsedError;
   String? get detailType =>
@@ -895,6 +897,7 @@ abstract class $TravelGuideTodoDtoCopyWith<$Res> {
   @useResult
   $Res call({
     int todoPeriodId,
+    bool isCarriedOver,
     int? todoId,
     int? recommendationDetailId,
     String? detailType,
@@ -920,6 +923,7 @@ class _$TravelGuideTodoDtoCopyWithImpl<$Res, $Val extends TravelGuideTodoDto>
   @override
   $Res call({
     Object? todoPeriodId = null,
+    Object? isCarriedOver = null,
     Object? todoId = freezed,
     Object? recommendationDetailId = freezed,
     Object? detailType = freezed,
@@ -933,6 +937,10 @@ class _$TravelGuideTodoDtoCopyWithImpl<$Res, $Val extends TravelGuideTodoDto>
                 ? _value.todoPeriodId
                 : todoPeriodId // ignore: cast_nullable_to_non_nullable
                       as int,
+            isCarriedOver: null == isCarriedOver
+                ? _value.isCarriedOver
+                : isCarriedOver // ignore: cast_nullable_to_non_nullable
+                      as bool,
             todoId: freezed == todoId
                 ? _value.todoId
                 : todoId // ignore: cast_nullable_to_non_nullable
@@ -974,6 +982,7 @@ abstract class _$$TravelGuideTodoDtoImplCopyWith<$Res>
   @useResult
   $Res call({
     int todoPeriodId,
+    bool isCarriedOver,
     int? todoId,
     int? recommendationDetailId,
     String? detailType,
@@ -998,6 +1007,7 @@ class __$$TravelGuideTodoDtoImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? todoPeriodId = null,
+    Object? isCarriedOver = null,
     Object? todoId = freezed,
     Object? recommendationDetailId = freezed,
     Object? detailType = freezed,
@@ -1011,6 +1021,10 @@ class __$$TravelGuideTodoDtoImplCopyWithImpl<$Res>
             ? _value.todoPeriodId
             : todoPeriodId // ignore: cast_nullable_to_non_nullable
                   as int,
+        isCarriedOver: null == isCarriedOver
+            ? _value.isCarriedOver
+            : isCarriedOver // ignore: cast_nullable_to_non_nullable
+                  as bool,
         todoId: freezed == todoId
             ? _value.todoId
             : todoId // ignore: cast_nullable_to_non_nullable
@@ -1045,6 +1059,7 @@ class __$$TravelGuideTodoDtoImplCopyWithImpl<$Res>
 class _$TravelGuideTodoDtoImpl implements _TravelGuideTodoDto {
   const _$TravelGuideTodoDtoImpl({
     required this.todoPeriodId,
+    this.isCarriedOver = false,
     this.todoId,
     this.recommendationDetailId,
     this.detailType,
@@ -1059,6 +1074,10 @@ class _$TravelGuideTodoDtoImpl implements _TravelGuideTodoDto {
   @override
   final int todoPeriodId;
   // Todo 체크 API(PATCH /guides/todos/{todoPeriodId})용
+  @override
+  @JsonKey()
+  final bool isCarriedOver;
+  // true: 지난 기간에서 못 한 항목이 이번 기간으로 이월됨
   @override
   final int? todoId;
   @override
@@ -1076,7 +1095,7 @@ class _$TravelGuideTodoDtoImpl implements _TravelGuideTodoDto {
 
   @override
   String toString() {
-    return 'TravelGuideTodoDto(todoPeriodId: $todoPeriodId, todoId: $todoId, recommendationDetailId: $recommendationDetailId, detailType: $detailType, content: $content, cost: $cost, isCompleted: $isCompleted)';
+    return 'TravelGuideTodoDto(todoPeriodId: $todoPeriodId, isCarriedOver: $isCarriedOver, todoId: $todoId, recommendationDetailId: $recommendationDetailId, detailType: $detailType, content: $content, cost: $cost, isCompleted: $isCompleted)';
   }
 
   @override
@@ -1086,6 +1105,8 @@ class _$TravelGuideTodoDtoImpl implements _TravelGuideTodoDto {
             other is _$TravelGuideTodoDtoImpl &&
             (identical(other.todoPeriodId, todoPeriodId) ||
                 other.todoPeriodId == todoPeriodId) &&
+            (identical(other.isCarriedOver, isCarriedOver) ||
+                other.isCarriedOver == isCarriedOver) &&
             (identical(other.todoId, todoId) || other.todoId == todoId) &&
             (identical(other.recommendationDetailId, recommendationDetailId) ||
                 other.recommendationDetailId == recommendationDetailId) &&
@@ -1102,6 +1123,7 @@ class _$TravelGuideTodoDtoImpl implements _TravelGuideTodoDto {
   int get hashCode => Object.hash(
     runtimeType,
     todoPeriodId,
+    isCarriedOver,
     todoId,
     recommendationDetailId,
     detailType,
@@ -1130,6 +1152,7 @@ class _$TravelGuideTodoDtoImpl implements _TravelGuideTodoDto {
 abstract class _TravelGuideTodoDto implements TravelGuideTodoDto {
   const factory _TravelGuideTodoDto({
     required final int todoPeriodId,
+    final bool isCarriedOver,
     final int? todoId,
     final int? recommendationDetailId,
     final String? detailType,
@@ -1143,6 +1166,8 @@ abstract class _TravelGuideTodoDto implements TravelGuideTodoDto {
 
   @override
   int get todoPeriodId; // Todo 체크 API(PATCH /guides/todos/{todoPeriodId})용
+  @override
+  bool get isCarriedOver; // true: 지난 기간에서 못 한 항목이 이번 기간으로 이월됨
   @override
   int? get todoId;
   @override
