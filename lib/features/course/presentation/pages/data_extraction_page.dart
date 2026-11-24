@@ -80,7 +80,7 @@ class _DataExtractionPageState extends ConsumerState<DataExtractionPage> {
           return Stack(
             fit: StackFit.expand,
             children: [
-              const BgTopEllipse(),
+              const BgTopEllipse(top: 15), //ellipse가 화면 상단 y: 15부터 시작
               const BgBottomEllipse(),
               Positioned(
                 top: inset.top,

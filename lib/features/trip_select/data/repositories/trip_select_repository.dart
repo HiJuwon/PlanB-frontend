@@ -13,9 +13,6 @@ class TripSelectRepository {
   TripSelectRepository(this._dio);
   final Dio _dio;
 
-  /// 4~6순위 추가 조회는 아직 동기 방식(응답이 오래 걸림)이라 이 요청만 응답 대기 시간을 늘림 (기본 60초)
-  static const Duration _recommendationTimeout = Duration(minutes: 10);
-
   /// 추천 생성 상태 조회 간격
   static const Duration _pollInterval = Duration(seconds: 3);
 
@@ -39,13 +36,10 @@ class TripSelectRepository {
   }
 
   /// 지갑 기준 추천 여행지 추가 조회 (4~6순위)
+  /// - 1~3순위 생성 때 서버가 함께 만들어 둔 결과를 조회하는 것이므로, 기본 응답 대기 시간 60초 사용.
   Future<List<TripPlan>> getMoreWalletRecommendations(int planId) {
     return apiRequest(
-      () => _dio.get(
-        '/api/v1/plans/$planId/recommendations/wallet/more',
-        // 일단 1~3순위와 같은 대기 시간 적용
-        options: Options(receiveTimeout: _recommendationTimeout),
-      ),
+      () => _dio.get('/api/v1/plans/$planId/recommendations/wallet/more'),
       (data) => RecommendationResponseDto.fromJson(data as Map<String, dynamic>)
           .toWalletTripPlans(),
     );
