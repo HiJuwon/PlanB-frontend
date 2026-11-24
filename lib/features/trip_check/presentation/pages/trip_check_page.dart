@@ -7,7 +7,10 @@ import 'package:go_router/go_router.dart';
 
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
+import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/shared/widgets/app_page.dart';
+import 'package:plan_b/core/theme/app_text_styles.dart';
+import 'package:plan_b/shared/widgets/feedback/modal_primary.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/btn/cta.dart';
 import 'package:plan_b/shared/widgets/header/title_header.dart';
@@ -23,8 +26,25 @@ class TripCheckPage extends ConsumerWidget {
   static const double _earthHeight = 239.8;
   static const double _earthOffsetY = 4.1;   // 피그마상 화면 중앙에서 아래로 4.1 이동
 
+  /// 신규 회원 '건너뛰기': 확인 모달 > 건너뛰기 선택 시 홈으로 (취소: 모달만 닫힘)
+  Future<void> _onSkipPressed(BuildContext context) async {
+    final bool confirmed = await showModalPrimary(
+      context,
+      title: '새 여행 플랜 생성을\n건너뛰시겠습니까?',
+      secondaryText: '취소',
+      primaryText: '건너뛰기',
+    );
+    if (!confirmed || !context.mounted) return;
+
+    context.go(AppRoutes.home);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 이전 화면이 없음 = 로그인 직후 신규 회원으로 redirect되어 들어온 경우
+    // (탭바 '새 플랜 생성'으로 들어오면 push라서 홈이 아래에 있음)
+    final bool isOnboarding = !context.canPop();
+
     return Stack(
       children: [
         // 배경: 흰색 + 배경 하단 ellipse
@@ -51,7 +71,24 @@ class TripCheckPage extends ConsumerWidget {
         // 실제 페이지
         AppPage(
           backgroundColor: Colors.transparent,
-          appBar: const TopAppBar(),
+          // 신규 회원: 뒤로가기 대신 우측 '건너뛰기' 노출 (바로 홈으로)
+          // 탭바로 진입(기존 회원): 기존처럼 뒤로가기(pop) -> 홈
+          appBar: TopAppBar(
+            showBack: !isOnboarding,
+            trailing: isOnboarding
+                ? TextButton(
+                    onPressed: () => _onSkipPressed(context),
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(48, 48),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    child: Text(
+                      '건너뛰기',
+                      style: AppTextStyles.labelMedium16.copyWith(color: AppColors.gray500),
+                    ),
+                  )
+                : null,
+          ),
           header: const Padding(
             padding: EdgeInsets.only(top: _titleExtraTop),
             child: TitleHeader(
