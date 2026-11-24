@@ -78,8 +78,18 @@ dart run build_runner build --delete-conflicting-outputs
 ```
 
 ### 5. Flutter 앱 실행
+사용 가능한 기기에서 디버그 모드로 앱 실행:
 ```bash
 flutter run
+```
+<br>
+
+지정한 실물 아이폰에서 릴리즈 모드로 앱 실행:
+```bash
+# 기기 아이디: flutter devices에 표시되는 실제 아이폰 ID
+
+flutter devices
+flutter run --release -d <아이폰_기기_ID>
 ```
 
 <br>
@@ -200,7 +210,7 @@ features/<feature>/
 | 염주원 [Github](https://github.com/HiJuwon) |
 | :---: |
 | <img src="https://github.com/HiJuwon.png" width="200" height="200"/> |
-| Product Design, Flutter Development |
+| Product Design,<br>Flutter Development |
 
 
 <br>
