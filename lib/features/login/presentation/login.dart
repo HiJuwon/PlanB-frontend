@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plan_b/features/login/data/kakao_login_service.dart';
 import 'package:plan_b/features/login/data/google_login_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:plan_b/features/login/presentation/providers/login_controller.dart';
 
 import 'package:plan_b/core/network/api_request.dart';
@@ -68,6 +69,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return '(서버 $status: ${e.message})';
     }
     if (e is PlatformException) return '(SDK ${e.code})';
+    if (e is GoogleSignInException) return '(SDK ${e.code.name})';
     return '(${e.runtimeType})';
   }
 
