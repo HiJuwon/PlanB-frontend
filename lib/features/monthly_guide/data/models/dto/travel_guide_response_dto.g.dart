@@ -78,6 +78,7 @@ _$TravelGuideTodoDtoImpl _$$TravelGuideTodoDtoImplFromJson(
   Map<String, dynamic> json,
 ) => _$TravelGuideTodoDtoImpl(
   todoPeriodId: (json['todoPeriodId'] as num).toInt(),
+  isCarriedOver: json['isCarriedOver'] as bool? ?? false,
   todoId: (json['todoId'] as num?)?.toInt(),
   recommendationDetailId: (json['recommendationDetailId'] as num?)?.toInt(),
   detailType: json['detailType'] as String?,
@@ -90,6 +91,7 @@ Map<String, dynamic> _$$TravelGuideTodoDtoImplToJson(
   _$TravelGuideTodoDtoImpl instance,
 ) => <String, dynamic>{
   'todoPeriodId': instance.todoPeriodId,
+  'isCarriedOver': instance.isCarriedOver,
   'todoId': instance.todoId,
   'recommendationDetailId': instance.recommendationDetailId,
   'detailType': instance.detailType,

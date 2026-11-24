@@ -58,6 +58,7 @@ class TravelGuideSavingDto with _$TravelGuideSavingDto {
 class TravelGuideTodoDto with _$TravelGuideTodoDto {
   const factory TravelGuideTodoDto({
     required int todoPeriodId, // Todo 체크 API(PATCH /guides/todos/{todoPeriodId})용
+    @Default(false) bool isCarriedOver, // true: 지난 기간에서 못 한 항목이 이번 기간으로 이월됨
     int? todoId,
     int? recommendationDetailId,
     String? detailType, // COURSE / LODGING / FLIGHT
