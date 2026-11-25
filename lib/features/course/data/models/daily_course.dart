@@ -1,5 +1,6 @@
 // 나의 여행 코스 데이터 모델
-// API 스펙 확정 전이라 UI 기준으로만 구조화함
+
+import 'package:plan_b/core/utils/cost_format.dart';
 
 /// 일일 코스 안의 개별 코스 항목(장소)
 class CoursePlace {
@@ -25,9 +26,9 @@ class DailyCourse {
 
   final String id;
   final List<CoursePlace> places;
-  final int estimatedCost; // 코스 항목별 예상 비용 합계 (원) - 정렬 기준
+  final int? estimatedCost; // 코스 항목별 예상 비용 합계 (원, 서버가 안 주면 null) - 정렬 기준
   final bool isNew;        // 웹에서 찾은 코스로 새로 생긴 일일 코스인지
 
   /// 카드 하단 예상 비용 문구
-  String get budgetLabel => '예상 비용 약 ${(estimatedCost / 10000).round()}만원';
+  String get budgetLabel => CostFormat.estimated(estimatedCost);
 }

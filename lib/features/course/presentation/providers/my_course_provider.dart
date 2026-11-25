@@ -44,9 +44,18 @@ class MyCourseNotifier
     }
   }
 
-  /// 일일 코스 정렬: 예상 비용이 낮은 순서
+  /// 일일 코스 정렬: 예상 비용이 낮은 순서 (비용을 알 수 없는 코스는 맨 뒤)
   static List<DailyCourse> _sortByCost(List<DailyCourse> courses) =>
-      List.of(courses)..sort((a, b) => a.estimatedCost.compareTo(b.estimatedCost));
+      List.of(courses)..sort(_compareCost);
+
+  static int _compareCost(DailyCourse a, DailyCourse b) {
+    final int? x = a.estimatedCost;
+    final int? y = b.estimatedCost;
+    if (x == null && y == null) return 0;
+    if (x == null) return 1;
+    if (y == null) return -1;
+    return x.compareTo(y);
+  }
 }
 
 final myCourseProvider = AsyncNotifierProvider.autoDispose
