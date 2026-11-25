@@ -57,8 +57,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (!auth.isLoggedIn) return isOnLogin ? null : AppRoutes.login;
 
       // 로그인 됨인데 로그인 화면에 있음 > 신규 회원은 온보딩, 기존 회원은 홈
+      // 인트로가 스택 위치(canPop)로 온보딩을 추측하지 않도록 쿼리로 명시
       if (isOnLogin) {
-        return auth.isNewUser ? AppRoutes.tripCheck : AppRoutes.home;
+        return auth.isNewUser
+            ? Uri(
+                path: AppRoutes.tripCheck,
+                queryParameters: {AppRouteQueries.onboarding: 'true'},
+              ).toString()
+            : AppRoutes.home;
       }
 
       // '/'로 들어오면 홈으로 리다이렉트
@@ -168,7 +174,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       // 단계 이동은 push로 쌓음 (go를 쓰면 중간 단계가 스택에서 빠지므로)
       GoRoute(
         path: AppRoutes.tripCheck,
-        builder: (context, state) => const TripCheckPage(),
+        builder: (context, state) => TripCheckPage(
+          isOnboarding:
+              state.uri.queryParameters[AppRouteQueries.onboarding] == 'true',
+        ),
         routes: [
           GoRoute(
             path: AppPaths.tripType,
