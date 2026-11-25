@@ -14,7 +14,7 @@ import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_top_gradient.dart';
 import 'package:plan_b/shared/widgets/btn/btn.dart';
-import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
+import 'package:plan_b/features/course/presentation/widgets/my_course_list_skeleton.dart';
 import 'package:plan_b/shared/widgets/nav/top_app_bar.dart';
 
 class CoursePage extends ConsumerWidget {
@@ -108,7 +108,7 @@ class _CourseContent extends ConsumerWidget {
               onPressed: () => context.go(AppRoutes.courseAdd),
             ),
             asyncCourses.when(
-              loading: () => const ShowGlobalLoading(),
+              loading: () => const MyCourseListSkeleton(),
               error: (_, _) => Padding(
                 padding: const EdgeInsets.only(top: 40),
                 child: Text(
