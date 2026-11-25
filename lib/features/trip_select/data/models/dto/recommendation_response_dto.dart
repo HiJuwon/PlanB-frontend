@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
 import 'package:plan_b/features/trip_select/data/models/budget_level.dart';
 import 'package:plan_b/shared/models/destination.dart';
+import 'package:plan_b/core/utils/cost_format.dart';
 
 part 'recommendation_response_dto.freezed.dart';
 part 'recommendation_response_dto.g.dart';
@@ -191,10 +192,6 @@ String flightTitle(FlightDto? flight) {
   return parts.isEmpty ? '-' : parts.join(' ');
 }
 
-/// 500000, 700000 -> '50-70만원' / 같거나 하나만 있으면 '약 15만원'
-String formatCostRange(num? low, num? high) {
-  String man(num won) => (won / 10000).round().toString();
-  if (low == null && high == null) return '';
-  if (low == null || high == null || low == high) return '약 ${man(low ?? high!)}만원';
-  return '${man(low)}-${man(high)}만원';
-}
+/// 금액 범위 표시 문구
+/// 500000, 700000 -> '50-70만원' / 같거나 하나만 있으면 '약 15만원' / 0원 '무료' / 1만원 이하 '1만원 이하' / 없음 '비용 알 수 없음'
+String formatCostRange(num? low, num? high) => CostFormat.range(low, high);
