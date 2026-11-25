@@ -67,8 +67,14 @@ class _DataExtractionPageState extends ConsumerState<DataExtractionPage> {
   /// 토스트는 코스 추가 화면에서 띄움: 그 화면 Scaffold 기준이어야 다른 토스트처럼 CTA 위 16px에 표시됨
   void _leaveWithFailure(CourseExtractionFailure failure) {
     if (_isLeaving || !mounted) return;
-    _isLeaving = true;
 
+    // 사용자가 직접 뒤로가기를 눌러 이미 스택에서 빠진 경우 (퇴장 전환 중이라 아직 mounted)
+    // 이때 pop하면 이 화면이 아니라 맨 위에 있는 코스 추가 화면이 닫히므로 실패 처리를 건너뜀
+    // (_isLeaving과 별개: 이 화면이 직접 pop했는지가 아니라, 바깥에서 빠졌는지를 라우트에서 바로 확인)
+    final bool isCurrentRoute = ModalRoute.of(context)?.isCurrent ?? false;
+    if (!isCurrentRoute) return;
+
+    _isLeaving = true;
     context.pop(_failureMessageOf(failure));
   }
 
