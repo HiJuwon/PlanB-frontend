@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:plan_b/core/config/app_routes.dart';
+import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/features/trip_check/data/models/options/trip_selection_type.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
@@ -43,6 +44,21 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
     _runAnalysis();
   }
 
+  /// 서버 에러 코드
+  static const String _priceLookupFailedCode = 'RECOMMENDATION011';     // 항공·숙소 가격 조회 실패
+  static const String _noDestinationInBudgetCode = 'RECOMMENDATION013'; // 예산 안에서 갈 수 있는 여행지 없음
+
+  /// 분석 실패 토스트 문구 (서버 에러 코드별, 그 외는 기본 문구)
+  /// - code가 없는 경우(네트워크 오류, 추천 생성 시간 초과·실패 등)와 ApiException이 아닌 예외도 기본 문구
+  static String _errorMessageOf(Object error) {
+    final String? code = error is ApiException ? error.code : null;
+    return switch (code) {
+      _priceLookupFailedCode => '항공, 숙소 가격 조회에 실패했어요.\n조건을 바꿔 시도해주세요.',
+      _noDestinationInBudgetCode => '예산 안에서 갈 수 있는\n여행지가 없어요.',
+      _ => '여행 계획 분석에 실패했어요.\n다시 시도해주세요.',
+    };
+  }
+
   Future<void> _runAnalysis() async {
     final draft = ref.read(tripCheckDraftProvider);
 
@@ -54,11 +70,11 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
       ]);
       if (!mounted) return;
       setState(() => _isLoaded = true);
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       showToast(
         context,
-        text: '여행 계획 분석에 실패했어요. 다시 시도해 주세요.',
+        text: _errorMessageOf(e),
         type: ToastType.warning,
       );
       // 코드에서 직접 부르는 pop은 PopScope와 상관없이 동작함
