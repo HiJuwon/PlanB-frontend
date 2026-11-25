@@ -51,7 +51,7 @@ extension ExtractCandidateDtoMapper on ExtractCandidateDto {
         title: courseName ?? '',
         caption: details.join(' · '),
         sourceUrl: url ?? '',
-        estimatedCost: estimatedCost?.toInt() ?? 0,
+        estimatedCost: estimatedCost?.toInt(), // 없으면 null (0과 구분: '비용 알 수 없음')
       );
 }
 

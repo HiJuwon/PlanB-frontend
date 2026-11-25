@@ -1,4 +1,5 @@
 import 'package:plan_b/features/course/data/models/course_category.dart';
+import 'package:plan_b/core/utils/cost_format.dart';
 
 /// 웹 링크에서 추출한 코스 정보
 class ExtractedCourse {
@@ -20,8 +21,8 @@ class ExtractedCourse {
   final String title;
   final String caption;
   final String sourceUrl;
-  final int estimatedCost;
+  final int? estimatedCost;
 
   /// 카드 하단 예상 비용 문구
-  String get budgetLabel => '예상 비용 약 ${(estimatedCost / 10000).round()}만원';
+  String get budgetLabel => CostFormat.estimated(estimatedCost);
 }
