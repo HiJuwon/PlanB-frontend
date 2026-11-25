@@ -11,15 +11,19 @@ class SkeletonBox extends StatefulWidget {
     this.height,
     this.color = AppColors.gray50,
     this.borderRadius = BorderRadius.zero,
+    this.shimmerPadding = EdgeInsets.zero,
+    this.shimmerBorderRadius,
   });
 
   final double? width;
   final double? height;
-  final Color color;                // 기본 배경 (기본값 gray50, 화면에 따라 dimSurfaceLight)
-  final BorderRadius borderRadius;
+  final Color color;                         // 기본 배경 (기본값 gray50, 화면에 따라 dimSurfaceLight)
+  final BorderRadius borderRadius;           // 박스 라운드
+  final EdgeInsets shimmerPadding;           // shimmer 영역 안쪽 여백 (기본: 박스 전체)
+  final BorderRadius? shimmerBorderRadius;   // shimmer 영역 라운드 (null이면 borderRadius와 동일)
 
   static const Duration _duration = Duration(milliseconds: 1200);
-  static const double _shimmerWidthFactor = 0.5; // 박스 너비의 50%
+  static const double _shimmerWidthFactor = 0.5; // 박스 전체 너비의 50%
 
   // 양 끝은 투명, 가운데(50%)가 흰색
   static const LinearGradient _shimmerGradient = LinearGradient(
@@ -66,35 +70,46 @@ class _SkeletonBoxState extends State<SkeletonBox>
               color: widget.color,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final double boxWidth = constraints.maxWidth;
+                  // shimmer 너비는 박스 전체 너비 기준
                   final double shimmerWidth =
-                      boxWidth * SkeletonBox._shimmerWidthFactor;
+                      constraints.maxWidth * SkeletonBox._shimmerWidthFactor;
+                  // shimmer가 실제로 지나가는 영역 너비
+                  final double areaWidth =
+                      constraints.maxWidth - widget.shimmerPadding.horizontal;
 
-                  return AnimatedBuilder(
-                    animation: _progress,
-                    // shimmer는 위치만 바뀌므로 child로 한 번만 생성
-                    child: const DecoratedBox(
-                      decoration:
-                          BoxDecoration(gradient: SkeletonBox._shimmerGradient),
-                    ),
-                    builder: (context, child) {
-                      // 박스 왼쪽 바깥(-shimmerWidth) -> 오른쪽 바깥(boxWidth)까지 이동
-                      final double left = -shimmerWidth +
-                          (boxWidth + shimmerWidth) * _progress.value;
-
-                      return Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Positioned(
-                            left: left,
-                            top: 0,
-                            bottom: 0,
-                            width: shimmerWidth,
-                            child: child!,
+                  return Padding(
+                    padding: widget.shimmerPadding,
+                    child: ClipRRect(
+                      borderRadius:
+                          widget.shimmerBorderRadius ?? widget.borderRadius,
+                      child: AnimatedBuilder(
+                        animation: _progress,
+                        // shimmer는 위치만 바뀌므로 child로 한 번만 생성
+                        child: const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: SkeletonBox._shimmerGradient,
                           ),
-                        ],
-                      );
-                    },
+                        ),
+                        builder: (context, child) {
+                          // 영역 왼쪽 바깥(-shimmerWidth) -> 오른쪽 바깥(areaWidth)까지 이동
+                          final double left = -shimmerWidth +
+                              (areaWidth + shimmerWidth) * _progress.value;
+
+                          return Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Positioned(
+                                left: left,
+                                top: 0,
+                                bottom: 0,
+                                width: shimmerWidth,
+                                child: child!,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                   );
                 },
               ),
