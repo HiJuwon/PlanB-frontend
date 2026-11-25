@@ -9,7 +9,7 @@ import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/shared/providers/global_loading_provider.dart';
-import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
+import 'package:plan_b/features/planner/presentation/widgets/my_trip_planner/my_trip_planner_skeleton.dart';
 import 'package:plan_b/features/planner/data/dummy/planner_trip_check_dummy.dart';
 import 'package:plan_b/features/planner/data/models/planner_trip_plan.dart';
 import 'package:plan_b/features/planner/presentation/providers/planner_trip_plan_provider.dart';
@@ -130,7 +130,20 @@ class _PlannerContent extends ConsumerWidget {
         ref.watch(plannerTripPlanProvider(planId));
 
     return asyncPlan.when(
-      loading: () => const ShowGlobalLoading(),
+      // 로딩중에도 '다시 선택하기' 버튼은 보이되, 플랜이 없으니 비활성
+      loading: () => const Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 20, // 플래너 ~ 다시 선택하기 버튼 사이 간격
+        children: [
+          MyTripPlannerSkeleton(),
+          Center(
+            child: BtnTextSecondary(
+              text: '여행 플랜 다시 선택하기',
+              onPressed: null,
+            ),
+          ),
+        ],
+      ),
       error: (_, _) => Padding(
         padding: const EdgeInsets.only(top: 40),
         child: Text(
