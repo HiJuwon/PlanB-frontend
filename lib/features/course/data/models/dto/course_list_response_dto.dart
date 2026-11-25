@@ -56,7 +56,7 @@ extension CourseItemDtoMapper on CourseItemDto {
 
     return DailyCourse(
       id: courseId.toString(),
-      estimatedCost: cost?.toInt() ?? 0,
+      estimatedCost: cost?.toInt(), // 없으면 null (0과 구분: '비용 알 수 없음')
       isNew: isLinkCourse,
       places: places
           .map((p) => CoursePlace(

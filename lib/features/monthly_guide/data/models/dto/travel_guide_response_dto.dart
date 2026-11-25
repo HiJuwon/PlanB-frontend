@@ -4,6 +4,7 @@ import 'package:plan_b/features/monthly_guide/data/models/monthly_guide.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_period_type.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_todo.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_todo_type.dart';
+import 'package:plan_b/core/utils/cost_format.dart';
 
 part 'travel_guide_response_dto.freezed.dart';
 part 'travel_guide_response_dto.g.dart';
@@ -173,9 +174,10 @@ extension TravelGuidePeriodDtoMapper on TravelGuidePeriodDto {
       endDate: end,
       remainingMonths: remainingMonths,
       // 지난 기간에서 넘어온 준비 항목 (isCarriedOver: true)
+      // 무료(0원) 항목은 준비할 게 없으므로 제외
       carryoverTodos: [
         for (final todo in todos)
-          if (todo.isCarriedOver) todo.toMonthlyTodo(),
+          if (todo.isCarriedOver && !todo.isFree) todo.toMonthlyTodo(),
       ],
       budgetTodo: goal == null
           ? null
@@ -189,20 +191,32 @@ extension TravelGuidePeriodDtoMapper on TravelGuidePeriodDto {
             ),
       reservationTodos: [
         for (final todo in todos)
-          if (!todo.isCarriedOver) todo.toMonthlyTodo(),
+          if (!todo.isCarriedOver && !todo.isFree) todo.toMonthlyTodo(),
       ],
     );
   }
 }
 
 extension TravelGuideTodoDtoMapper on TravelGuideTodoDto {
+  /// 무료(0원) 항목: 준비할 게 없어서 월별 가이드에 노출하지 않음
+  bool get isFree => cost == 0;
+
   MonthlyTodo toMonthlyTodo() => MonthlyTodo(
         id: todoIdOf(todoPeriodId),
         type: MonthlyTodoType.reservation,
         title: _title(),
-        caption: cost == null ? null : '약 ${_man(cost)}만원 내외',
+        caption: _costCaption(cost),
         isCompleted: isCompleted,
       );
+
+  /// 준비 항목 설명: '약 N만원 내외' / '1만원 이하' / '비용 알 수 없음'
+  /// (0원은 목록에서 제외되므로 여기 오지 않음)
+  static String _costCaption(num? cost) {
+    if (cost == null || cost <= CostFormat.tenThousand) {
+      return CostFormat.single(cost);
+    }
+    return '${CostFormat.single(cost)} 내외';
+  }
 
   /// 준비 항목 제목
   /// - COURSE: content가 장소/활동 이름이라 그대로 사용

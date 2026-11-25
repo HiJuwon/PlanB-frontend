@@ -6,5 +6,5 @@ class TripPlanCostItem {
   });
 
   final String title; // 도쿄 핵심 명소 투어
-  final String cost;  // 약 15만원
+  final String cost;  // 약 15만원 / 무료 / 1만원 이하 / 비용 알 수 없음
 }
