@@ -217,8 +217,10 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
     // 제목 'TOP n' = 지금 보여주는 추천 개수 (1~3순위 + 추가 조회로 받은 개수)
     // - 추가 조회 전: 3 / 추가로 3개면 6, 2개면 5, 1개면 4
     // - 로딩, 에러처럼 개수를 알 수 없을 때는 기본값 3
-    final int shownCount =
-        (recommendations.valueOrNull?.length ?? 0) + _morePlans.length;
+    // (추천 응답에 이미 있는 여행지는 아래 목록처럼 추가 조회 결과에서 빼고 셈)
+    final List<TripPlan> basePlans = recommendations.valueOrNull ?? const [];
+    final int shownCount = basePlans.length +
+        _morePlans.where((more) => !basePlans.any((plan) => plan.id == more.id)).length;
     final int topCount = shownCount > 0 ? shownCount : _defaultTopCount;
 
     return PlanListSheet(
@@ -226,7 +228,12 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
       subtitle: '마음에 드는 여행지 티켓을 선택하세요.',
       children: recommendations.when(
         data: (plans) => [
-          for (final plan in [...plans, ..._morePlans])
+          // 추천 응답에 이미 있는 여행지는 추가 조회 결과에서 빼고 붙임
+          // (같은 티켓이 두 번 보이거나 ValueKey가 겹치지 않도록)
+          for (final plan in [
+            ...plans,
+            ..._morePlans.where((more) => !plans.any((plan) => plan.id == more.id)),
+          ])
             TripPlanTicket(
               key: ValueKey(plan.id), // 열림 상태가 다른 티켓으로 옮겨가지 않도록
               plan: plan,
