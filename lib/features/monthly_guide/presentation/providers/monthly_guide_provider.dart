@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 
 import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
+import 'package:plan_b/features/home/data/models/trip_time_status.dart';
 import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
 import 'package:plan_b/features/monthly_guide/data/repositories/monthly_guide_repository.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_guide.dart';
+import 'package:plan_b/features/monthly_guide/data/models/monthly_guide_not_provided_exception.dart';
 import 'package:plan_b/features/monthly_guide/presentation/providers/guide_creator_provider.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 import 'package:plan_b/features/monthly_guide/data/models/dto/travel_guide_response_dto.dart';
@@ -70,10 +72,16 @@ class MonthlyGuideNotifier
   }
 
   /// 가이드 id 확보: 홈 목록에 있으면 사용, 없으면(생성 실패 / 기존 플랜) 생성
+  /// - 가이드가 없고 시작일이 오늘이거나 지난 플랜은 생성하지 않고 MonthlyGuideNotProvidedException
   Future<int> _resolveGuideId(String planId) async {
     // watch가 아닌 read (homePlansProvider가 갱신돼도 가이드를 다시 불러오지 않도록)
     final int? savedId = await ref.read(selectedTravelGuideIdProvider.future);
     if (savedId != null) return savedId;
+
+    // 이미 시작한 여행은 월별로 준비할 기간이 없어서 가이드를 만들지 않음
+    if (await _hasTripStarted(planId)) {
+      throw const MonthlyGuideNotProvidedException();
+    }
 
     final int? confirmedPlanId = int.tryParse(planId);
     if (confirmedPlanId == null) throw StateError('확정된 플랜 id가 아님: $planId');
@@ -83,13 +91,20 @@ class MonthlyGuideNotifier
       return await ref.read(guideCreatorProvider).ensureGuide(confirmedPlanId);
     } on ApiException catch (e) {
       // 이미 생성된 가이드(중복 생성 충돌): 갱신된 홈 목록에서 기존 id를 다시 찾음
-      // TODO: 서버의 중복 생성 응답(상태 코드 / 에러 코드)에 맞게 조건 수정
       if (e.statusCode != 409) rethrow;
 
       final int? existingId = await ref.read(selectedTravelGuideIdProvider.future);
       if (existingId == null) rethrow;
       return existingId;
     }
+  }
+
+  /// 시작일이 오늘이거나 지난 플랜인지 (진행 중 / 지난 여행)
+  Future<bool> _hasTripStarted(String planId) async {
+    final List<TripPlanSummary> plans = await ref.read(homePlansProvider.future);
+    final TripPlanSummary? plan =
+        plans.where((plan) => plan.id == planId).firstOrNull;
+    return plan != null && plan.status != TripTimeStatus.upcoming;
   }
 
   /// 할 일 완료 체크 토글 (준비 항목 / 저축 목표 공통)

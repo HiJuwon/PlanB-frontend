@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:plan_b/features/monthly_guide/data/models/monthly_guide.dart';
+import 'package:plan_b/features/monthly_guide/data/models/monthly_guide_not_provided_exception.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_period_type.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_todo.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_todo_type.dart';
@@ -107,9 +108,12 @@ int? savingIdOf(String todoId) => todoId.startsWith(_savingIdPrefix)
 
 extension TravelGuideResponseDtoMapper on TravelGuideResponseDto {
   /// 조회 API는 이번 기간 하나만 주므로 periods에 이번 기간만 담음 (전체 기간은 타임라인 조회 후 MonthlyGuide.withTimeline으로 합침)
+  /// - 이번 기간이 비어 있으면(이미 시작한 여행 등) MonthlyGuideNotProvidedException
   MonthlyGuide toMonthlyGuide(String planId) {
     final TravelGuidePeriodDto? current = period;
-    if (current == null) throw StateError('가이드 응답에 이번 기간 정보가 없음');
+    if (current == null || current.hasNothingToPrepare) {
+      throw const MonthlyGuideNotProvidedException();
+    }
 
     return MonthlyGuide(
       planId: planId,
@@ -152,6 +156,10 @@ extension AllTimelineGuideResponseDtoMapper on AllTimelineGuideResponseDto {
 }
 
 extension TravelGuidePeriodDtoMapper on TravelGuidePeriodDto {
+  /// 준비할 게 없는 기간: 저축 목표가 없고, 준비 항목이 없거나 전부 무료(0원, 화면에서 숨김)
+  bool get hasNothingToPrepare =>
+      saving == null && todos.every((todo) => todo.isFree);
+
   /// 기간 1개 -> 화면 모델 (월별 & 타임라인 공통)
   MonthlyGuidePeriod toMonthlyGuidePeriod({
     required int remainingMonths,
