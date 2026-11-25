@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
+import 'package:plan_b/shared/widgets/feedback/skeleton/skeleton_image.dart';
 import 'package:plan_b/features/home/presentation/widgets/d_day_tag.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 
@@ -65,7 +66,7 @@ class TripPlanThumbnailCard extends ConsumerWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image(image: thumbnail, fit: BoxFit.cover),
+                    SkeletonImage(image: thumbnail),
                     if (daysLeft != null)
                       Positioned(
                         left: 10,

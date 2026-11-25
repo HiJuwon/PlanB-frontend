@@ -19,6 +19,7 @@ import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_anchored_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_top_ellipse.dart';
 import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
+import 'package:plan_b/features/monthly_guide/presentation/widgets/monthly_guide_skeleton.dart';
 import 'package:plan_b/shared/widgets/nav/top_app_bar.dart';
 import 'package:plan_b/shared/widgets/feedback/toast.dart';
 
@@ -179,7 +180,11 @@ class _GuideContent extends ConsumerWidget {
     }
 
     return asyncGuide.when(
-      loading: () => const ShowGlobalLoading(),
+      // 월별 보기: 스켈레톤, 전체 타임라인 보기: 전역 로딩
+      loading: () => switch (viewType) {
+        GuideViewType.monthlyGuide => const MonthlyGuideSkeleton(),
+        GuideViewType.timeline => const ShowGlobalLoading(),
+      },
       error: (_, _) => const _MessageText('월별 여행 준비 가이드를 불러오지 못했어요.'),
       data: (guide) => switch (viewType) {
         GuideViewType.monthlyGuide =>

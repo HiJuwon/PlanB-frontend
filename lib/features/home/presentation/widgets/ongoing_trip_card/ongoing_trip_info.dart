@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
+import 'package:plan_b/shared/widgets/feedback/skeleton/skeleton_image.dart';
 import 'package:plan_b/features/home/presentation/widgets/d_day_tag.dart';
 
 class OngoingTripInfo extends StatelessWidget {
@@ -34,11 +35,10 @@ class OngoingTripInfo extends StatelessWidget {
             // 썸네일
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image(
+              child: SkeletonImage(
                 image: thumbnail,
                 width: 60,
                 height: 60,
-                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(width: 12),

@@ -12,7 +12,7 @@ import 'package:plan_b/features/course/presentation/widgets/extracted_course_lis
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_top_ellipse.dart';
-import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
+import 'package:plan_b/features/course/presentation/widgets/extracted_course_list_skeleton.dart';
 import 'package:plan_b/shared/widgets/feedback/toast.dart';
 import 'package:plan_b/shared/widgets/header/title_header.dart';
 import 'package:plan_b/shared/widgets/nav/top_app_bar.dart';
@@ -62,6 +62,38 @@ class _DataExtractionPageState extends ConsumerState<DataExtractionPage> {
     }
   }
 
+  /// 고정 헤더 + 카드 목록 스크롤 영역 (로딩 스켈레톤 / 추출 결과 공통)
+  Widget _buildCourseBody(
+    EdgeInsets inset, {
+    required String title,
+    required Widget list,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 헤더는 고정, 카드 목록만 스크롤 (헤더 경계에서 잘림)
+        TitleHeader(
+          title: title,
+          subtitle: '각 코스를 확인하고, 마음에 드는 코스는\n'
+              '내 여행 플랜에 추가해 보세요.',
+          size: TitleHeaderSize.md,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            clipBehavior: Clip.hardEdge,
+            padding: EdgeInsets.fromLTRB(
+              24,
+              _listTopGap,
+              24,
+              inset.bottom + _contentBottomGap,
+            ),
+            child: list,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final AsyncValue<List<ExtractedCourse>> asyncCourses = ref.watch(
@@ -88,7 +120,11 @@ class _DataExtractionPageState extends ConsumerState<DataExtractionPage> {
                 right: 0,
                 bottom: 0,
                 child: asyncCourses.when(
-                  loading: () => const ShowGlobalLoading(),
+                  loading: () => _buildCourseBody(
+                    inset,
+                    title: '예산에 맞는 코스 추출 중...',
+                    list: const ExtractedCourseListSkeleton(),
+                  ),
                   error: (_, _) => const _ExtractionMessage(
                     text: '코스를 추출하지 못했어요.\n잠시 후 다시 시도해주세요.',
                   ),
@@ -96,33 +132,14 @@ class _DataExtractionPageState extends ConsumerState<DataExtractionPage> {
                       ? const _ExtractionMessage(
                           text: '링크에서 추가할 수 있는 코스를 찾지 못했어요.',
                         )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // 헤더는 고정, 카드 목록만 스크롤 (헤더 경계에서 잘림)
-                            const TitleHeader(
-                              title: '예산에 맞는 코스 추출 완료!',
-                              subtitle: '각 코스를 확인하고, 마음에 드는 코스는\n'
-                                  '내 여행 플랜에 추가해 보세요.',
-                              size: TitleHeaderSize.md,
-                            ),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                clipBehavior: Clip.hardEdge,
-                                padding: EdgeInsets.fromLTRB(
-                                  24,
-                                  _listTopGap,
-                                  24,
-                                  inset.bottom + _contentBottomGap,
-                                ),
-                                child: ExtractedCourseList(
-                                  courses: courses,
-                                  disabledIds: {..._addingIds, ..._addedIds},
-                                  onAddPressed: _addCourse,
-                                ),
-                              ),
-                            ),
-                          ],
+                      : _buildCourseBody(
+                          inset,
+                          title: '예산에 맞는 코스 추출 완료!',
+                          list: ExtractedCourseList(
+                            courses: courses,
+                            disabledIds: {..._addingIds, ..._addedIds},
+                            onAddPressed: _addCourse,
+                          ),
                         ),
                 ),
               ),
