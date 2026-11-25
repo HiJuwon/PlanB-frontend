@@ -7,6 +7,7 @@ import 'package:plan_b/features/home/data/models/trip_time_status.dart';
 class TripPlanSummary {
   const TripPlanSummary({
     required this.id,
+    required this.planId,
     this.travelGuideId,
     required this.thumbnailUrl,
     required this.title,
@@ -17,6 +18,7 @@ class TripPlanSummary {
   });
 
   final String id;              // 플랜 id (플래너 화면 이동용)
+  final int planId;             // 확정 전 플랜 id ('여행 플랜 다시 선택하기'에서 기존 추천 조회용)
   final int? travelGuideId;     // 월별 여행 준비 가이드 id (가이드가 아직 없으면 null)
   final String thumbnailUrl;    // 썸네일 이미지 URL
   final String title;           // 이탈리아 9월 여행 플랜

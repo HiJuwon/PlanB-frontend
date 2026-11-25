@@ -9,18 +9,25 @@ import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/shared/providers/global_loading_provider.dart';
+import 'package:plan_b/features/home/data/models/trip_plan_summary.dart';
+import 'package:plan_b/features/home/presentation/providers/home_plans_provider.dart';
+import 'package:plan_b/features/monthly_guide/presentation/providers/guide_creator_provider.dart';
 import 'package:plan_b/features/planner/presentation/widgets/my_trip_planner/my_trip_planner_skeleton.dart';
-import 'package:plan_b/features/planner/data/dummy/planner_trip_check_dummy.dart';
 import 'package:plan_b/features/planner/data/models/planner_trip_plan.dart';
 import 'package:plan_b/features/planner/presentation/providers/planner_trip_plan_provider.dart';
 import 'package:plan_b/features/planner/presentation/widgets/my_trip_planner/my_trip_planner.dart';
 import 'package:plan_b/features/trip_check/data/models/trip_check_draft.dart';
 import 'package:plan_b/features/trip_check/presentation/providers/trip_check_draft_provider.dart';
+import 'package:plan_b/features/trip_select/data/models/trip_basic_info.dart';
+import 'package:plan_b/features/trip_select/data/repositories/trip_select_repository.dart';
+import 'package:plan_b/features/trip_select/presentation/providers/goal_recommendation_provider.dart';
+import 'package:plan_b/features/trip_select/presentation/providers/wallet_recommendation_provider.dart';
 import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_top_ellipse.dart';
 import 'package:plan_b/shared/widgets/btn/btn_text_secondary.dart';
 import 'package:plan_b/shared/widgets/feedback/modal_primary.dart';
+import 'package:plan_b/shared/widgets/feedback/toast.dart';
 import 'package:plan_b/shared/widgets/nav/top_app_bar.dart';
 
 class PlannerPage extends ConsumerWidget {
@@ -88,7 +95,8 @@ class _PlannerContent extends ConsumerWidget {
 
   final String planId;
 
-  /// 다시 선택하기: 확인 모달 > 플랜 초기화 > 여행 고르기로
+  /// 다시 선택하기: 확인 모달 > 기존 플랜 조건 조회 > 여행 고르기로 (기존 AI 추천을 다시 노출)
+  /// - 기존 확정 플랜, 월별 가이드, 여행 코스는 여행 고르기에서 새 플랜을 확정할 때 서버가 다시 만듦
   Future<void> _onReselectPressed(
     BuildContext context,
     WidgetRef ref,
@@ -97,31 +105,71 @@ class _PlannerContent extends ConsumerWidget {
     final bool confirmed = await showModalPrimary(
       context,
       title: '나의 여행 플랜을\n다시 선택하시겠습니까?',
-      caption: '현재 진행 중인 플랜은 초기화됩니다.',
+      // 서버는 새 플랜을 확정할 때 기존 데이터를 다시 만들기 때문에, 확정 전까지는 기존 플랜이 유지됨
+      caption: '새 플랜을 확정하면\n현재 플랜은 초기화됩니다.',
       secondaryText: '취소',
       primaryText: '확인',
     );
     if (!confirmed || !context.mounted) return; // 취소: 모달만 닫힘
 
-    final TripCheckDraft draft = await ref
-      .read(globalLoadingProvider.notifier)
-      .run(() => _requestPlanReselect(plan));
+    final TripCheckDraft draft;
+    try {
+      draft = await ref
+          .read(globalLoadingProvider.notifier)
+          .run(() => _requestPlanReselect(ref, plan));
+    } catch (_) {
+      if (!context.mounted) return;
+      showToast(
+        context,
+        text: '여행 플랜을 불러오지 못했어요.\n다시 시도해 주세요.',
+        type: ToastType.warning,
+      );
+      return;
+    }
     if (!context.mounted) return;
 
-    // 여행 고르기가 이 플랜을 만들 때의 조건(플로우, 기본 정보)으로 보이도록 입력 상태 복원
+    // 여행 고르기가 이 플랜을 만들 때의 조건(플로우, 기본 정보, planId)으로 보이도록 입력 상태 복원
+    // -> 추천 provider가 같은 planId로 요청해서 서버가 기존 추천(DONE)을 그대로 돌려줌
     ref.read(tripCheckDraftProvider.notifier).restore(draft);
-    // 초기화된 플랜이므로 선택 해제 (플랜 화면에 다시 들어오면 홈으로 redirect)
+    // 이전 추천 결과(다른 플랜, 에러 상태 등)가 남지 않도록 새로 조회
+    ref.invalidate(walletRecommendationsProvider);
+    ref.invalidate(goalRecommendationsProvider);
+    // 다시 확정하면 월별 가이드를 새로 생성해야 하므로 기존 생성 기록 삭제
+    final int? confirmedPlanId = int.tryParse(plan.id);
+    if (confirmedPlanId != null) ref.read(guideCreatorProvider).forget(confirmedPlanId);
+    // 다시 선택 중인 플랜이므로 선택 해제 (플랜 화면에 다시 들어오면 홈으로 redirect)
     ref.read(selectedPlanIdProvider.notifier).clear();
     // 홈, 플래너 스택을 비우고 여행 고르기로
     // (여행 고르기의 뒤로가기/돌아가기는 기존처럼 '여행 조건 다시 선택' 모달로 처리됨)
     context.go(AppRoutes.tripSelect);
   }
 
-  /// 플랜 초기화 요청 -> 플랜 생성 당시의 맞춤 여행 체크 조건 응답
-  // TODO: 서버 API 연동 (planId 전송 -> 플랜 초기화 + 맞춤 여행 체크 조건 & 추천 플랜 3개 응답)
-  Future<TripCheckDraft> _requestPlanReselect(PlannerTripPlan plan) async {
-    await Future<void>.delayed(const Duration(milliseconds: 300)); // 임시: 서버 응답 대기 흉내
-    return dummyTripCheckDraftOf(plan);
+  /// 플랜 생성 당시의 맞춤 여행 체크 조건 (확정 전 planId + 기본 정보)
+  Future<TripCheckDraft> _requestPlanReselect(WidgetRef ref, PlannerTripPlan plan) async {
+    final int planId = await _originalPlanIdOf(ref, plan.id);
+    final TripBasicInfo info =
+        await ref.read(tripSelectRepositoryProvider).getPlanBasicInfo(planId);
+
+    // 여행 고르기에서 '돌아가기'로 기본 정보 입력에 가도 값이 채워져 있도록 기본 정보까지 복원
+    // (세부 취향, 식사 예산은 조회 응답에 없어서 다시 선택해야 함)
+    return TripCheckDraft(
+      tripType: info.tripType ?? plan.tripType,
+      planId: planId,
+      destination: info.destination,
+      travelPeriod: info.travelPeriod,
+      peopleCount: info.peopleCount,
+      companionType: info.companionType,
+      maxBudget: info.maxBudget,
+    );
+  }
+
+  /// confirmedPlanId -> 확정 전 planId (홈 '나의 여행 플랜' 목록 응답에서 찾음)
+  Future<int> _originalPlanIdOf(WidgetRef ref, String confirmedPlanId) async {
+    final List<TripPlanSummary> plans = await ref.read(homePlansProvider.future);
+    for (final TripPlanSummary summary in plans) {
+      if (summary.id == confirmedPlanId) return summary.planId;
+    }
+    throw StateError('홈 목록에서 플랜을 찾지 못함: $confirmedPlanId');
   }
 
   @override
