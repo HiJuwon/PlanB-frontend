@@ -42,6 +42,7 @@ class TripSelectPage extends ConsumerStatefulWidget {
 class _TripSelectPageState extends ConsumerState<TripSelectPage> {
   static const double _infoTopGap = 20;   // title_header ~ 여행 기본 정보
   static const double _sheetTopGap = 40;  // 여행 기본 정보 ~ 파란 시트
+  static const int _defaultTopCount = 3;  // 지갑 기준 제목 'TOP n'의 기본값 (추천 개수를 아직 모를 때)
 
   String? _selectedPlanId;       // 하나만 선택
   List<TripPlan> _morePlans = const []; // 지갑 기준: 추가 조회한 4~6순위
@@ -185,14 +186,21 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
     );
   }
 
-  /// 지갑 기준: trip_plan_ticket (AI 추천 TOP 1~3 + '다른 여행지' 4~6)
+  /// 지갑 기준: trip_plan_ticket (AI 추천 TOP 1~3 + '다른 여행지' 추가 조회 최대 3개)
   /// 분석 페이지에서 이미 생성된 결과를 바로 사용 (재시도/직접 진입 시에만 로딩)
   Widget _buildTicketSheet() {
     final AsyncValue<List<TripPlan>> recommendations =
         ref.watch(walletRecommendationsProvider);
 
+    // 제목 'TOP n' = 지금 보여주는 추천 개수 (1~3순위 + 추가 조회로 받은 개수)
+    // - 추가 조회 전: 3 / 추가로 3개면 6, 2개면 5, 1개면 4
+    // - 로딩, 에러처럼 개수를 알 수 없을 때는 기본값 3
+    final int shownCount =
+        (recommendations.valueOrNull?.length ?? 0) + _morePlans.length;
+    final int topCount = shownCount > 0 ? shownCount : _defaultTopCount;
+
     return PlanListSheet(
-      title: '당신을 위한 여행지 TOP 3',
+      title: '당신을 위한 여행지 TOP $topCount',
       subtitle: '마음에 드는 여행지 티켓을 선택하세요.',
       children: recommendations.when(
         data: (plans) => [
