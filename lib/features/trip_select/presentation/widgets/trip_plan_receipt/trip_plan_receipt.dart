@@ -70,7 +70,7 @@ class _TripPlanReceiptState extends State<TripPlanReceipt> {
                       if (_isOpen) ReceiptDetails(plan: widget.plan, palette: palette.base),
                     ],
                   ),
-                  // TODO: 서버 summary 추가되면 조건 제거
+                  // 요약이 비어있으면 요약 박스 숨기도록 처리함 (펼쳤을 때만 표시)
                   if (_isOpen && widget.plan.summary.isNotEmpty)
                     PlanSummaryBox(summary: widget.plan.summary, palette: palette.base),
                 ],
