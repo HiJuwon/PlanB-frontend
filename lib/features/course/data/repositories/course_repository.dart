@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:plan_b/core/network/api_request.dart';
 import 'package:plan_b/core/network/dio_provider.dart';
+import 'package:plan_b/features/course/data/models/course_extraction_failure.dart';
 import 'package:plan_b/features/course/data/models/daily_course.dart';
 import 'package:plan_b/features/course/data/models/dto/course_list_response_dto.dart';
 import 'package:plan_b/features/course/data/models/extracted_course.dart';
@@ -25,14 +26,17 @@ class CourseRepository {
 
   /// 추출 요청 응답 대기 시간
   /// AI가 링크 내용을 읽느라 다른 API보다 오래 걸려서 이 요청만 늘림 (기본 60초)
-  // TODO: 실제 소요 시간 확인 후 조정
   static const Duration _extractReceiveTimeout = Duration(seconds: 120);
 
   /// 링크에서 추가할 수 있는 코스를 못 찾았을 때 서버 에러 코드 (400)
   static const String _noCourseFoundCode = 'CONTENT004';
 
+  /// 서버 에러 메시지 (끝의 마침표 유무와 관계없이 찾도록 contains로 비교)
+  static const String _noCourseFoundMessage = '링크에서 추가할 수 있는 코스를 찾지 못했습니다';
+  static const String _unsupportedLinkMessage = '인스타그램, 네이버, 티스토리, 유튜브 링크만 지원합니다';
+
   /// 링크에서 여행 코스 후보 추출 (AI가 링크 내용을 읽고 플랜 예산에 맞는 코스 추출)
-  /// 추출된 코스가 없으면 서버가 400(CONTENT004)으로 응답 > 빈 목록으로 처리
+  /// 실패하면 사유를 담은 CourseExtractionException을 던짐
   Future<List<ExtractedCourse>> extractCourses(
     int confirmedPlanId,
     List<String> urls,
@@ -48,9 +52,20 @@ class CourseRepository {
             .toExtractedCourses(),
       );
     } on ApiException catch (e) {
-      if (e.code == _noCourseFoundCode) return const [];
-      rethrow;
+      throw CourseExtractionException(_failureOf(e));
     }
+  }
+
+  /// 서버 에러 > 추출 실패 사유
+  static CourseExtractionFailure _failureOf(ApiException e) {
+    if (e.code == _noCourseFoundCode ||
+        e.message.contains(_noCourseFoundMessage)) {
+      return CourseExtractionFailure.noCourseFound;
+    }
+    if (e.message.contains(_unsupportedLinkMessage)) {
+      return CourseExtractionFailure.unsupportedLink;
+    }
+    return CourseExtractionFailure.unknown;
   }
 
   /// 링크에서 고른 코스 후보를 나의 여행 코스로 추가

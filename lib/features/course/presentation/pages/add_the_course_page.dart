@@ -99,7 +99,10 @@ class _AddTheCourseViewState extends State<_AddTheCourseView> {
       showToast(context, text: text, type: ToastType.warning);
 
   /// '붙여넣기 완료': 마지막으로 전체 링크 형식, 중복 확인 후 코스 정보 추출 화면으로
-  void _submit() {
+  /// - 추출 실패 / 코스 없음이면 추출 화면이 안내 문구를 결과로 돌려주며 닫힘 > 이 화면에서 토스트
+  ///   (이 화면 Scaffold 기준으로 띄워야 다른 토스트처럼 CTA 위 16px에 표시됨)
+  /// - 결과를 받아야 해서 go 대신 push 사용 (같은 하위 경로라 화면 구성, 입력한 링크 유지는 동일)
+  Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     final List<String> links = _links;
 
@@ -113,7 +116,11 @@ class _AddTheCourseViewState extends State<_AddTheCourseView> {
       return;
     }
 
-    context.go(AppRoutes.courseExtraction, extra: links);
+    final String? failureMessage =
+        await context.push<String>(AppRoutes.courseExtraction, extra: links);
+    if (!mounted || failureMessage == null) return; // 직접 뒤로가기로 돌아온 경우는 토스트 없음
+
+    _showWarning(failureMessage);
   }
 
   static bool _isHttpUrl(String value) {
