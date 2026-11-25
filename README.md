@@ -64,7 +64,7 @@ flutter pub get
 
 ### 3. 환경 변수 설정
 프로젝트 루트에 `.env` 파일을 만들고 아래 값을 채워주세요. (실제 값은 팀 노션으로 공유)
-```env
+```
 BASE_URL=
 KAKAO_NATIVE_KEY=
 GOOGLE_IOS_CLIENT_ID=
@@ -89,7 +89,7 @@ flutter run
 # 기기 아이디: flutter devices에 표시되는 실제 아이폰 ID
 
 flutter devices
-flutter run --release -d <아이폰_기기_ID>
+flutter run --release -d "아이폰_기기_ID"
 ```
 
 <br>
