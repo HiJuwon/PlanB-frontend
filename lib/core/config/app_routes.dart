@@ -65,3 +65,9 @@ abstract final class AppRouteExtras {
   // 여행 고르기 -> '여행 조건 다시 선택'으로 기본 정보 입력에 재진입
   static const String reselect = 'reselect';
 }
+
+/// 라우트 이동 시 쓰는 쿼리 파라미터 키
+abstract final class AppRouteQueries {
+  // 로그인 직후 신규 회원 온보딩으로 맞춤 여행 체크 인트로에 들어온 경우 ('true')
+  static const String onboarding = 'onboarding';
+}
