@@ -18,7 +18,7 @@ import 'package:plan_b/shared/providers/selected_plan_id_provider.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_bottom_anchored_ellipse.dart';
 import 'package:plan_b/shared/widgets/background/bg_top_ellipse.dart';
-import 'package:plan_b/shared/widgets/feedback/global_loading/show_global_loading.dart';
+import 'package:plan_b/features/monthly_guide/presentation/widgets/monthly_guide_skeleton.dart';
 import 'package:plan_b/shared/widgets/nav/top_app_bar.dart';
 import 'package:plan_b/shared/widgets/feedback/toast.dart';
 
@@ -179,7 +179,7 @@ class _GuideContent extends ConsumerWidget {
     }
 
     return asyncGuide.when(
-      loading: () => const ShowGlobalLoading(),
+      loading: () => const MonthlyGuideSkeleton(),
       error: (_, _) => const _MessageText('월별 여행 준비 가이드를 불러오지 못했어요.'),
       data: (guide) => switch (viewType) {
         GuideViewType.monthlyGuide =>
