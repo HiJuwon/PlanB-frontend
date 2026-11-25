@@ -14,6 +14,7 @@ class MonthlyGuideSkeleton extends StatelessWidget {
   static const double _summaryBoxHeight = 78;
   static const BorderRadius _summaryRadius = BorderRadius.all(Radius.circular(24));
   static const double _cardRadius = 100;
+  static const double _cardBorderWidth = 32; // MonthlyTodoCardFrame 바깥 테두리 두께
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,7 @@ class MonthlyGuideSkeleton extends StatelessWidget {
           ],
         ),
 
-        // 월별 카드
+        // 월별 카드: 배경은 카드 전체, shimmer는 테두리 안쪽에서만
         SizedBox(
           width: double.infinity,
           height: MonthlyTodoCard.height,
@@ -53,6 +54,11 @@ class MonthlyGuideSkeleton extends StatelessWidget {
             children: [
               SkeletonBox(
                 borderRadius: BorderRadius.all(Radius.circular(_cardRadius)),
+                shimmerPadding: EdgeInsets.all(_cardBorderWidth),
+                // 테두리 안쪽 라운드
+                shimmerBorderRadius: BorderRadius.all(
+                  Radius.circular(_cardRadius - _cardBorderWidth),
+                ),
               ),
               MonthlyTodoCardFrame(radius: _cardRadius),
             ],
