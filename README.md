@@ -37,7 +37,7 @@ AI 기반 스케줄링 플랫폼입니다.
 
 | 구분 | 사용 기술 |
 | --- | --- |
-| Framework | Flutter (Dart SDK ^3.10.0) |
+| Framework | Flutter 3.50.1 (Dart 3.14.0) |
 | 상태 관리 | flutter_riverpod |
 | 라우팅 | go_router (StatefulShellRoute) |
 | 네트워크 | dio (+ 인증 인터셉터) |
@@ -52,8 +52,9 @@ AI 기반 스케줄링 플랫폼입니다.
 ## 🛫 설치 및 실행
 
 ### 1. 요구 사항
-- Flutter SDK (Dart ^3.10.0 포함 버전)
+- Flutter SDK 3.47.0 이상 (개발 기준: 3.50.1 / Dart 3.14.0)
 - Xcode (iOS 빌드), CocoaPods
+- iOS 15.0 이상 (실기기/시뮬레이터)
 
 ### 2. 프로젝트 클론 및 패키지 설치
 ```bash
