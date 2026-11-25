@@ -68,6 +68,7 @@ extension PlanSummaryDtoMapper on PlanSummaryDto {
     return TripPlanSummary(
       // 플래너/코스 API가 모두 confirmedPlanId를 쓰므로 이걸 id로 사용
       id: (confirmedPlanId ?? planId).toString(),
+      planId: planId,
       travelGuideId: travelGuideId,
       thumbnailUrl: destinationImageUrl ?? '',
       title: title ?? '',

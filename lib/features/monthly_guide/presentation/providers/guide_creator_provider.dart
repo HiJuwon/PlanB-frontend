@@ -14,6 +14,10 @@ class GuideCreator {
   /// confirmedPlanId -> 생성 요청
   final Map<int, Future<int>> _requests = {};
 
+  /// '여행 플랜 다시 선택하기'로 기존 가이드가 초기화될 때 생성 기록 삭제
+  /// (다시 확정했을 때 서버가 같은 confirmedPlanId를 써도 가이드를 새로 생성하도록)
+  void forget(int confirmedPlanId) => _requests.remove(confirmedPlanId);
+
   /// 월별 가이드 생성 (요청 중이거나 이미 만들었으면 그 결과를 그대로 반환)
   /// - 반환: travelGuideId
   /// - 성공/실패와 관계없이 homePlansProvider를 갱신 (다음 진입이 최신 travelGuideId를 읽도록)

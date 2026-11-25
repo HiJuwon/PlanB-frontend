@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:plan_b/core/config/app_routes.dart';
 import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
+import 'package:plan_b/core/storage/wallet_more_viewed_storage.dart';
 import 'package:plan_b/features/my_page/presentation/providers/my_profile_provider.dart';
 import 'package:plan_b/features/trip_select/data/models/trip_plan.dart';
 import 'package:plan_b/features/trip_select/presentation/providers/wallet_recommendation_provider.dart';
@@ -47,6 +48,25 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
   String? _selectedPlanId;       // 하나만 선택
   List<TripPlan> _morePlans = const []; // 지갑 기준: 추가 조회한 4~6순위
   bool _isLoadingMore = false;          // 4~6순위 조회 중 (버튼 중복 탭 방지)
+
+  @override
+  void initState() {
+    super.initState();
+    // '여행 플랜 다시 선택하기'로 들어왔을 때: 이전에 4~6순위를 열람한 플랜이면 다시 불러옴
+    WidgetsBinding.instance.addPostFrameCallback((_) => _restoreMorePlans());
+  }
+
+  Future<void> _restoreMorePlans() async {
+    final TripCheckDraft draft = ref.read(tripCheckDraftProvider);
+    final int? planId = draft.planId;
+    if (planId == null || draft.tripType != TripSelectionType.budget) return;
+
+    final bool viewed = await ref
+        .read(walletMoreViewedStorageProvider)
+        .isViewed(planId)
+        .catchError((_) => false);
+    if (viewed && mounted && _morePlans.isEmpty) await _onShowMorePressed();
+  }
 
   void _onPlanSelected(String planId, bool selected) =>
       setState(() => _selectedPlanId = selected ? planId : null);
@@ -94,6 +114,8 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
           .run(() => ref.read(tripSelectRepositoryProvider).getMoreWalletRecommendations(planId));
       if (!mounted) return;
       setState(() => _morePlans = plans);
+      // 다시 선택하기로 돌아왔을 때 1~6순위까지 보여주기 위해 열람 기록 저장 (실패해도 무시)
+      ref.read(walletMoreViewedStorageProvider).markViewed(planId).catchError((_) {});
     } catch (_) {
       if (!mounted) return;
       showToast(
@@ -195,8 +217,10 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
     // 제목 'TOP n' = 지금 보여주는 추천 개수 (1~3순위 + 추가 조회로 받은 개수)
     // - 추가 조회 전: 3 / 추가로 3개면 6, 2개면 5, 1개면 4
     // - 로딩, 에러처럼 개수를 알 수 없을 때는 기본값 3
-    final int shownCount =
-        (recommendations.valueOrNull?.length ?? 0) + _morePlans.length;
+    // (추천 응답에 이미 있는 여행지는 아래 목록처럼 추가 조회 결과에서 빼고 셈)
+    final List<TripPlan> basePlans = recommendations.valueOrNull ?? const [];
+    final int shownCount = basePlans.length +
+        _morePlans.where((more) => !basePlans.any((plan) => plan.id == more.id)).length;
     final int topCount = shownCount > 0 ? shownCount : _defaultTopCount;
 
     return PlanListSheet(
@@ -204,7 +228,12 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
       subtitle: '마음에 드는 여행지 티켓을 선택하세요.',
       children: recommendations.when(
         data: (plans) => [
-          for (final plan in [...plans, ..._morePlans])
+          // 추천 응답에 이미 있는 여행지는 추가 조회 결과에서 빼고 붙임
+          // (같은 티켓이 두 번 보이거나 ValueKey가 겹치지 않도록)
+          for (final plan in [
+            ...plans,
+            ..._morePlans.where((more) => !plans.any((plan) => plan.id == more.id)),
+          ])
             TripPlanTicket(
               key: ValueKey(plan.id), // 열림 상태가 다른 티켓으로 옮겨가지 않도록
               plan: plan,
@@ -212,7 +241,9 @@ class _TripSelectPageState extends ConsumerState<TripSelectPage> {
               onSelectedChanged: (selected) => _onPlanSelected(plan.id, selected),
             ),
           // 4~6순위를 아직 안 불러왔을 때만 노출
-          if (plans.isNotEmpty && _morePlans.isEmpty)
+          if (plans.isNotEmpty &&
+              _morePlans.isEmpty &&
+              !plans.any((plan) => plan.rank > 3))
             Btn(
               text: '다른 여행지도 보고싶어요',
               onPressed: _onShowMorePressed,
