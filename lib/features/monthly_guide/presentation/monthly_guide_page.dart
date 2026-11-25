@@ -10,6 +10,7 @@ import 'package:plan_b/core/theme/app_colors.dart';
 import 'package:plan_b/core/theme/app_text_styles.dart';
 import 'package:plan_b/features/monthly_guide/data/models/guide_view_type.dart';
 import 'package:plan_b/features/monthly_guide/data/models/monthly_guide.dart';
+import 'package:plan_b/features/monthly_guide/data/models/monthly_guide_not_provided_exception.dart';
 import 'package:plan_b/features/monthly_guide/presentation/providers/monthly_guide_provider.dart';
 import 'package:plan_b/features/monthly_guide/presentation/widgets/btn_swap_guide_view.dart';
 import 'package:plan_b/features/monthly_guide/presentation/widgets/monthly_month_view.dart';
@@ -92,10 +93,12 @@ class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
     // 보기를 전환해도 월별 가이드 상태(완료 체크)가 유지되도록 페이지가 provider를 계속 구독
     // - 보기 전환 중: 페이지가 구독 중이라 폐기되지 않음
     // - 플랜 화면(로컬 Shell)을 벗어나면: 구독이 끊겨 autoDispose로 폐기 > 다시 들어오면 새로 조회
-    // - listen이라 데이터가 바뀌어도 페이지 전체가 다시 그려지지는 않음
-    if (planId != null) {
-      ref.listen(monthlyGuideProvider(planId), (_, _) {});
-    }
+    // - select로 에러 여부만 구독해서, 데이터가 바뀌어도(완료 체크 등) 페이지 전체가 다시 그려지지는 않음
+    // 에러(조회 실패 / 가이드를 제공하지 않는 플랜)면 상단 ellipse 배경을 숨김
+    final bool hasGuideError = planId != null &&
+        ref.watch(
+          monthlyGuideProvider(planId).select((guide) => guide.hasError),
+        );
 
     return Scaffold(
       backgroundColor: AppColors.blue50,
@@ -114,8 +117,9 @@ class _MonthlyGuidePageState extends ConsumerState<MonthlyGuidePage> {
             fit: StackFit.expand,
             children: [
               // 배경: 월별 보기는 위+아래 ellipse, 전체 타임라인은 하단에 붙은 ellipse 하나만 표시.
+              // 조회 실패 / 가이드를 제공하지 않는 플랜이면 월별 보기의 상단 ellipse는 숨김
               if (_viewType == GuideViewType.monthlyGuide) ...[
-                const BgTopEllipse(),
+                if (!hasGuideError) const BgTopEllipse(),
                 const BgBottomEllipse(),
               ] else
                 const BgBottomAnchoredEllipse(),
@@ -185,7 +189,12 @@ class _GuideContent extends ConsumerWidget {
         GuideViewType.monthlyGuide => const MonthlyGuideSkeleton(),
         GuideViewType.timeline => const ShowGlobalLoading(),
       },
-      error: (_, _) => const _MessageText('월별 여행 준비 가이드를 불러오지 못했어요.'),
+      // 가이드를 제공하지 않는 플랜(이미 시작한 여행)과 조회 실패를 구분
+      error: (error, _) => _MessageText(
+        error is MonthlyGuideNotProvidedException
+            ? '월별로 준비할 항목이 없어,\n가이드를 제공하지 않아요.'
+            : '월별 여행 준비 가이드를 불러오지 못했어요.',
+      ),
       data: (guide) => switch (viewType) {
         GuideViewType.monthlyGuide =>
           MonthlyMonthView(guide: guide, onTodoToggled: toggleTodo),
@@ -196,7 +205,7 @@ class _GuideContent extends ConsumerWidget {
   }
 }
 
-/// 오류 안내 문구
+/// 오류 안내 문구 (조회 실패 / 가이드를 제공하지 않는 플랜)
 class _MessageText extends StatelessWidget {
   const _MessageText(this.message);
 
