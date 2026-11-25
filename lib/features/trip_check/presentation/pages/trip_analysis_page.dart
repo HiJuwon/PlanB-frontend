@@ -55,7 +55,7 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
     final String? code = error is ApiException ? error.code : null;
     return switch (code) {
       _priceLookupFailedCode => '항공, 숙소 가격 조회에 실패했어요.\n조건을 바꿔 시도해주세요.',
-      _noMatchingFlightStayCode => '조건에 맞는 항공편, 숙소를 못 찾았어요.\n조건을 바꿔 다시 시도해주세요.',
+      _noMatchingFlightStayCode => '적절한 항공편, 숙소를 못 찾았어요.\n조건을 바꿔 시도해주세요.',
       _noDestinationInBudgetCode => '예산 안에서 갈 수 있는\n여행지가 없어요.',
       _ => '여행 계획 분석에 실패했어요.\n다시 시도해주세요.',
     };
