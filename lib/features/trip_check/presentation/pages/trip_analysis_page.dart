@@ -46,6 +46,7 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
 
   /// 서버 에러 코드
   static const String _priceLookupFailedCode = 'RECOMMENDATION011';     // 항공·숙소 가격 조회 실패
+  static const String _noMatchingFlightStayCode = 'RECOMMENDATION012';  // 선택한 조건에 맞는 항공·숙소 없음
   static const String _noDestinationInBudgetCode = 'RECOMMENDATION013'; // 예산 안에서 갈 수 있는 여행지 없음
 
   /// 분석 실패 토스트 문구 (서버 에러 코드별, 그 외는 기본 문구)
@@ -54,6 +55,7 @@ class _TripAnalysisPageState extends ConsumerState<TripAnalysisPage> {
     final String? code = error is ApiException ? error.code : null;
     return switch (code) {
       _priceLookupFailedCode => '항공, 숙소 가격 조회에 실패했어요.\n조건을 바꿔 시도해주세요.',
+      _noMatchingFlightStayCode => '조건에 맞는 항공편, 숙소를 못 찾았어요.\n조건을 바꿔 다시 시도해주세요.',
       _noDestinationInBudgetCode => '예산 안에서 갈 수 있는\n여행지가 없어요.',
       _ => '여행 계획 분석에 실패했어요.\n다시 시도해주세요.',
     };
