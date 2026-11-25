@@ -59,6 +59,10 @@ _$RecommendationItemDtoImpl _$$RecommendationItemDtoImplFromJson(
           ?.map((e) => CourseDto.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  hashtags:
+      (json['hashtags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  summary: json['summary'] as String?,
 );
 
 Map<String, dynamic> _$$RecommendationItemDtoImplToJson(
@@ -72,6 +76,8 @@ Map<String, dynamic> _$$RecommendationItemDtoImplToJson(
   'lodging': instance.lodging,
   'flight': instance.flight,
   'courses': instance.courses,
+  'hashtags': instance.hashtags,
+  'summary': instance.summary,
 };
 
 const _$DestinationEnumMap = {

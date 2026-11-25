@@ -41,6 +41,8 @@ class RecommendationItemDto with _$RecommendationItemDto {
     LodgingDto? lodging,
     FlightDto? flight,
     @Default([]) List<CourseDto> courses,
+    @Default([]) List<String> hashtags,
+    String? summary,
   }) = _RecommendationItemDto;
 
   factory RecommendationItemDto.fromJson(Map<String, dynamic> json) =>

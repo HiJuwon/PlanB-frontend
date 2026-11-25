@@ -246,6 +246,8 @@ mixin _$RecommendationItemDto {
   LodgingDto? get lodging => throw _privateConstructorUsedError;
   FlightDto? get flight => throw _privateConstructorUsedError;
   List<CourseDto> get courses => throw _privateConstructorUsedError;
+  List<String> get hashtags => throw _privateConstructorUsedError;
+  String? get summary => throw _privateConstructorUsedError;
 
   /// Serializes this RecommendationItemDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -274,6 +276,8 @@ abstract class $RecommendationItemDtoCopyWith<$Res> {
     LodgingDto? lodging,
     FlightDto? flight,
     List<CourseDto> courses,
+    List<String> hashtags,
+    String? summary,
   });
 
   $LodgingDtoCopyWith<$Res>? get lodging;
@@ -306,6 +310,8 @@ class _$RecommendationItemDtoCopyWithImpl<
     Object? lodging = freezed,
     Object? flight = freezed,
     Object? courses = null,
+    Object? hashtags = null,
+    Object? summary = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -341,6 +347,14 @@ class _$RecommendationItemDtoCopyWithImpl<
                 ? _value.courses
                 : courses // ignore: cast_nullable_to_non_nullable
                       as List<CourseDto>,
+            hashtags: null == hashtags
+                ? _value.hashtags
+                : hashtags // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
+            summary: freezed == summary
+                ? _value.summary
+                : summary // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -394,6 +408,8 @@ abstract class _$$RecommendationItemDtoImplCopyWith<$Res>
     LodgingDto? lodging,
     FlightDto? flight,
     List<CourseDto> courses,
+    List<String> hashtags,
+    String? summary,
   });
 
   @override
@@ -425,6 +441,8 @@ class __$$RecommendationItemDtoImplCopyWithImpl<$Res>
     Object? lodging = freezed,
     Object? flight = freezed,
     Object? courses = null,
+    Object? hashtags = null,
+    Object? summary = freezed,
   }) {
     return _then(
       _$RecommendationItemDtoImpl(
@@ -460,6 +478,14 @@ class __$$RecommendationItemDtoImplCopyWithImpl<$Res>
             ? _value._courses
             : courses // ignore: cast_nullable_to_non_nullable
                   as List<CourseDto>,
+        hashtags: null == hashtags
+            ? _value._hashtags
+            : hashtags // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
+        summary: freezed == summary
+            ? _value.summary
+            : summary // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -478,7 +504,10 @@ class _$RecommendationItemDtoImpl implements _RecommendationItemDto {
     this.lodging,
     this.flight,
     final List<CourseDto> courses = const [],
-  }) : _courses = courses;
+    final List<String> hashtags = const [],
+    this.summary,
+  }) : _courses = courses,
+       _hashtags = hashtags;
 
   factory _$RecommendationItemDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$RecommendationItemDtoImplFromJson(json);
@@ -509,9 +538,21 @@ class _$RecommendationItemDtoImpl implements _RecommendationItemDto {
     return EqualUnmodifiableListView(_courses);
   }
 
+  final List<String> _hashtags;
+  @override
+  @JsonKey()
+  List<String> get hashtags {
+    if (_hashtags is EqualUnmodifiableListView) return _hashtags;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_hashtags);
+  }
+
+  @override
+  final String? summary;
+
   @override
   String toString() {
-    return 'RecommendationItemDto(recommendationId: $recommendationId, recommendationValue: $recommendationValue, destination: $destination, lowTotalCost: $lowTotalCost, highTotalCost: $highTotalCost, lodging: $lodging, flight: $flight, courses: $courses)';
+    return 'RecommendationItemDto(recommendationId: $recommendationId, recommendationValue: $recommendationValue, destination: $destination, lowTotalCost: $lowTotalCost, highTotalCost: $highTotalCost, lodging: $lodging, flight: $flight, courses: $courses, hashtags: $hashtags, summary: $summary)';
   }
 
   @override
@@ -531,7 +572,9 @@ class _$RecommendationItemDtoImpl implements _RecommendationItemDto {
                 other.highTotalCost == highTotalCost) &&
             (identical(other.lodging, lodging) || other.lodging == lodging) &&
             (identical(other.flight, flight) || other.flight == flight) &&
-            const DeepCollectionEquality().equals(other._courses, _courses));
+            const DeepCollectionEquality().equals(other._courses, _courses) &&
+            const DeepCollectionEquality().equals(other._hashtags, _hashtags) &&
+            (identical(other.summary, summary) || other.summary == summary));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -546,6 +589,8 @@ class _$RecommendationItemDtoImpl implements _RecommendationItemDto {
     lodging,
     flight,
     const DeepCollectionEquality().hash(_courses),
+    const DeepCollectionEquality().hash(_hashtags),
+    summary,
   );
 
   /// Create a copy of RecommendationItemDto
@@ -577,6 +622,8 @@ abstract class _RecommendationItemDto implements RecommendationItemDto {
     final LodgingDto? lodging,
     final FlightDto? flight,
     final List<CourseDto> courses,
+    final List<String> hashtags,
+    final String? summary,
   }) = _$RecommendationItemDtoImpl;
 
   factory _RecommendationItemDto.fromJson(Map<String, dynamic> json) =
@@ -600,6 +647,10 @@ abstract class _RecommendationItemDto implements RecommendationItemDto {
   FlightDto? get flight;
   @override
   List<CourseDto> get courses;
+  @override
+  List<String> get hashtags;
+  @override
+  String? get summary;
 
   /// Create a copy of RecommendationItemDto
   /// with the given fields replaced by the non-null parameter values.
