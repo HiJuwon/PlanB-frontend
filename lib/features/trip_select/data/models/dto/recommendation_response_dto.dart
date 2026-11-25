@@ -114,7 +114,11 @@ extension RecommendationItemDtoMapper on RecommendationItemDto {
       id: recommendationId.toString(),
       rank: _rank(recommendationValue),
       destination: destination,
-      tags: [if (destination != null) destination!.label], // TODO: 서버 hashtags 추가되면 교체할 예정.
+      // '#'은 PlanTags가 붙이므로 서버 값에 '#'이 있으면 제거 (홈 해시태그와 같은 처리)
+      // 서버가 해시태그를 안 주면 기존처럼 여행지 이름 하나로 대체
+      tags: hashtags.isNotEmpty
+          ? hashtags.map((tag) => tag.replaceFirst('#', '')).toList()
+          : [if (destination != null) destination!.label],
       highlights: courses
           .map((c) => TripPlanCostItem(title: c.content ?? '', cost: formatCostRange(c.cost, c.cost)))
           .toList(),
@@ -127,7 +131,8 @@ extension RecommendationItemDtoMapper on RecommendationItemDto {
         cost: formatCostRange(flight?.lowCost, flight?.highCost),
       ),
       totalCost: formatCostRange(lowTotalCost, highTotalCost),
-      summary: '', // TODO: 서버 summary 추가되면 교체할 예정.
+      // 비어 있으면 요약 박스를 숨김 (ticket_body, trip_plan_receipt에서 isNotEmpty 확인)
+      summary: summary?.trim() ?? '',
     );
 }
 
